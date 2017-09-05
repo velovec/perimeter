@@ -1,0 +1,50 @@
+                #parse("components/header.vm")
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header" data-background-color="purple">
+                                    <h4 class="title">Remote Agents</h4>
+                                    <p class="category">Remote Agents Info and Status</p>
+                                </div>
+                                <div class="card-content table-responsive">
+                                    <table class="table">
+                                        <thead class="text-primary">
+                                        <th>ID</th>
+                                        <th>Type</th>
+                                        <th>HostName</th>
+                                        <th>OS</th>
+                                        <th>Arch</th>
+                                        <th>Agent Status</th>
+                                        <th>Task</th>
+                                        <th>Task State</th>
+                                        <th></th>
+                                        </thead>
+                                        <tbody id="agent_list">
+                                            #foreach($agent in $AGENTS)
+                                            <tr id="${agent.id()}">
+                                                <td>${agent.id()}</td>
+                                                <td>${agent.type()}</td>
+                                                <td>${agent.hostname()}</td>
+                                                <td>${agent.os()}</td>
+                                                <td>${agent.arch()}</td>
+                                                #if ($TS - $agent.lastSeen() < 20000)
+                                                <td id="status_${agent.id()}" class="text-success">On-Line</td>
+                                                #else
+                                                <td id="status_${agent.id()}" class="text-danger">Off-Line</td>
+                                                #end
+                                                <td id="task_${agent.id()}">#if($agent.task())${agent.task()}#else-#end</td>
+                                                <td id="state_${agent.id()}">${agent.taskState()}</td>
+                                                <td>
+                                                    <button type="button" class="btn btn-danger btn-sm" onclick="deleteAgent('${agent.id()}');">Delete</button>
+                                                </td>
+                                            </tr>
+                                            #end
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                #parse("components/footer.vm")

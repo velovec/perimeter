@@ -1,0 +1,139 @@
+                #parse("components/header.vm")
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-lg-3 col-md-6 col-sm-6">
+                            <div class="card card-stats">
+                                <div class="card-header" data-background-color="orange">
+                                    <i class="material-icons">autorenew</i>
+                                </div>
+                                <div class="card-content">
+                                    <p class="category">Processing</p>
+                                    <h3 class="title" id="flag_stats_pr">N/A</h3>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="stats">
+                                        Processing queue size
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 col-sm-6">
+                            <div class="card card-stats">
+                                <div class="card-header" data-background-color="purple">
+                                    <i class="material-icons">trending_up</i>
+                                </div>
+                                <div class="card-content">
+                                    <p class="category">Queued</p>
+                                    #set($QUEUED_TOTAL = ${FLAG_STATS.getQueued()[0]} + ${FLAG_STATS.getQueued()[1]} + ${FLAG_STATS.getQueued()[2]})
+                                    <h3 class="title" id="flag_stats_qt">${QUEUED_TOTAL}</h3>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="stats">
+                                        <i class="material-icons text-danger">trending_up</i> <span id="flag_stats_qh">${FLAG_STATS.getQueued()[0]}</span>
+                                        <i class="material-icons text-info">trending_flat</i> <span id="flag_stats_qn">${FLAG_STATS.getQueued()[1]}</span>
+                                        <i class="material-icons text-success">trending_down</i> <span id="flag_stats_ql">${FLAG_STATS.getQueued()[2]}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 col-sm-6">
+                            <div class="card card-stats">
+                                <div class="card-header" data-background-color="green">
+                                    <i class="material-icons">done_all</i>
+                                </div>
+                                <div class="card-content">
+                                    <p class="category">Accepted</p>
+                                    <h3 class="title" id="flag_stats_ac">${FLAG_STATS.getAccepted()}</h3>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="stats">
+                                        Total flags accepted
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 col-sm-6">
+                            <div class="card card-stats">
+                                <div class="card-header" data-background-color="red">
+                                    <i class="material-icons">error_outline</i>
+                                </div>
+                                <div class="card-content">
+                                    <p class="category">Rejected</p>
+                                    <h3 class="title" id="flag_stats_rj">${FLAG_STATS.getRejected()}</h3>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="stats">
+                                        Total flags rejected
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-3 col-md-6 col-sm-6">
+                            <div class="card card-stats">
+                                <div class="card-header" data-background-color="purple">
+                                    <i class="material-icons">polymer</i>
+                                </div>
+                                <div class="card-content">
+                                    <p class="category">Exploits</p>
+                                    <h3 class="title" id="exploits">${EXPLOITS}</h3>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="stats">
+                                        Exploits Registered
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 col-sm-6">
+                            <div class="card card-stats">
+                                <div class="card-header" data-background-color="blue">
+                                    <i class="material-icons">cast</i>
+                                </div>
+                                <div class="card-content">
+                                    <p class="category">Remote Agents</p>
+                                    <h3 class="title" id="remote_agents">${REMOTE_AGENTS}</h3>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="stats">
+                                        Remote Agents On-Line
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 col-sm-6">
+                            <div class="card card-stats">
+                                <div class="card-header" data-background-color="orange">
+                                    <i class="material-icons">dns</i>
+                                </div>
+                                <div class="card-content">
+                                    <p class="category">Services</p>
+                                    <h3 class="title" id="services">${SERVICES}</h3>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="stats">
+                                        Services Registered
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 col-sm-6">
+                            <div class="card card-stats">
+                                <div class="card-header" data-background-color="green">
+                                    <i class="material-icons">supervisor_account</i>
+                                </div>
+                                <div class="card-content">
+                                    <p class="category">Teams</p>
+                                    <h3 class="title" id="teams">${TEAMS}</h3>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="stats">
+                                        Teams Registered
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                #parse("components/footer.vm")

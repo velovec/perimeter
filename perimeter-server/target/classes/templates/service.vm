@@ -1,0 +1,103 @@
+                #parse("components/header.vm")
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header" data-background-color="blue">
+                                    <h4 class="title">Services</h4>
+                                    <p class="category">Service Info and Status</p>
+                                </div>
+                                <div class="card-content table-responsive">
+                                    <table class="table">
+                                        <thead class="text-primary">
+                                        <th>ID</th>
+                                        <th>Service Name</th>
+                                        <th>Port</th>
+                                        <th>Status</th>
+                                        <th></th>
+                                        </thead>
+                                        <tbody id="service_list">
+                                            #foreach($service in $SERVICES)
+                                            <tr id="${service.id()}">
+                                                <td>${service.id()}</td>
+                                                <td>${service.name()}</td>
+                                                <td>${service.port()}</td>
+                                                <td id="status_${service.id()}"#if($service.available()) class="text-success">On-Line#else class="text-danger">Off-Line#end</td>
+                                                <td>
+                                                    <button type="button" class="btn btn-danger btn-sm" onclick="deleteService('${service.id()}');">Delete</button>
+                                                </td>
+                                            </tr>
+                                            #end
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="addService" tabindex="-1" role="dialog" aria-labelledby="addService" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <!--Content-->
+                            <div class="modal-content">
+                                <!--Header-->
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                    <h4 class="modal-title w-100" id="myModalLabel">Add Service</h4>
+                                </div>
+                                <!--Body-->
+                                <div class="modal-body">
+                                    <form>
+                                        <div class="col-md-9">
+                                            <div class="form-group label-floating">
+                                                <label class="control-label">Service Name</label>
+                                                <input type="text" class="form-control" id="service_name">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group label-floating">
+                                                <label class="control-label">Service Port</label>
+                                                <input type="text" class="form-control" id="service_port">
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                                <!--Footer-->
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-success">Add Service</button>
+                                </div>
+                            </div>
+                            <!--/.Content-->
+                        </div>
+                    </div>
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="syncServices" tabindex="-1" role="dialog" aria-labelledby="syncServices" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <!--Content-->
+                            <div class="modal-content">
+                                <!--Header-->
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                    <h4 class="modal-title w-100" id="myModalLabel">Sync Services</h4>
+                                </div>
+                                <!--Body-->
+                                <div class="modal-body">
+                                    <!-- TODO: Add Service List Sync -->
+                                </div>
+                                <!--Footer-->
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-primary">Sync</button>
+                                </div>
+                            </div>
+                            <!--/.Content-->
+                        </div>
+                    </div>
+                </div>
+                #parse("components/footer.vm")

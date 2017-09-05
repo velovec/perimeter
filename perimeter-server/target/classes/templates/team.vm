@@ -1,0 +1,107 @@
+                #parse("components/header.vm")
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header" data-background-color="blue">
+                                    <h4 class="title">Team Info</h4>
+                                    <p class="category">Some usefull info</p>
+                                </div>
+                                <div class="card-content table-responsive">
+                                    <table class="table">
+                                        <thead class="text-primary">
+                                            <th>ID</th>
+                                            <th>Team</th>
+                                            <th>IP</th>
+                                            <th></th>
+                                        </thead>
+                                        <tbody id="team_list">
+                                        #foreach($team in $TEAMS)
+                                            <tr id="${team.id()}">
+                                                <td>${team.id()}</td>
+                                                <td>${team.name()}</td>
+                                                <td>${team.ip()}</td>
+                                                <td>
+                                                    <button type="button" class="btn btn-danger btn-sm" onclick="deleteTeam('${team.id()}');">Delete</button>
+                                                </td>
+                                            </tr>
+                                        #end
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="addTeam" tabindex="-1" role="dialog" aria-labelledby="addTeam" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <!--Content-->
+                                <div class="modal-content">
+                                    <!--Header-->
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                        <h4 class="modal-title w-100" id="myModalLabel">Add Team</h4>
+                                    </div>
+                                    <!--Body-->
+                                    <div class="modal-body">
+                                        <form>
+                                            <div class="col-md-2">
+                                                <div class="form-group label-floating">
+                                                    <label class="control-label">ID</label>
+                                                    <input type="text" id="new_team_id" class="form-control">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group label-floating">
+                                                    <label class="control-label">Team</label>
+                                                    <input type="text" id="new_team_name" class="form-control">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group label-floating">
+                                                    <label class="control-label">IP</label>
+                                                    <input type="text" id="new_team_ip" class="form-control">
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <!--Footer-->
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-success">Add Team</button>
+                                    </div>
+                                </div>
+                                <!--/.Content-->
+                            </div>
+                        </div>
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="syncTeams" tabindex="-1" role="dialog" aria-labelledby="syncTeams" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <!--Content-->
+                                <div class="modal-content">
+                                    <!--Header-->
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                        <h4 class="modal-title w-100" id="myModalLabel">Sync Team List</h4>
+                                    </div>
+                                    <!--Body-->
+                                    <div class="modal-body">
+                                        <!-- TODO: Add Team List Sync -->
+                                    </div>
+                                    <!--Footer-->
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-primary">Sync</button>
+                                    </div>
+                                </div>
+                                <!--/.Content-->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                #parse("components/footer.vm")

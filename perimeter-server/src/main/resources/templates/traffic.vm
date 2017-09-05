@@ -1,0 +1,149 @@
+                #parse("components/header.vm")
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header" data-background-color="purple">
+                                    <h4 class="title">Traffic Info</h4>
+                                    <p class="category">View Packet by Service</p>
+                                </div>
+                                <div class="card-content table-responsive">
+                                    <table class="table">
+                                        <thead class="text-primary">
+                                            <th>Service</th>
+                                            <th>Direction</th>
+                                            <th>Client</th>
+                                            <th>Length</th>
+                                            <th>Sequence ID</th>
+                                            <th>Time Stamp</th>
+                                            <th>Data</th>
+                                        </thead>
+                                        <tbody id="traffic">
+                                            #foreach($packet in $PACKETS)
+                                            <tr id="packet_${packet.id()}">
+                                                <td><a onclick="setFilter('service', '${packet.service().name()}');">${packet.service().name()} (${packet.service().port()})</a></td>
+                                                <td><a onclick="setFilter('direction', #if($packet.direction())'in'#else'out'#end);">#if($packet.direction()) Inbound #else Outgoing #end</a></td>
+                                                <td><a onclick="setFilter('client', '${packet.client()}');">${packet.client()}</a></td>
+                                                <td>${packet.length()}</td>
+                                                <td><a onclick="setFilter('sequence', '${packet.sequence()}');">${packet.sequence()}</a></td>
+                                                <td>${packet.time()}</td>
+                                                <td>
+                                                    <button type="button" class="btn btn-primary btn-sm" data-toggle="tab" data-target="#data_${packet.id()}">Show</button>
+                                                </td>
+                                            </tr>
+                                            #end
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card">
+                                        <div class="card-content">
+                                            <form>
+                                                <div class="row">
+                                                    <div class="col-md-2">
+                                                        <div class="form-group label-floating">
+                                                            <label class="control-label">Service</label>
+                                                            <select class="form-control" id="service">
+                                                                <option value="all">All</option>
+                                                                #foreach($service in $SERVICES)
+                                                                    <option value="${service.name()}">${service.name()} (${service.port()})</option>
+                                                                #end
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-1">
+                                                        <div class="form-group label-floating">
+                                                            <label class="control-label">Direction</label>
+                                                            <select class="form-control" id="direction">
+                                                                <option value="all">All</option>
+                                                                <option value="in">In</option>
+                                                                <option value="out">Out</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group label-floating">
+                                                            <label class="control-label">Client</label>
+                                                            <input type="text" id="client" class="form-control">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-1">
+                                                        <div class="form-group label-floating">
+                                                            <label class="control-label">Length</label>
+                                                            <input type="text" id="length" class="form-control">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group label-floating">
+                                                            <label class="control-label">Sequence ID</label>
+                                                            <input type="text" id="sequence" class="form-control">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="form-group label-floating">
+                                                            <label class="control-label">Sequence ID Radius</label>
+                                                            <input type="text" id="sequence_range" class="form-control" value="10000">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-10">
+                                                        <div class="form-group label-floating">
+                                                            <label class="control-label">Data (not implemented)</label>
+                                                            <input type="text" id="data" class="form-control" disabled>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-1">
+                                                        <div class="form-group label-floating">
+                                                            <label class="control-label">Limit</label>
+                                                            <input type="text" id="limit" class="form-control" value="50">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-1">
+                                                        <div class="form-group label-floating">
+                                                            <label class="control-label">Offset</label>
+                                                            <input type="text" id="offset" class="form-control" value="0">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card">
+                                        <div class="card-content">
+                                            <div class="tab-content" id="traffic_data">
+                                                #foreach($packet in $PACKETS)
+                                                <div id="data_${packet.id()}" class="tab-pane">
+                                                    <ul class="nav nav-tabs">
+                                                        <li class="active"><a data-toggle="tab" href="#data_hex_${packet.id()}">HEX</a></li>
+                                                        <li><a data-toggle="tab" href="#data_ascii_${packet.id()}">ASCII</a></li>
+                                                    </ul>
+
+                                                    <div class="tab-content">
+                                                        <div id="data_hex_${packet.id()}" class="tab-pane active">
+                                                            <pre>${packet.hex()}</pre>
+                                                        </div>
+                                                        <div id="data_ascii_${packet.id()}" class="tab-pane">
+                                                            <pre>${packet.ascii()}</pre>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                #end
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                #parse("components/footer.vm")

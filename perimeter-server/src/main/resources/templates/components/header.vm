@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png" />
+    <link rel="icon" type="image/png" href="../assets/img/favicon.png" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+    <title>Perimeter :: ${PAGE_TITLE}</title>
+
+    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
+    <meta name="viewport" content="width=device-width" />
+
+    <!-- Bootstrap core CSS     -->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!--  Material Dashboard CSS    -->
+    <link href="/static/css/material-dashboard.css" rel="stylesheet"/>
+
+    <!--  Perimeter CSS    -->
+    <link href="/static/css/perimeter.css" rel="stylesheet"/>
+
+    <!--     Fonts and icons     -->
+    <link href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
+    <link href='http://fonts.googleapis.com/css?family=Roboto:400,700,300|Material+Icons' rel='stylesheet' type='text/css'>
+</head>
+
+<body>
+
+<div class="wrapper">
+
+    <div class="sidebar" data-color="orange" data-image="/static/images/sidebar.png">
+        <div class="logo">
+            <a href="/" class="simple-text">
+                Perimeter
+            </a>
+        </div>
+
+        <div class="sidebar-wrapper">
+            <ul class="nav">
+                #foreach($navLink in $PAGE_NAV_LINKS)
+                <li#if($navLink.title().equals($PAGE_TITLE)) class="active"#end>
+                    <a href="${navLink.link()}">
+                        <i class="material-icons">${navLink.icon()}</i>
+                        <p>${navLink.title()}</p>
+                    </a>
+                </li>
+                #end
+            </ul>
+        </div>
+    </div>
+
+    <div class="main-panel">
+        <nav class="navbar navbar-transparent navbar-absolute">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#">${PAGE_TITLE}</a>
+                </div>
+                <div class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav navbar-right" id="navbar_controls">
+                    </ul>
+                    <form class="navbar-form navbar-right" role="search">
+                        <div class="form-group  is-empty">
+                            <input type="text" id="flag_to_submit" class="form-control" placeholder="Submit flag">
+                            <span class="material-input"></span>
+                        </div>
+                        <button type="button" id="submit_flag" class="btn btn-white btn-round btn-just-icon">
+                            <i class="material-icons">send</i><div class="ripple-container"></div>
+                        </button>
+                        <button class="btn btn-xs btn-round btn-just-icon btn-danger" id="connection_status">
+                            <i class="material-icons" id="connection_status_icon">error_outline</i><div class="ripple-container"></div>
+                        </button>
+                        #foreach($button in $PAGE_NAV_BUTTONS)
+                        <button type="button" class="btn btn-${button.color()} btn-round btn-just-icon" ${button.extraOptions()}>
+                            <i class="material-icons">${button.icon()}</i><div class="ripple-container"></div>
+                        </button>
+                        #end
+                    </form>
+                </div>
+            </div>
+        </nav>
+
+        <div class="content">
