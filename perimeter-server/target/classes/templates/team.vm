@@ -1,7 +1,7 @@
                 #parse("components/header.vm")
                 <div class="container-fluid">
                     <div class="row">
-                        <div class="col-md-12">
+                        <div class="col-md-6">
                             <div class="card">
                                 <div class="card-header" data-background-color="blue">
                                     <h4 class="title">Team Info</h4>
@@ -13,16 +13,28 @@
                                             <th>ID</th>
                                             <th>Team</th>
                                             <th>IP</th>
+                                            <th>Guest</th>
                                             <th></th>
                                         </thead>
-                                        <tbody id="team_list">
+                                        <tbody id="teams">
                                         #foreach($team in $TEAMS)
-                                            <tr id="${team.id()}">
-                                                <td>${team.id()}</td>
-                                                <td>${team.name()}</td>
-                                                <td>${team.ip()}</td>
+                                            <tr id="team_id${team.getId()}">
+                                                <td>${team.getId()}</td>
+                                                <td>${team.getName()}</td>
+                                                <td>${team.getIp()}</td>
                                                 <td>
-                                                    <button type="button" class="btn btn-danger btn-sm" onclick="deleteTeam('${team.id()}');">Delete</button>
+                                                    #if($team.isGuest())
+                                                        <i class="material-icons text-success">done</i>
+                                                    #else
+                                                        <i class="material-icons text-danger">clear</i>
+                                                    #end
+                                                    <div class="ripple-container"></div>
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-danger btn-round btn-just-icon" onclick="deleteTeam(${team.getId()})">
+                                                        <i class="material-icons">delete</i>
+                                                        <div class="ripple-container"></div>
+                                                    </button>
                                                 </td>
                                             </tr>
                                         #end
@@ -70,7 +82,7 @@
                                     <!--Footer-->
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                        <button type="button" class="btn btn-success">Add Team</button>
+                                        <button type="button" class="btn btn-success" onclick="addTeam();">Add Team</button>
                                     </div>
                                 </div>
                                 <!--/.Content-->
@@ -87,16 +99,26 @@
                                         <button type="button" class="close" data-dismiss="modal" aria-label="close">
                                             <span aria-hidden="true">&times;</span>
                                         </button>
-                                        <h4 class="modal-title w-100" id="myModalLabel">Sync Team List</h4>
+                                        <h4 class="modal-title w-100" id="myModalLabel">Team List from Themis</h4>
                                     </div>
                                     <!--Body-->
                                     <div class="modal-body">
-                                        <!-- TODO: Add Team List Sync -->
+                                        <table class="table">
+                                            <thead class="text-primary">
+                                                <th>ID</th>
+                                                <th>Team</th>
+                                                <th>IP</th>
+                                                <th>Guest</th>
+                                            </thead>
+                                            <tbody id="team_sync">
+
+                                            </tbody>
+                                        </table>
                                     </div>
                                     <!--Footer-->
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                        <button type="button" class="btn btn-primary">Sync</button>
+                                        <button type="button" class="btn btn-primary" onclick="confirmTeamSync();" data-dismiss="modal">Sync</button>
                                     </div>
                                 </div>
                                 <!--/.Content-->

@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import ru.v0rt3x.perimeter.server.properties.PerimeterProperties;
 import ru.v0rt3x.perimeter.server.themis.ThemisClient;
-import ru.v0rt3x.perimeter.server.web.types.Team;
+import ru.v0rt3x.perimeter.server.web.views.team.Team;
 
 import java.util.List;
 

@@ -1,7 +1,12 @@
-package ru.v0rt3x.perimeter.server.web.types;
+package ru.v0rt3x.perimeter.server.web.views.team;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+@Entity
 public class Team {
 
+    @Id
     private int id;
     private String name;
     private boolean guest;

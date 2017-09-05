@@ -1,4 +1,4 @@
-package ru.v0rt3x.perimeter.server.web.types;
+package ru.v0rt3x.perimeter.server.web.views.service;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

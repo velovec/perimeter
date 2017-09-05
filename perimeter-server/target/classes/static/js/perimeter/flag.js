@@ -1,6 +1,7 @@
 eventHandlers = {
     update_flag: onFlagUpdate,
-    stats_flag: onFlagStats
+    stats_flag: onFlagStats,
+    contest_state: onContestStateChange
 };
 
 var state_map = {
@@ -10,6 +11,9 @@ var state_map = {
 };
 
 var flags = $("#flags");
+var contest_state = $("#contest_state");
+var contest_state_icon = $("#contest_state_icon");
+var contest_round = $("#contest_round");
 
 var flag_stats = {
     queued: {
@@ -23,6 +27,14 @@ var flag_stats = {
     processing: $("#flag_stats_pr")
 };
 
+var state_to_icon = {
+    INITIAL: { color: "blue", icon: "autorenew" },
+    AWAIT_START: { color: "blue", icon: "autorenew" },
+    RUNNING: { color: "green", icon: "play_arrow" },
+    PAUSED: { color: "orange", icon: "pause" },
+    AWAIT_COMPLETE: { color: "red", icon: "stop" },
+    COMPLETED: { color: "red", icon: "stop" }
+};
 
 function onFlagStats(event) {
     var stats = event.data;
@@ -52,4 +64,12 @@ function onFlagUpdate(event) {
     flag_element.append($("<td></td>").text(flag.createTimeStamp));
 
     flags.prepend(flag_element);
+}
+
+function onContestStateChange(event) {
+    contest_round.text(event.data[1]);
+
+    contest_state_icon.parent().attr("data-background-color", state_to_icon[event.data[0]].color);
+    contest_state_icon.text(state_to_icon[event.data[0]].icon);
+    contest_state.text("Contest is " + event.data[0]);
 }

@@ -3,16 +3,27 @@
                     <div class="row">
                         <div class="col-lg-3 col-md-6 col-sm-6">
                             <div class="card card-stats">
+                                #if($CONTEST_STATE == "INITIAL" || $CONTEST_STATE == "AWAIT_START")
+                                <div class="card-header" data-background-color="blue">
+                                    <i class="material-icons" id="contest_state_icon">autorenew</i>
+                                #elseif($CONTEST_STATE == "RUNNING")
+                                <div class="card-header" data-background-color="green">
+                                    <i class="material-icons" id="contest_state_icon">play_arrow</i>
+                                #elseif($CONTEST_STATE == "PAUSED")
                                 <div class="card-header" data-background-color="orange">
-                                    <i class="material-icons">autorenew</i>
+                                    <i class="material-icons" id="contest_state_icon">pause</i>
+                                #elseif($CONTEST_STATE == "AWAIT_COMPLETE" || $CONTEST_STATE == "COMPLETED")
+                                <div class="card-header" data-background-color="red">
+                                    <i class="material-icons" id="contest_state_icon">stop</i>
+                                #end
                                 </div>
                                 <div class="card-content">
-                                    <p class="category">Processing</p>
-                                    <h3 class="title" id="flag_stats_pr">N/A</h3>
+                                    <p class="category">Round</p>
+                                    <h3 class="title" id="contest_round">${CONTEST_ROUND}</h3>
                                 </div>
                                 <div class="card-footer">
-                                    <div class="stats">
-                                        Processing queue size
+                                    <div class="stats" id="contest_state">
+                                        Contest is ${CONTEST_STATE}
                                     </div>
                                 </div>
                             </div>

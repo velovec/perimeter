@@ -6,10 +6,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+
+import ru.v0rt3x.perimeter.server.properties.PerimeterProperties;
 import ru.v0rt3x.perimeter.server.properties.ThemisProperties;
-import ru.v0rt3x.perimeter.server.web.types.*;
 import ru.v0rt3x.perimeter.server.web.views.flag.Flag;
 import ru.v0rt3x.perimeter.server.web.views.flag.FlagResult;
+import ru.v0rt3x.perimeter.server.web.views.service.Service;
+import ru.v0rt3x.perimeter.server.web.views.team.Team;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -21,6 +24,9 @@ public class ThemisClient {
 
     @Autowired
     private ThemisProperties themisProperties;
+
+    @Autowired
+    private PerimeterProperties perimeterProperties;
 
     private final RestTemplate restClient = new RestTemplate();
 
@@ -35,9 +41,9 @@ public class ThemisClient {
     }
 
     public List<Team> getTeamList() {
-        return Arrays.asList(restClient.getForObject(
-            getEndpoint("teams"), Team[].class
-        ));
+        return Arrays.stream(restClient.getForObject(getEndpoint("teams"), Team[].class))
+            .peek(team -> team.setIp(String.format(perimeterProperties.getTeamIpPattern(), team.getId())))
+            .collect(Collectors.toList());
     }
 
     public List<Service> getServiceList() {
@@ -48,6 +54,10 @@ public class ThemisClient {
 
     public ContestState getContestState() {
         return ContestState.values()[restClient.getForObject(getEndpoint("contest/state"), Integer.class)];
+    }
+
+    public Integer getContestRound() {
+        return restClient.getForObject(getEndpoint("contest/round"), Integer.class);
     }
 
     public List<FlagResult> sendFlags(List<Flag> flags) {

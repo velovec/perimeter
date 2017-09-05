@@ -81,6 +81,15 @@ public abstract class UIBaseView {
         return result;
     }
 
+    protected <T> void deleteAndNotify(CrudRepository<T, Long> repository, List<T> list) {
+        list.forEach(object -> deleteAndNotify(repository, object));
+    }
+
+    protected <T> void deleteAndNotify(CrudRepository<T, Long> repository, T object) {
+        repository.delete(object);
+        emitter.sendEvent(String.format("delete_%s", object.getClass().getSimpleName().toLowerCase()), object);
+    }
+
     protected void notify(String eventType, Object eventData) {
         emitter.sendEvent(eventType, eventData);
     }

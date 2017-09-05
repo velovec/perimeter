@@ -4,11 +4,11 @@ var eventHandlers = {};
 var status_element = $("#connection_status");
 var status_icon = $("#connection_status_icon");
 
+var contest_status_element = $("#connection_status");
+var contest_status_icon = $("#connection_status");
+
 function connect() {
-    var options = {
-        protocols_whitelist : [ "websocket", "xhr-streaming", "xdr-streaming", "xhr-polling", "xdr-polling", "iframe-htmlfile", "iframe-eventsource", "iframe-xhr-polling" ],
-        debug : false
-    };
+    var options = { debug : false };
 
     setStatus("warning", "autorenew");
 
@@ -29,8 +29,6 @@ function onEvent(event) {
         notify(event.data.type, event.data.message);
     } else if (event.type in eventHandlers) {
         eventHandlers[event.type](event);
-    } else {
-        console.log("Event '" + event.type + "' not found in " + eventHandlers);
     }
 }
 
@@ -65,5 +63,9 @@ $(function () {
 
         stompClient.send("/ws/flag/send", {}, JSON.stringify({ "flag": flag_element.val() }));
         flag_element.val("");
-    })
+    });
+});
+
+$(document).ready(function () {
+    $('.modal').appendTo("body");
 });

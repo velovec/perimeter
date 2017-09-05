@@ -1,4 +1,4 @@
-package ru.v0rt3x.perimeter.server.web.views;
+package ru.v0rt3x.perimeter.server.web.views.config;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,11 +9,11 @@ import ru.v0rt3x.perimeter.server.web.UIView;
 import java.util.Map;
 
 @Controller
-@UIView(name = "traffic", linkOrder = 4, link = "/traffic/", title = "Traffic Analyzer", icon = "traffic")
-public class TrafficView extends UIBaseView {
+@UIView(name = "config", linkOrder = 8, link = "/config/", title = "Configuration", icon = "build")
+public class ConfigView extends UIBaseView {
 
-    @RequestMapping(value = "/traffic/", method = RequestMethod.GET)
+    @RequestMapping(value = "/config/", method = RequestMethod.GET)
     public String index(Map<String, Object> context) {
-        return "traffic";
+        return "config";
     }
 }

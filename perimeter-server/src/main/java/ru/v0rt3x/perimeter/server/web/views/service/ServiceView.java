@@ -1,4 +1,4 @@
-package ru.v0rt3x.perimeter.server.web.views;
+package ru.v0rt3x.perimeter.server.web.views.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import ru.v0rt3x.perimeter.server.web.UIBaseView;
 import ru.v0rt3x.perimeter.server.web.UIView;
-import ru.v0rt3x.perimeter.server.web.types.Service;
-import ru.v0rt3x.perimeter.server.web.types.repositories.ServiceRepository;
+import ru.v0rt3x.perimeter.server.web.views.service.Service;
+import ru.v0rt3x.perimeter.server.web.views.service.ServiceRepository;
 
 import java.util.Map;
 

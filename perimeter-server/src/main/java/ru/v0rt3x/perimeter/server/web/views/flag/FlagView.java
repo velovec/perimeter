@@ -1,7 +1,6 @@
 package ru.v0rt3x.perimeter.server.web.views.flag;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
@@ -9,6 +8,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import ru.v0rt3x.perimeter.server.properties.FlagProcessorProperties;
+import ru.v0rt3x.perimeter.server.themis.ContestState;
 import ru.v0rt3x.perimeter.server.themis.ThemisClient;
 import ru.v0rt3x.perimeter.server.web.UIBaseView;
 import ru.v0rt3x.perimeter.server.web.UIView;
@@ -36,6 +36,8 @@ public class FlagView extends UIBaseView {
     private ThemisClient themisClient;
 
     private FlagStats flagStats;
+    private ContestState contestState = ContestState.INITIAL;
+    private Integer contestRound = 0;
 
     @PostConstruct
     private void initQueue() {
@@ -61,18 +63,43 @@ public class FlagView extends UIBaseView {
     }
 
     @ModelAttribute("FLAG_STATS")
-    private FlagStats flagStats() {
+    public FlagStats getFlagStats() {
         return flagStats;
     }
 
     @ModelAttribute("FLAGS")
-    private List<Flag> flags() {
+    private List<Flag> getFlags() {
         return flagRepository.findAllByOrderByLastUpdateTimeStampDesc(new PageRequest(0, 10)).getContent();
+    }
+
+    @ModelAttribute("CONTEST_STATE")
+    public ContestState getContestState() {
+        return contestState;
+    }
+
+    @ModelAttribute("CONTEST_ROUND")
+    public Integer getContestRound() {
+        return contestRound;
     }
 
     @RequestMapping(value = "/flag/", method = RequestMethod.GET)
     public String index(Map<String, Object> context) {
         return "flag";
+    }
+
+    @Scheduled(fixedRate = 10000L)
+    private void watchContestStatus() {
+        ContestState currentState = themisClient.getContestState();
+        Integer currentRound = themisClient.getContestRound();
+
+        currentRound = currentRound != null ? currentRound : 0;
+
+        if (!contestState.equals(currentState) || !contestRound.equals(currentRound)) {
+            contestState = currentState;
+            contestRound = currentRound;
+
+            notify("contest_state", new Object[] { contestState, contestRound });
+        }
     }
 
     @Scheduled(fixedRate = 3000L)
@@ -89,8 +116,8 @@ public class FlagView extends UIBaseView {
             if (flag.getCreateTimeStamp() + flagProcessorProperties.getTtl() * 1000 <= System.currentTimeMillis()) {
                 flag.setStatus(REJECTED);
 
-                flagStats().incrementByStatus(flag.getStatus());
-                flagStats().decrementByPriority(flag.getPriority());
+                getFlagStats().incrementByStatus(flag.getStatus());
+                getFlagStats().decrementByPriority(flag.getPriority());
 
                 flagsToUpdate.add(flag);
                 flagHistory.add(flag);
@@ -192,9 +219,5 @@ public class FlagView extends UIBaseView {
                 }
             }
         }
-    }
-
-    public FlagStats getFlagStats() {
-        return flagStats;
     }
 }
