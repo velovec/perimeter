@@ -77,3 +77,7 @@ function confirmTeamSync() {
         notify("warning", "No data to sync");
     }
 }
+
+function deleteTeam(team) {
+    alert("Not Implemented");
+}

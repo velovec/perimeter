@@ -31,7 +31,7 @@
                                                     <div class="ripple-container"></div>
                                                 </td>
                                                 <td>
-                                                    <button class="btn btn-danger btn-round btn-just-icon" onclick="deleteTeam(${team.getId()})">
+                                                    <button class="btn btn-danger btn-round btn-just-icon" onclick="deleteTeam(${team.getId()});">
                                                         <i class="material-icons">delete</i>
                                                         <div class="ripple-container"></div>
                                                     </button>

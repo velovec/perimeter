@@ -11,6 +11,8 @@ import ru.v0rt3x.perimeter.server.web.UIBaseView;
 import ru.v0rt3x.perimeter.server.web.UIView;
 import ru.v0rt3x.perimeter.server.web.views.flag.FlagStats;
 import ru.v0rt3x.perimeter.server.web.views.flag.FlagView;
+import ru.v0rt3x.perimeter.server.web.views.service.Service;
+import ru.v0rt3x.perimeter.server.web.views.service.ServiceView;
 import ru.v0rt3x.perimeter.server.web.views.team.Team;
 import ru.v0rt3x.perimeter.server.web.views.team.TeamView;
 
@@ -26,6 +28,9 @@ public class IndexView extends UIBaseView {
 
     @Autowired
     private TeamView teamView;
+
+    @Autowired
+    private ServiceView serviceView;
 
     @ModelAttribute("FLAG_STATS")
     private FlagStats getFlagStats() {
@@ -45,6 +50,11 @@ public class IndexView extends UIBaseView {
     @ModelAttribute("TEAMS")
     private List<Team> getTeams() {
         return teamView.getTeams();
+    }
+
+    @ModelAttribute("SERVICES")
+    private List<Service> getServices() {
+        return serviceView.getServices();
     }
 
     @RequestMapping(value = "/", method = RequestMethod.GET)

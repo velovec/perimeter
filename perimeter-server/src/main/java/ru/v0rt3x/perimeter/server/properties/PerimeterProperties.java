@@ -7,11 +7,21 @@ public class PerimeterProperties {
 
     private String teamIpPattern;
 
+    private String teamIp;
+
     public String getTeamIpPattern() {
         return teamIpPattern;
     }
 
     public void setTeamIpPattern(String teamIPPattern) {
         this.teamIpPattern = teamIPPattern;
+    }
+
+    public String getTeamIp() {
+        return teamIp;
+    }
+
+    public void setTeamIp(String teamIp) {
+        this.teamIp = teamIp;
     }
 }

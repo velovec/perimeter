@@ -120,7 +120,7 @@
                                 </div>
                                 <div class="card-content">
                                     <p class="category">Services</p>
-                                    <h3 class="title" id="services">${SERVICES}</h3>
+                                    <h3 class="title" id="services">${SERVICES.size()}</h3>
                                 </div>
                                 <div class="card-footer">
                                     <div class="stats">

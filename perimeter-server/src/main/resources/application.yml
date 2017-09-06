@@ -34,6 +34,7 @@ security:
 
 perimeter:
     teamIpPattern: 10.0.%d.1
+    teamIp: 127.0.0.1
     flag:
         ttl: 300
         pattern: ^[a-f0-9]{32}=$

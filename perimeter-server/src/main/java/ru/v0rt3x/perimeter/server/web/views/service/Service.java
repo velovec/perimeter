@@ -8,9 +8,10 @@ import javax.persistence.Id;
 public class Service {
 
     @Id
-    @GeneratedValue
     private int id;
     private String name;
+    private int port;
+    private boolean available;
 
     public int getId() {
         return id;
@@ -26,5 +27,26 @@ public class Service {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public boolean isAvailable() {
+        return available;
+    }
+
+    public void setAvailable(boolean available) {
+        this.available = available;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Service(name='%s',port=%d)", name, port);
     }
 }
