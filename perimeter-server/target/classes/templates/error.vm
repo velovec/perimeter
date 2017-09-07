@@ -1,8 +1,0 @@
-                #set($PAGE_TITLE = "Error Page")
-                #parse("components/header.vm")
-                <h4>${error_cause}</h4>
-                <code>${context.keys}</code>
-                <pre>
-                    <code>${stack_trace}</code>
-                </pre>
-                #parse("components/footer.vm")

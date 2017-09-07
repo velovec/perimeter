@@ -1,6 +1,0 @@
-                #parse("components/header.vm")
-                <div class="container-fluid">
-                    <div class="row">
-                    </div>
-                </div>
-                #parse("components/footer.vm")
