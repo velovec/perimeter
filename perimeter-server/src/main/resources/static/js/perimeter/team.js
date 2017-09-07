@@ -10,8 +10,6 @@ var team_sync_data = null;
 var team_table = $("#teams");
 
 function onTeamUpdate(event) {
-    onTeamDelete(event);
-
     var team = $("<tr></tr>").attr("id", "team_id" + event.data.id);
 
     team.append($("<td></td>").text(event.data.id));
@@ -30,7 +28,12 @@ function onTeamUpdate(event) {
         )
     ));
 
-    team_table.append(team);
+    var old_team = $("#team_id" + event.data.id);
+    if (old_team.length > 0) {
+        old_team.replaceWith(team);
+    } else {
+        team_table.append(team);
+    }
 }
 
 function onTeamDelete(event) {

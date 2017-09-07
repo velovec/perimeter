@@ -10,8 +10,6 @@ var service_sync_data = null;
 var service_table = $("#services");
 
 function onServiceUpdate(event) {
-    onServiceDelete(event);
-
     var service = $("<tr></tr>").attr("id", "service_id" + event.data.id);
 
     service.append($("<td></td>").text(event.data.id));
@@ -37,7 +35,12 @@ function onServiceUpdate(event) {
         )
     ));
 
-    service_table.append(service);
+    var old_service = $("#service_id" + event.data.id);
+    if (old_service.length > 0) {
+        old_service.replaceWith(service);
+    } else {
+        service_table.append(service);
+    }
 }
 
 function onServiceDelete(event) {
