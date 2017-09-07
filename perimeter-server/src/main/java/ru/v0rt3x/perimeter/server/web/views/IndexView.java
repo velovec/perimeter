@@ -9,6 +9,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import ru.v0rt3x.perimeter.server.themis.ContestState;
 import ru.v0rt3x.perimeter.server.web.UIBaseView;
 import ru.v0rt3x.perimeter.server.web.UIView;
+import ru.v0rt3x.perimeter.server.web.views.agent.Agent;
+import ru.v0rt3x.perimeter.server.web.views.agent.AgentView;
+import ru.v0rt3x.perimeter.server.web.views.exploit.Exploit;
+import ru.v0rt3x.perimeter.server.web.views.exploit.ExploitView;
 import ru.v0rt3x.perimeter.server.web.views.flag.FlagStats;
 import ru.v0rt3x.perimeter.server.web.views.flag.FlagView;
 import ru.v0rt3x.perimeter.server.web.views.service.Service;
@@ -31,6 +35,12 @@ public class IndexView extends UIBaseView {
 
     @Autowired
     private ServiceView serviceView;
+
+    @Autowired
+    private ExploitView exploitView;
+
+    @Autowired
+    private AgentView agentView;
 
     @ModelAttribute("FLAG_STATS")
     private FlagStats getFlagStats() {
@@ -55,6 +65,16 @@ public class IndexView extends UIBaseView {
     @ModelAttribute("SERVICES")
     private List<Service> getServices() {
         return serviceView.getServices();
+    }
+
+    @ModelAttribute("EXPLOITS")
+    private List<Exploit> getExploits() {
+        return exploitView.getExploits();
+    }
+
+    @ModelAttribute("AGENTS")
+    private List<Agent> getAgents() {
+        return agentView.getAgents();
     }
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
