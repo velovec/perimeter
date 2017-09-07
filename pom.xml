@@ -30,6 +30,13 @@
         <java.version>1.8</java.version>
     </properties>
 
+    <distributionManagement>
+        <snapshotRepository>
+            <id>nexus.inferno-project.ru</id>
+            <url>https://nexus.inferno-project.ru/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <dependencyManagement>
         <dependencies>
             <!-- UI -->
