@@ -5,3 +5,10 @@
 .text-muted:hover {
     color: #252422;
 }
+
+.drop-zone {
+    border: 2px dashed #bbb;
+    border-radius: 5px;
+    padding: 25px;
+    text-align: center;
+}

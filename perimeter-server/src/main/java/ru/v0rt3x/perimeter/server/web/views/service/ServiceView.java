@@ -39,13 +39,23 @@ public class ServiceView extends UIBaseView {
         return serviceRepository.findAll();
     }
 
+    @MessageMapping("/service/add")
+    private void addService(Service service) {
+        saveAndNotify(serviceRepository, service);
+    }
+
+    @MessageMapping("/service/delete")
+    private void deleteService(Service service) {
+        deleteAndNotify(serviceRepository, service);
+    }
+
     @MessageMapping("/service/request_sync")
-    public void syncRequest() {
+    private void syncRequest() {
         notify("sync_service", themisClient.getServiceList());
     }
 
     @MessageMapping("/service/confirm_sync")
-    public void syncConfirm(Service[] services) {
+    private void syncConfirm(Service[] services) {
         List<String> invalidServices = Arrays.stream(services)
             .filter(service -> service.getPort() < 1 || service.getPort() > 65535)
             .map(Service::getName)
@@ -66,7 +76,7 @@ public class ServiceView extends UIBaseView {
     }
 
     @RequestMapping(value = "/service/", method = RequestMethod.GET)
-    public String index(Map<String, Object> context) {
+    private String index(Map<String, Object> context) {
         addNavButton(context,"add", "success", "data-toggle=\"modal\" data-target=\"#addService\"");
         addNavButton(context,"sync", "primary", "data-toggle=\"modal\" data-target=\"#syncServices\" onclick=\"requestServiceSync();\"");
 

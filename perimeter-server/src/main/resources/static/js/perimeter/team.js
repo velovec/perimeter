@@ -82,5 +82,7 @@ function confirmTeamSync() {
 }
 
 function deleteTeam(team) {
-    alert("Not Implemented");
+    stompClient.send("/ws/team/delete", {}, JSON.stringify({
+        id: team
+    }));
 }

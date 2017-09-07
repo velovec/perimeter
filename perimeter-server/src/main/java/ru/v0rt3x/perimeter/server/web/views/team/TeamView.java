@@ -1,7 +1,6 @@
 package ru.v0rt3x.perimeter.server.web.views.team;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -33,6 +32,16 @@ public class TeamView extends UIBaseView {
         return teamRepository.findAll();
     }
 
+    @MessageMapping("/team/add")
+    private void addTeam(Team team) {
+        saveAndNotify(teamRepository, team);
+    }
+
+    @MessageMapping("/team/delete")
+    private void deleteTeam(Team team) {
+        deleteAndNotify(teamRepository, team);
+    }
+
     @MessageMapping("/team/request_sync")
     private void syncRequest() {
         notify("sync_team", themisClient.getTeamList());
@@ -50,7 +59,7 @@ public class TeamView extends UIBaseView {
     }
 
     @RequestMapping(value = "/team/", method = RequestMethod.GET)
-    public String index(Map<String, Object> context) {
+    private String index(Map<String, Object> context) {
         addNavButton(context,"add", "success", "data-toggle=\"modal\" data-target=\"#addTeam\"");
         addNavButton(context,"sync", "primary", "data-toggle=\"modal\" data-target=\"#syncTeams\" onclick=\"requestTeamSync();\"");
 

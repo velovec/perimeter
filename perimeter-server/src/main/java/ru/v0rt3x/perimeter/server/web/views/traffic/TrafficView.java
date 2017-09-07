@@ -13,7 +13,7 @@ import java.util.Map;
 public class TrafficView extends UIBaseView {
 
     @RequestMapping(value = "/traffic/", method = RequestMethod.GET)
-    public String index(Map<String, Object> context) {
+    private String index(Map<String, Object> context) {
         return "traffic";
     }
 }

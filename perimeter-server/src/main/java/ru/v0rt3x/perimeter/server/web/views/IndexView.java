@@ -58,7 +58,7 @@ public class IndexView extends UIBaseView {
     }
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
-    public String index(Map<String, Object> context) {
+    private String index(Map<String, Object> context) {
         return "index";
     }
 }

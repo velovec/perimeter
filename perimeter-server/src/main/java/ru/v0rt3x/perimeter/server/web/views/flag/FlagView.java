@@ -87,7 +87,7 @@ public class FlagView extends UIBaseView {
     }
 
     @RequestMapping(value = "/flag/", method = RequestMethod.GET)
-    public String index(Map<String, Object> context) {
+    private String index(Map<String, Object> context) {
         return "flag";
     }
 

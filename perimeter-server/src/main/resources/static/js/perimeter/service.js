@@ -121,5 +121,7 @@ function toggleMonitoring(service) {
 }
 
 function deleteService(service) {
-    alert("Not Implemented");
+    stompClient.send("/ws/service/delete", {}, JSON.stringify({
+        id: service
+    }));
 }
