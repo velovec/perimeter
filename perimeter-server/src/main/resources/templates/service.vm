@@ -65,15 +65,15 @@
                                 <div class="modal-body">
                                     <form>
                                         <div class="col-md-9">
-                                            <div class="form-group label-floating">
+                                            <div class="form-group">
                                                 <label class="control-label">Service Name</label>
-                                                <input type="text" class="form-control" id="service_name">
+                                                <input type="text" class="form-control" id="new_service_name">
                                             </div>
                                         </div>
                                         <div class="col-md-3">
-                                            <div class="form-group label-floating">
+                                            <div class="form-group">
                                                 <label class="control-label">Service Port</label>
-                                                <input type="text" class="form-control" id="service_port">
+                                                <input type="text" class="form-control" id="new_service_port">
                                             </div>
                                         </div>
                                     </form>
@@ -81,7 +81,7 @@
                                 <!--Footer-->
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                    <button type="button" class="btn btn-success">Add Service</button>
+                                    <button type="button" class="btn btn-success" onclick="addService();">Add Service</button>
                                 </div>
                             </div>
                             <!--/.Content-->

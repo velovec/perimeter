@@ -60,21 +60,21 @@
                                     <div class="modal-body">
                                         <form>
                                             <div class="col-md-2">
-                                                <div class="form-group label-floating">
+                                                <div class="form-group">
                                                     <label class="control-label">ID</label>
-                                                    <input type="text" id="new_team_id" class="form-control">
+                                                    <input type="text" id="new_team_id" class="form-control" onchange="onTeamIDChange('${TEAM_IP_PATTERN}');">
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
-                                                <div class="form-group label-floating">
+                                                <div class="form-group">
                                                     <label class="control-label">Team</label>
                                                     <input type="text" id="new_team_name" class="form-control">
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
-                                                <div class="form-group label-floating">
+                                                <div class="form-group">
                                                     <label class="control-label">IP</label>
-                                                    <input type="text" id="new_team_ip" class="form-control">
+                                                    <input type="text" id="new_team_ip" class="form-control" disabled>
                                                 </div>
                                             </div>
                                         </form>

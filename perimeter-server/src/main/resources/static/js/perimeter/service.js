@@ -7,6 +7,9 @@ eventHandlers = {
 var service_sync_table = $("#service_sync");
 var service_sync_data = null;
 
+var new_service_name = $("#new_service_name");
+var new_service_port = $("#new_service_port");
+
 var service_table = $("#services");
 
 function onServiceUpdate(event) {
@@ -118,6 +121,44 @@ function showTrafficForService(service) {
 
 function toggleMonitoring(service) {
     alert("Not Implemented");
+}
+
+function addService() {
+    var valid = true;
+
+    if (new_service_port.val().length === 0 || parseInt(new_service_port.val()) < 1 || parseInt(new_service_port.val()) > 65535) {
+        new_service_port.parent().addClass('has-error').addClass('has-feedback');
+        new_service_port.parent().append(
+            $("<span></span>").attr('id', "new_service_port_feedback")
+                .attr("class", "glyphicon glyphicon-warning-sign form-control-feedback")
+        );
+
+        valid = false;
+    } else {
+        new_service_port.parent().removeClass('has-error').removeClass('has-feedback');
+        $("#new_service_port_feedback").remove();
+    }
+
+    if (new_service_name.val().length === 0) {
+        new_service_name.parent().addClass('has-error').addClass('has-feedback');
+        new_service_name.parent().append(
+            $("<span></span>").attr('id', "new_service_name_feedback")
+                .attr("class", "glyphicon glyphicon-warning-sign form-control-feedback")
+        );
+
+        valid = false;
+    } else {
+        new_service_name.parent().removeClass('has-error').removeClass('has-feedback');
+        $("#new_service_name_feedback").remove();
+    }
+
+    if (valid) {
+        stompClient.send("/ws/service/add", {}, JSON.stringify({
+            name: new_service_name.val(),
+            port: parseInt(new_service_port.val())
+        }));
+        $("#addService").modal('hide');
+    }
 }
 
 function deleteService(service) {

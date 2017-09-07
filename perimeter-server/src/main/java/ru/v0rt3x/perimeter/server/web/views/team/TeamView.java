@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import ru.v0rt3x.perimeter.server.properties.PerimeterProperties;
 import ru.v0rt3x.perimeter.server.themis.ThemisClient;
 import ru.v0rt3x.perimeter.server.web.UIBaseView;
 import ru.v0rt3x.perimeter.server.web.UIView;
@@ -22,6 +23,9 @@ import java.util.stream.Collectors;
 public class TeamView extends UIBaseView {
 
     @Autowired
+    private PerimeterProperties perimeterProperties;
+
+    @Autowired
     private TeamRepository teamRepository;
 
     @Autowired
@@ -30,6 +34,11 @@ public class TeamView extends UIBaseView {
     @ModelAttribute("TEAMS")
     public List<Team> getTeams() {
         return teamRepository.findAll();
+    }
+
+    @ModelAttribute("TEAM_IP_PATTERN")
+    private String getTeamIPPattern() {
+        return perimeterProperties.getTeamIpPattern();
     }
 
     @MessageMapping("/team/add")

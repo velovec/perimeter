@@ -8,6 +8,7 @@ import javax.persistence.Id;
 public class Service {
 
     @Id
+    @GeneratedValue
     private int id;
     private String name;
     private int port;
