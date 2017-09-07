@@ -19,13 +19,14 @@ var flag_stats = {
     processing: $("#flag_stats_pr")
 };
 
-var state_to_icon = {
-    INITIAL: { color: "blue", icon: "autorenew" },
-    AWAIT_START: { color: "blue", icon: "autorenew" },
-    RUNNING: { color: "green", icon: "play_arrow" },
-    PAUSED: { color: "orange", icon: "pause" },
-    AWAIT_COMPLETE: { color: "red", icon: "stop" },
-    COMPLETED: { color: "red", icon: "stop" }
+var state_to_status = {
+    INITIAL: { color: "blue", icon: "autorenew", message: "Contest is initialized" },
+    AWAIT_START: { color: "blue", icon: "autorenew", message: "Contest is starting" },
+    RUNNING: { color: "green", icon: "play_arrow", message: "Contest is running" },
+    PAUSED: { color: "orange", icon: "pause", message: "Contest is paused" },
+    AWAIT_COMPLETE: { color: "red", icon: "stop", message: "Contest is preparing to complete" },
+    COMPLETED: { color: "red", icon: "stop", message: "Contest is completed" },
+    NOT_AVAILABLE: { color: "red", icon: "error_outline", message: "Themis integration is disabled" }
 };
 
 function onFlagStats(event) {
@@ -43,7 +44,7 @@ function onFlagStats(event) {
 function onContestStateChange(event) {
     contest_round.text(event.data[1]);
 
-    contest_state_icon.parent().attr("data-background-color", state_to_icon[event.data[0]].color);
-    contest_state_icon.text(state_to_icon[event.data[0]].icon);
-    contest_state.text("Contest is " + event.data[0]);
+    contest_state_icon.parent().attr("data-background-color", state_to_status[event.data[0]].color);
+    contest_state_icon.text(state_to_status[event.data[0]].icon);
+    contest_state.text(state_to_status[event.data[0]].message);
 }

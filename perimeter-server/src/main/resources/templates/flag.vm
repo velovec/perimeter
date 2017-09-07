@@ -15,6 +15,9 @@
                                 #elseif($CONTEST_STATE == "AWAIT_COMPLETE" || $CONTEST_STATE == "COMPLETED")
                                 <div class="card-header" data-background-color="red">
                                     <i class="material-icons" id="contest_state_icon">stop</i>
+                                #elseif($CONTEST_STATE == "NOT_AVAILABLE")
+                                <div class="card-header" data-background-color="red">
+                                    <i class="material-icons" id="contest_state_icon">error_outline</i>
                                 #end
                                 </div>
                                 <div class="card-content">
@@ -23,7 +26,21 @@
                                 </div>
                                 <div class="card-footer">
                                     <div class="stats" id="contest_state">
-                                        Contest is ${CONTEST_STATE}
+                                        #if($CONTEST_STATE == "INITIAL")
+                                        Contest is initialized
+                                        #elseif($CONTEST_STATE == "AWAIT_START")
+                                        Contest is starting
+                                        #elseif($CONTEST_STATE == "RUNNING")
+                                        Contest is running
+                                        #elseif($CONTEST_STATE == "PAUSED")
+                                        Contest is paused
+                                        #elseif($CONTEST_STATE == "AWAIT_COMPLETE")
+                                        Contest is preparing to complete
+                                        #elseif($CONTEST_STATE == "COMPLETED")
+                                        Contest is completed
+                                        #elseif($CONTEST_STATE == "NOT_AVAILABLE")
+                                        Themis integration is disabled
+                                        #end
                                     </div>
                                 </div>
                             </div>

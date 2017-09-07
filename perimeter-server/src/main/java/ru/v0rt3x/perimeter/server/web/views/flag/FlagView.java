@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import ru.v0rt3x.perimeter.server.properties.FlagProcessorProperties;
+import ru.v0rt3x.perimeter.server.properties.ThemisProperties;
 import ru.v0rt3x.perimeter.server.themis.ContestState;
 import ru.v0rt3x.perimeter.server.themis.ThemisClient;
 import ru.v0rt3x.perimeter.server.web.UIBaseView;
@@ -31,6 +32,9 @@ public class FlagView extends UIBaseView {
 
     @Autowired
     private FlagProcessorProperties flagProcessorProperties;
+
+    @Autowired
+    private ThemisProperties themisProperties;
 
     @Autowired
     private ThemisClient themisClient;
@@ -89,16 +93,21 @@ public class FlagView extends UIBaseView {
 
     @Scheduled(fixedRate = 10000L)
     private void watchContestStatus() {
-        ContestState currentState = themisClient.getContestState();
-        Integer currentRound = themisClient.getContestRound();
+        if (themisProperties.isIntegrationEnabled()) {
+            ContestState currentState = themisClient.getContestState();
+            Integer currentRound = themisClient.getContestRound();
 
-        currentRound = currentRound != null ? currentRound : 0;
+            currentRound = currentRound != null ? currentRound : 0;
 
-        if (!contestState.equals(currentState) || !contestRound.equals(currentRound)) {
-            contestState = currentState;
-            contestRound = currentRound;
+            if (!contestState.equals(currentState) || !contestRound.equals(currentRound)) {
+                contestState = currentState;
+                contestRound = currentRound;
 
-            notify("contest_state", new Object[] { contestState, contestRound });
+                notify("contest_state", new Object[]{contestState, contestRound});
+            }
+        } else {
+            contestState = ContestState.NOT_AVAILABLE;
+            contestRound = 0;
         }
     }
 
