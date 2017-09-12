@@ -25,6 +25,12 @@ function onTeamUpdate(event) {
         $("<div></div>").attr("class", "ripple-container")
     ));
     team.append($("<td></td>").append(
+        $("<button></button>").attr('type', 'button').attr('class', 'btn btn-' + (event.data.active ? "success" : "danger") +' btn-round btn-just-icon').click(function () { toggleTeam(event.data.id); }).append(
+            $("<i></i>").attr("class", "material-icons").text("power_settings_new")
+        ).append(
+            $("<div></div>").attr("class", "ripple-container")
+        )
+    ).append(
         $("<button></button>").attr('type', 'button').attr('class', 'btn btn-danger btn-round btn-just-icon').click(function () { deleteTeam(event.data.id); }).append(
             $("<i></i>").attr("class", "material-icons").text("delete")
         ).append(
@@ -126,6 +132,13 @@ function addTeam() {
         }));
         $("#addTeam").modal('hide');
     }
+}
+
+
+function toggleTeam(team) {
+    stompClient.send("/ws/team/toggle", {}, JSON.stringify({
+        id: team
+    }));
 }
 
 function deleteTeam(team) {

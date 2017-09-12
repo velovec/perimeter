@@ -41,17 +41,17 @@ public class ServiceView extends UIBaseView {
 
     @MessageMapping("/service/add")
     private void addService(Service service) {
-        saveAndNotify(serviceRepository, service);
+        eventProducer.saveAndNotify(serviceRepository, service);
     }
 
     @MessageMapping("/service/delete")
     private void deleteService(Service service) {
-        deleteAndNotify(serviceRepository, service);
+        eventProducer.deleteAndNotify(serviceRepository, service);
     }
 
     @MessageMapping("/service/request_sync")
     private void syncRequest() {
-        notify("sync_service", themisClient.getServiceList());
+        eventProducer.notify("sync_service", themisClient.getServiceList());
     }
 
     @MessageMapping("/service/confirm_sync")
@@ -62,7 +62,7 @@ public class ServiceView extends UIBaseView {
             .collect(Collectors.toList());
 
         if (invalidServices.size() > 0) {
-            emitter.sendNotificationEvent("danger", String.format("Invalid port for services: %s", invalidServices));
+            eventProducer.sendNotificationEvent("danger", String.format("Invalid port for services: %s", invalidServices));
             return;
         }
 
@@ -71,8 +71,8 @@ public class ServiceView extends UIBaseView {
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
 
-        deleteAndNotify(serviceRepository, existingServices);
-        saveAndNotify(serviceRepository, Arrays.asList(services));
+        eventProducer.deleteAndNotify(serviceRepository, existingServices);
+        eventProducer.saveAndNotify(serviceRepository, Arrays.asList(services));
     }
 
     @RequestMapping(value = "/service/", method = RequestMethod.GET)
@@ -90,7 +90,7 @@ public class ServiceView extends UIBaseView {
                 boolean isRunning = isServiceRunning(service);
                 if (service.isAvailable() != isRunning) {
                     service.setAvailable(isRunning);
-                    saveAndNotify(serviceRepository, service);
+                    eventProducer.saveAndNotify(serviceRepository, service);
                 }
             }
         );
@@ -98,7 +98,7 @@ public class ServiceView extends UIBaseView {
 
     private boolean isServiceRunning(Service service) {
         try (Socket socket = new Socket()) {
-            socket.connect(new InetSocketAddress(perimeterProperties.getTeamIp(), service.getPort()), 5);
+            socket.connect(new InetSocketAddress(perimeterProperties.getTeam().getInternalIp(), service.getPort()), 5);
             return true;
         } catch (IOException e) {
             return false;

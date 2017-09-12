@@ -12,6 +12,8 @@ public class Team {
     private boolean guest;
     private String ip;
 
+    private boolean active = true;
+
     public int getId() {
         return id;
     }
@@ -42,5 +44,13 @@ public class Team {
 
     public String getIp() {
         return ip;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }

@@ -8,4 +8,5 @@ public interface AgentRepository extends CrudRepository<Agent, Long> {
 
     List<Agent> findAll();
 
+    Agent findByUuid(String uuid);
 }

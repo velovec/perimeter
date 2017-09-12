@@ -19,14 +19,14 @@ public class AgentView extends UIBaseView {
     @Autowired
     private AgentRepository agentRepository;
 
-    @ModelAttribute
+    @ModelAttribute("AGENTS")
     public List<Agent> getAgents() {
         return agentRepository.findAll();
     }
 
     @MessageMapping("/agent/delete")
     private void deleteAgent(Agent agent) {
-        deleteAndNotify(agentRepository, agent);
+        eventProducer.deleteAndNotify(agentRepository, agent);
     }
 
     @RequestMapping(value = "/agent/", method = RequestMethod.GET)

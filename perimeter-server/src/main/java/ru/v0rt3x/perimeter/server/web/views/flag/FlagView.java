@@ -7,8 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import ru.v0rt3x.perimeter.server.properties.FlagProcessorProperties;
-import ru.v0rt3x.perimeter.server.properties.ThemisProperties;
+import ru.v0rt3x.perimeter.server.properties.PerimeterProperties;
 import ru.v0rt3x.perimeter.server.themis.ContestState;
 import ru.v0rt3x.perimeter.server.themis.ThemisClient;
 import ru.v0rt3x.perimeter.server.web.UIBaseView;
@@ -24,31 +23,26 @@ import static ru.v0rt3x.perimeter.server.web.views.flag.FlagStatus.*;
 @UIView(name = "flag", linkOrder = 2, link = "/flag/", title = "Flag Processor", icon = "flag")
 public class FlagView extends UIBaseView {
 
-    private final Map<FlagPriority, Queue<Flag>> flagQueue = new HashMap<>();
-    private final Set<Flag> flagHistory = new HashSet<>();
-
     @Autowired
     private FlagRepository flagRepository;
 
     @Autowired
-    private FlagProcessorProperties flagProcessorProperties;
-
-    @Autowired
-    private ThemisProperties themisProperties;
+    private PerimeterProperties perimeterProperties;
 
     @Autowired
     private ThemisClient themisClient;
 
+    @Autowired
+    private FlagQueue flagQueue;
+
+    @Autowired
     private FlagStats flagStats;
+
     private ContestState contestState = ContestState.INITIAL;
     private Integer contestRound = 0;
 
     @PostConstruct
     private void initQueue() {
-        flagQueue.put(LOW, new LinkedList<>());
-        flagQueue.put(NORMAL, new LinkedList<>());
-        flagQueue.put(HIGH, new LinkedList<>());
-
         final int[] stats = new int[] { 0, 0, 0, 0, 0 };
 
         List<Flag> flags = flagRepository.findAllByOrderByCreateTimeStampDesc();
@@ -56,14 +50,14 @@ public class FlagView extends UIBaseView {
         flags.stream()
             .filter(flag -> flag.getStatus() == QUEUED)
             .peek(flag -> stats[flag.getPriority().ordinal()]++)
-            .forEach(this::enqueueFlag);
+            .forEach(flagQueue::enqueueFlag);
 
         flags.stream()
             .filter(flag -> flag.getStatus() != QUEUED)
             .peek(flag -> stats[flag.getStatus().ordinal() + 2]++)
-            .forEach(flagHistory::add);
+            .forEach(flagQueue::addToHistory);
 
-        flagStats = new FlagStats(emitter, stats);
+        flagStats.setStats(stats);
     }
 
     @ModelAttribute("FLAG_STATS")
@@ -93,7 +87,7 @@ public class FlagView extends UIBaseView {
 
     @Scheduled(fixedRate = 10000L)
     private void watchContestStatus() {
-        if (themisProperties.isIntegrationEnabled()) {
+        if (perimeterProperties.getThemis().isIntegrationEnabled()) {
             ContestState currentState = themisClient.getContestState();
             Integer currentRound = themisClient.getContestRound();
 
@@ -103,7 +97,7 @@ public class FlagView extends UIBaseView {
                 contestState = currentState;
                 contestRound = currentRound;
 
-                notify("contest_state", new Object[]{contestState, contestRound});
+                eventProducer.notify("contest_state", new Object[]{contestState, contestRound});
             }
         } else {
             contestState = ContestState.NOT_AVAILABLE;
@@ -111,25 +105,25 @@ public class FlagView extends UIBaseView {
         }
     }
 
-    @Scheduled(fixedRate = 3000L)
+    @Scheduled(fixedRate = 5000L)
     private void processQueue() {
         List<Flag> flagsToSend = new ArrayList<>();
         List<Flag> flagsToUpdate = new ArrayList<>();
 
         while (flagsToSend.size() < 25) {
-            Flag flag = pollFlag();
+            Flag flag = flagQueue.pollFlag();
 
             if (flag == null)
                 break;
 
-            if (flag.getCreateTimeStamp() + flagProcessorProperties.getTtl() * 1000 <= System.currentTimeMillis()) {
+            if (flag.getCreateTimeStamp() + perimeterProperties.getFlag().getTtl() * 1000 <= System.currentTimeMillis()) {
                 flag.setStatus(REJECTED);
 
                 getFlagStats().incrementByStatus(flag.getStatus());
                 getFlagStats().decrementByPriority(flag.getPriority());
 
                 flagsToUpdate.add(flag);
-                flagHistory.add(flag);
+                flagQueue.addToHistory(flag);
 
                 continue;
             }
@@ -138,7 +132,7 @@ public class FlagView extends UIBaseView {
         }
 
         if (flagsToUpdate.size() > 0) {
-            saveAndNotify(flagRepository, flagsToUpdate);
+            eventProducer.saveAndNotify(flagRepository, flagsToUpdate);
         }
 
         if (flagsToSend.size() > 0) {
@@ -147,38 +141,7 @@ public class FlagView extends UIBaseView {
         }
     }
 
-    boolean enqueueFlag(Flag flag) {
-        if (flagProcessorProperties.getPattern().matcher(flag.getFlag()).matches()) {
-            if (flag.getStatus() != QUEUED)
-                return false;
 
-            if (flagHistory.contains(flag))
-                return false;
-
-            synchronized (flagQueue) {
-                saveAndNotify(flagRepository, flag);
-
-                flagQueue.get(flag.getPriority()).add(flag);
-                flagStats.incrementByPriority(flag.getPriority());
-            }
-
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    private Flag pollFlag() {
-        for (FlagPriority priority : new FlagPriority[] { HIGH, NORMAL, LOW }) {
-            if (!flagQueue.get(priority).isEmpty()) {
-                synchronized (flagQueue) {
-                    return flagQueue.get(priority).poll();
-                }
-            }
-        }
-
-        return null;
-    }
 
     private void processResults(List<Flag> flags, List<FlagResult> results) {
         int resultsCount = results.size();
@@ -190,7 +153,7 @@ public class FlagView extends UIBaseView {
 
                 flags.parallelStream()
                     .peek(flag -> flagStats.decrementByPriority(flag.getPriority()))
-                    .forEach(this::enqueueFlag);
+                    .forEach(flagQueue::enqueueFlag);
             } else {
                 logger.error("Invalid Themis response: Got {} results but expected {}", resultsCount, flagsCount);
             }
@@ -210,8 +173,8 @@ public class FlagView extends UIBaseView {
                         flagStats.decrementByPriority(flag.getPriority());
                         flagStats.incrementByStatus(flag.getStatus());
 
-                        saveAndNotify(flagRepository, flag);
-                        flagHistory.add(flag);
+                        eventProducer.saveAndNotify(flagRepository, flag);
+                        flagQueue.addToHistory(flag);
                         break;
                     case CONTEST_NOT_STARTED:
                     case CONTEST_PAUSED:
@@ -220,7 +183,7 @@ public class FlagView extends UIBaseView {
                     case SERVICE_IS_DOWN:
                         logger.warn("ThemisError: {} : {}", flag, result);
                         flagStats.decrementByPriority(flag.getPriority());
-                        enqueueFlag(flag);
+                        flagQueue.enqueueFlag(flag);
                         break;
                     default:
                         logger.warn("Unexpected result: {} : {}", flag, result);

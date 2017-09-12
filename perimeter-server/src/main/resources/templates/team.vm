@@ -31,6 +31,14 @@
                                                     <div class="ripple-container"></div>
                                                 </td>
                                                 <td>
+                                                    #if($team.isActive())
+                                                    <button class="btn btn-success btn-round btn-just-icon" onclick="toggleTeam(${team.getId()});">
+                                                    #else
+                                                    <button class="btn btn-danger btn-round btn-just-icon" onclick="toggleTeam(${team.getId()});">
+                                                    #end
+                                                        <i class="material-icons">power_settings_new</i>
+                                                        <div class="ripple-container"></div>
+                                                    </button>
                                                     <button class="btn btn-danger btn-round btn-just-icon" onclick="deleteTeam(${team.getId()});">
                                                         <i class="material-icons">delete</i>
                                                         <div class="ripple-container"></div>

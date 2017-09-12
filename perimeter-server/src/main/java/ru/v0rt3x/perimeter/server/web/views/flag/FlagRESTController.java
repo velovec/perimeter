@@ -8,11 +8,11 @@ import java.util.Collections;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/flags")
+@RequestMapping("/api/flag")
 public class FlagRESTController {
 
     @Autowired
-    private FlagView flagView;
+    private FlagQueue flagQueue;
 
     @Autowired
     private FlagRepository flagRepository;
@@ -28,7 +28,7 @@ public class FlagRESTController {
             .peek(flag -> flag.setPriority(FlagPriority.valueOf(queue.toUpperCase())))
             .peek(flag -> flag.setCreateTimeStamp(System.currentTimeMillis()))
             .peek(flag -> flag.setStatus(FlagStatus.QUEUED))
-            .map(flagView::enqueueFlag)
+            .map(flagQueue::enqueueFlag)
             .mapToInt(x -> x ? 1 : 0)
             .sum();
     }

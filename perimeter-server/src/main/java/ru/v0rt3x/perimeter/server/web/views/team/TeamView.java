@@ -38,22 +38,31 @@ public class TeamView extends UIBaseView {
 
     @ModelAttribute("TEAM_IP_PATTERN")
     private String getTeamIPPattern() {
-        return perimeterProperties.getTeamIpPattern();
+        return perimeterProperties.getTeam().getIpPattern();
     }
 
     @MessageMapping("/team/add")
     private void addTeam(Team team) {
-        saveAndNotify(teamRepository, team);
+        eventProducer.saveAndNotify(teamRepository, team);
     }
 
     @MessageMapping("/team/delete")
     private void deleteTeam(Team team) {
-        deleteAndNotify(teamRepository, team);
+        eventProducer.deleteAndNotify(teamRepository, team);
+    }
+
+    @MessageMapping("/team/toggle")
+    private void toggleTeam(Team teamRef) {
+        Team team = teamRepository.findById(teamRef.getId());
+        if (Objects.nonNull(team)) {
+            team.setActive(!team.isActive());
+            eventProducer.saveAndNotify(teamRepository, team);
+        }
     }
 
     @MessageMapping("/team/request_sync")
     private void syncRequest() {
-        notify("sync_team", themisClient.getTeamList());
+        eventProducer.notify("sync_team", themisClient.getTeamList());
     }
 
     @MessageMapping("/team/confirm_sync")
@@ -63,8 +72,8 @@ public class TeamView extends UIBaseView {
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
 
-        deleteAndNotify(teamRepository, existingTeams);
-        saveAndNotify(teamRepository, Arrays.asList(teams));
+        eventProducer.deleteAndNotify(teamRepository, existingTeams);
+        eventProducer.saveAndNotify(teamRepository, Arrays.asList(teams));
     }
 
     @RequestMapping(value = "/team/", method = RequestMethod.GET)

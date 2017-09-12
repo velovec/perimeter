@@ -1,18 +1,24 @@
 package ru.v0rt3x.perimeter.server.web.views.flag;
 
-import ru.v0rt3x.perimeter.server.web.events.EventEmitter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import ru.v0rt3x.perimeter.server.web.events.EventProducer;
 
+@Component
 public class FlagStats {
 
     private final int[] stats = new int[] { 0, 0, 0, 0, 0 };
 
-    private final EventEmitter emitter;
+    private EventProducer eventProducer;
 
-    FlagStats(EventEmitter emitter, int... stats) {
+    @Autowired
+    FlagStats(EventProducer eventProducer) {
+        this.eventProducer = eventProducer;
+    }
+
+    public void setStats(int... stats) {
         if (stats.length != 5)
-            throw new IllegalArgumentException("FlagStats should have 5 integer parameters!");
-
-        this.emitter = emitter;
+            throw new IllegalArgumentException("Invalid stats");
 
         this.stats[0] = stats[0];
         this.stats[1] = stats[1];
@@ -37,27 +43,31 @@ public class FlagStats {
         synchronized (stats) {
             stats[status.ordinal() + 2]++;
         }
-        emitter.sendEvent("stats_flag", this);
+
+        eventProducer.notify("stats_flag", this);
     }
 
     void decrementByStatus(FlagStatus status) {
         synchronized (stats) {
             stats[status.ordinal() + 2]--;
         }
-        emitter.sendEvent("stats_flag", this);
+
+        eventProducer.notify("stats_flag", this);
     }
 
     void incrementByPriority(FlagPriority priority) {
         synchronized (stats) {
             stats[priority.ordinal()]++;
         }
-        emitter.sendEvent("stats_flag", this);
+
+        eventProducer.notify("stats_flag", this);
     }
 
     void decrementByPriority(FlagPriority priority) {
         synchronized (stats) {
             stats[priority.ordinal()]--;
         }
-        emitter.sendEvent("stats_flag", this);
+
+        eventProducer.notify("stats_flag", this);
     }
 }

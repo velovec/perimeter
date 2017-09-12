@@ -9,4 +9,8 @@ public interface TeamRepository extends CrudRepository<Team, Long> {
     List<Team> findAll();
 
     Team findByName(String name);
+
+    Team findById(int id);
+
+    List<Team> findAllByActive(boolean isActive);
 }

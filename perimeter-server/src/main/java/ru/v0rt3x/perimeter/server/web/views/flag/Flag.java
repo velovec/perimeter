@@ -95,4 +95,19 @@ public class Flag {
     public String toString() {
         return String.format("Flag(flag='%s', service=%d)", flag, service);
     }
+
+    public static Flag fromString(String flagString) {
+        Flag flag = new Flag();
+
+        flag.setFlag(flagString);
+        flag.setPriority(FlagPriority.NORMAL);
+        flag.setCreateTimeStamp(System.currentTimeMillis());
+        flag.setStatus(FlagStatus.QUEUED);
+
+        return flag;
+    }
+
+    public void setFlag(String flag) {
+        this.flag = flag;
+    }
 }

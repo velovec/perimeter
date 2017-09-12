@@ -17,9 +17,9 @@ spring:
         add-mappings: true
         static-locations: classpath:static
     jpa:
-      hibernate:
-        use-new-id-generator-mappings: true
-        ddl-auto: create
+        hibernate:
+            use-new-id-generator-mappings: true
+            ddl-auto: create
 
 flyway:
     enabled: false
@@ -33,14 +33,19 @@ security:
         enabled: false
 
 perimeter:
-    teamIpPattern: 10.0.%d.1
-    teamIp: 127.0.0.1
+    team:
+        ip-pattern: 10.0.%d.1
+        internal-ip: 127.0.0.1
     flag:
         ttl: 300
-        pattern: ^[a-f0-9]{32}=$
-
-themis:
-    host: 127.0.0.1
-    port: 5000
-    protocol: http
-    integrationEnabled: true
+        pattern: ^[a-fA-F0-9]{32}=$
+    exploit:
+        execution-interval: 60000
+    themis:
+        host: 127.0.0.1
+        port: 5000
+        protocol: http
+        integration-enabled: true
+    agent:
+        timeout: 20000
+        delete-after: 100000

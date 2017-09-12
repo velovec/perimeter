@@ -1,0 +1,11 @@
+spring:
+    jackson:
+        date-format: com.fasterxml.jackson.databind.util.ISO8601DateFormat
+
+perimeter:
+    agent:
+        type: EXECUTOR
+    server:
+        host: 127.0.0.1
+        port: 8080
+        protocol: http
