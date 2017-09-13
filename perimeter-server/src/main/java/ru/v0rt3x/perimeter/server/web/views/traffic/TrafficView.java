@@ -14,6 +14,8 @@ public class TrafficView extends UIBaseView {
 
     @RequestMapping(value = "/traffic/", method = RequestMethod.GET)
     private String index(Map<String, Object> context) {
+        addNavButton(context, "filter", "white", "data-toggle=\"modal\" data-target=\"#filterTraffic\"");
+
         return "traffic";
     }
 }

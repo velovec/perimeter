@@ -14,6 +14,7 @@ public class PerimeterProperties {
     private AgentProperties agent = new AgentProperties();
     private ServerProperties server = new ServerProperties();
     private ExecutorProperties executor = new ExecutorProperties();
+    private MonitorProperties monitor = new MonitorProperties();
 
     public AgentProperties getAgent() {
         return agent;
@@ -37,6 +38,14 @@ public class PerimeterProperties {
 
     public void setExecutor(ExecutorProperties executor) {
         this.executor = executor;
+    }
+
+    public MonitorProperties getMonitor() {
+        return monitor;
+    }
+
+    public void setMonitor(MonitorProperties monitor) {
+        this.monitor = monitor;
     }
 
     public class AgentProperties {
@@ -113,6 +122,19 @@ public class PerimeterProperties {
 
         public void setExecutionTimeout(Long executionTimeout) {
             this.executionTimeout = executionTimeout;
+        }
+    }
+
+    public class MonitorProperties {
+
+        private String gatewayInterface;
+
+        public String getGatewayInterface() {
+            return gatewayInterface;
+        }
+
+        public void setGatewayInterface(String gatewayInterface) {
+            this.gatewayInterface = gatewayInterface;
         }
     }
 }

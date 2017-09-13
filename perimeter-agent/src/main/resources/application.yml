@@ -13,6 +13,8 @@ perimeter:
           go: go run %exploit% %team%
           java: javac %exploit%; java %exploit% %team%
           shell: bash %exploit% %team%
+    monitor:
+        gateway-interface: lo0
     server:
         host: 127.0.0.1
         port: 8080

@@ -13,6 +13,7 @@ import ru.v0rt3x.perimeter.server.web.views.exploit.ExploitRepository;
 import ru.v0rt3x.perimeter.server.web.views.flag.Flag;
 import ru.v0rt3x.perimeter.server.web.views.flag.FlagPriority;
 import ru.v0rt3x.perimeter.server.web.views.flag.FlagQueue;
+import ru.v0rt3x.perimeter.server.web.views.service.ServiceRepository;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -28,6 +29,9 @@ public class AgentRESTController {
 
     @Autowired
     private ExploitRepository exploitRepository;
+
+    @Autowired
+    private ServiceRepository serviceRepository;
 
     @Autowired
     private EventProducer eventProducer;
@@ -77,7 +81,14 @@ public class AgentRESTController {
                     task = agentTaskQueue.getTask();
                 }
             } else if (agent.isMonitor()) {
-                // TODO: Implement monitoring tasks
+                Map<String, Object> parameters = new LinkedHashMap<>();
+
+                parameters.put("services", serviceRepository.findAll());
+                parameters.put("server", perimeterProperties.getTeam().getInternalIp());
+
+                task = new AgentTask();
+                task.setType(AgentTaskType.MONITOR);
+                task.setParameters(parameters);
             }
 
             if (Objects.isNull(task)) {

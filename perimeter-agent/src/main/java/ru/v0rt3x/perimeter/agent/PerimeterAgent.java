@@ -7,6 +7,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import ru.v0rt3x.perimeter.agent.client.PerimeterClient;
 import ru.v0rt3x.perimeter.agent.executor.ExploitExecutor;
+import ru.v0rt3x.perimeter.agent.monitoring.MonitoringAgent;
 import ru.v0rt3x.perimeter.agent.properties.PerimeterProperties;
 import ru.v0rt3x.perimeter.agent.types.AgentID;
 import ru.v0rt3x.perimeter.agent.types.AgentInfo;
@@ -15,6 +16,7 @@ import ru.v0rt3x.perimeter.agent.types.AgentTaskType;
 
 import javax.annotation.PostConstruct;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
@@ -31,6 +33,9 @@ public class PerimeterAgent {
 
     @Autowired
     private ExploitExecutor exploitExecutor;
+
+    @Autowired
+    private MonitoringAgent monitoringAgent;
 
     private AgentID agentID;
     private AgentTask agentTask = AgentTask.noOp();
@@ -53,6 +58,7 @@ public class PerimeterAgent {
     private void getTask() {
         if (agentTask.getType() == AgentTaskType.NOOP) {
             agentTask = client.getTask(agentID);
+            logger.info("Got {} task: {}", agentTask.getType(), agentTask.getParameters());
         } else if (agentTask.getType() == AgentTaskType.MONITOR) {
             agentTask.setParameters(client.getTask(agentID).getParameters());
         } else {
@@ -66,10 +72,25 @@ public class PerimeterAgent {
             case NOOP:
                 break;
             case MONITOR:
+                setUpMonitoring(agentTask.getParameters());
                 break;
             case EXECUTE:
                 executeExploit(agentTask.getParameters());
                 break;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void setUpMonitoring(Map<String, Object> parameters) {
+        if (parameters.containsKey("services") && parameters.containsKey("server")) {
+            List<Map<String, Object>> services = (List<Map<String, Object>>) parameters.get("services");
+            String server = (String) parameters.get("server");
+
+            monitoringAgent.setMonitoringServices(services, server);
+
+            if ((executionResult == null) || executionResult.isDone() || executionResult.isCancelled()) {
+                executionResult = monitoringAgent.startMonitoring();
+            }
         }
     }
 
