@@ -96,11 +96,11 @@ public class Flag {
         return String.format("Flag(flag='%s', service=%d)", flag, service);
     }
 
-    public static Flag fromString(String flagString) {
+    public static Flag newFlag(String flagString, FlagPriority priority) {
         Flag flag = new Flag();
 
         flag.setFlag(flagString);
-        flag.setPriority(FlagPriority.NORMAL);
+        flag.setPriority(priority);
         flag.setCreateTimeStamp(System.currentTimeMillis());
         flag.setStatus(FlagStatus.QUEUED);
 

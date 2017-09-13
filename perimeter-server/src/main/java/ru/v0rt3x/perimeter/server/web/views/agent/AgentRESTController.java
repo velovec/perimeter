@@ -11,6 +11,7 @@ import ru.v0rt3x.perimeter.server.web.events.EventProducer;
 import ru.v0rt3x.perimeter.server.web.views.exploit.Exploit;
 import ru.v0rt3x.perimeter.server.web.views.exploit.ExploitRepository;
 import ru.v0rt3x.perimeter.server.web.views.flag.Flag;
+import ru.v0rt3x.perimeter.server.web.views.flag.FlagPriority;
 import ru.v0rt3x.perimeter.server.web.views.flag.FlagQueue;
 
 import java.util.LinkedHashMap;
@@ -39,6 +40,8 @@ public class AgentRESTController {
 
     @Autowired
     private FlagQueue flagQueue;
+
+    private static final Logger logger = LoggerFactory.getLogger(AgentRESTController.class);
 
     @RequestMapping(path = "/register", method = RequestMethod.POST)
     private Agent registerAgent(@RequestBody Agent agent) {
@@ -118,18 +121,23 @@ public class AgentRESTController {
 
     @SuppressWarnings("unchecked")
     private void processExecutionReport(Map<String, Object> parameters, Map<String, Object> result) {
-        if (Objects.nonNull(result) && result.containsKey("flags") && parameters.containsKey("exploit")) {
-            int hits = ((List<String>) result.get("flags")).parallelStream()
-                .map(Flag::fromString)
-                .map(flagQueue::enqueueFlag)
-                .mapToInt(x -> x ? 1 : 0)
-                .sum();
+        if (Objects.nonNull(result)) {
+            if (result.containsKey("flags") && parameters.containsKey("exploit")) {
+                Map<String, Object> exploitData = (Map<String, Object>) parameters.get("exploit");
+                Exploit exploit = exploitRepository.findById((Integer) exploitData.get("id"));
+                if (Objects.nonNull(exploit)) {
+                    int hits = ((List<String>) result.get("flags")).parallelStream()
+                        .filter(Objects::nonNull)
+                        .map(flag -> Flag.newFlag(flag, exploit.getPriority()))
+                        .map(flagQueue::enqueueFlag)
+                        .mapToInt(x -> x ? 1 : 0)
+                        .sum();
 
-            Map<String, Object> exploitData = (Map<String, Object>) parameters.get("exploit");
-            Exploit exploit = exploitRepository.findById((Integer) exploitData.get("id"));
-            if (Objects.nonNull(exploit)) {
-                exploit.setHits(exploit.getHits() + hits);
-                eventProducer.saveAndNotify(exploitRepository, exploit);
+                    exploit.setHits(exploit.getHits() + hits);
+                    eventProducer.saveAndNotify(exploitRepository, exploit);
+                } else {
+                    logger.warn("Got flags from unregistered exploit: {}", exploitData);
+                }
             }
         }
     }

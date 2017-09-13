@@ -4,7 +4,7 @@ server:
 spring:
     datasource:
         type: com.zaxxer.hikari.HikariDataSource
-        url: jdbc:postgresql://0.0.0.0:5432/perimeter
+        url: jdbc:postgresql://127.0.0.1:5432/perimeter
         username: postgres
         password: P@ssw0rd
     jackson:
@@ -23,10 +23,6 @@ spring:
 
 flyway:
     enabled: false
-    url: jdbc:postgresql://0.0.0.0:5432/perimeter
-    user: postgres
-    password: P@ssw0rd
-    locations: classpath:db/migrations
 
 security:
     basic:

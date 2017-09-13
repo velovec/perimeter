@@ -5,6 +5,14 @@ spring:
 perimeter:
     agent:
         type: EXECUTOR
+    executor:
+        tmp-directory: /tmp/perimeter/exploits
+        execution-timeout: 120000
+        command-line:
+          python: python %exploit% %team%
+          go: go run %exploit% %team%
+          java: javac %exploit%; java %exploit% %team%
+          shell: bash %exploit% %team%
     server:
         host: 127.0.0.1
         port: 8080

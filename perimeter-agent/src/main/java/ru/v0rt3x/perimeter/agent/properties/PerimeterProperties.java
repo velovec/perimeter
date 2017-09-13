@@ -4,11 +4,16 @@ package ru.v0rt3x.perimeter.agent.properties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import ru.v0rt3x.perimeter.agent.types.AgentType;
 
+import java.io.File;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 @ConfigurationProperties(prefix = "perimeter")
 public class PerimeterProperties {
 
     private AgentProperties agent = new AgentProperties();
     private ServerProperties server = new ServerProperties();
+    private ExecutorProperties executor = new ExecutorProperties();
 
     public AgentProperties getAgent() {
         return agent;
@@ -24,6 +29,14 @@ public class PerimeterProperties {
 
     public void setServer(ServerProperties server) {
         this.server = server;
+    }
+
+    public ExecutorProperties getExecutor() {
+        return executor;
+    }
+
+    public void setExecutor(ExecutorProperties executor) {
+        this.executor = executor;
     }
 
     public class AgentProperties {
@@ -70,4 +83,36 @@ public class PerimeterProperties {
         }
     }
 
+    public class ExecutorProperties {
+
+        private Map<String, String> commandLine = new LinkedHashMap<>();
+
+        private File tmpDirectory;
+
+        private Long executionTimeout;
+
+        public File getTmpDirectory() {
+            return tmpDirectory;
+        }
+
+        public void setTmpDirectory(String tmpDirectory) {
+            this.tmpDirectory = new File(tmpDirectory);
+        }
+
+        public Map<String, String> getCommandLine() {
+            return commandLine;
+        }
+
+        public void setCommandLine(Map<String, String> commandLine) {
+            this.commandLine = commandLine;
+        }
+
+        public Long getExecutionTimeout() {
+            return executionTimeout;
+        }
+
+        public void setExecutionTimeout(Long executionTimeout) {
+            this.executionTimeout = executionTimeout;
+        }
+    }
 }
