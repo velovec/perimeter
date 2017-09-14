@@ -8,7 +8,6 @@ pipeline {
     }
 
     environment {
-        DOCKER_REPOSITORY = 'registry.inferno-project.ru/v0rt3x'
         DOCKER_CONFIG = "${env.WORKSPACE}/.docker"
         MAVEN_CONFIG = "${env.WORKSPACE}/.m2"
     }
@@ -35,7 +34,7 @@ pipeline {
 
         stage ('Build :: Build Artifacts') {
             steps {
-                sh 'mvn clean install -gs ${WORKSPACE}/.m2/settings.xml -C -B -DskipTests -Ddocker.repository=${DOCKER_REPOSITORY}'
+                sh 'mvn clean install -gs ${WORKSPACE}/.m2/settings.xml -C -B -DskipTests'
             }
         }
 
@@ -45,7 +44,7 @@ pipeline {
             }
 
             steps {
-                sh 'mvn deploy -gs ${WORKSPACE}/.m2/settings.xml -C -B -DskipTests -Ddocker.skip.build=true -Ddocker.repository=${DOCKER_REPOSITORY}'
+                sh 'mvn deploy -gs ${WORKSPACE}/.m2/settings.xml -C -B -DskipTests -Ddocker.skip.build=true'
             }
         }
     }
