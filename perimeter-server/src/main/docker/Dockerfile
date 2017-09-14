@@ -4,7 +4,7 @@ ENTRYPOINT ["java", "-jar", "/opt/perimeter/perimeter.jar", "--spring.config.loc
 WORKDIR "/opt/perimeter"
 EXPOSE 8080
 
-COPY application.yml /opt/perimeter/perimeter.yml
+COPY classes/application.yml /opt/perimeter/perimeter.yml
 COPY @project.artifactId@-@project.version@.jar /opt/perimeter/perimeter.jar
 
 LABEL project.groupid="@project.groupId@" \
