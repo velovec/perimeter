@@ -102,12 +102,14 @@
                                     <argument>build</argument>
                                     <argument>-t</argument>
                                     <argument>${docker.repository}/${project.artifactId}:${project.version}</argument>
+                                    <argument>-t</argument>
+                                    <argument>${docker.repository}/${project.artifactId}:latest</argument>
                                     <argument>${project.build.directory}</argument>
                                 </arguments>
                             </configuration>
                         </execution>
                         <execution>
-                            <id>docker-push</id>
+                            <id>docker-push-snapshot</id>
                             <phase>none</phase>
                             <goals>
                                 <goal>exec</goal>
@@ -118,6 +120,21 @@
                                 <arguments>
                                     <argument>push</argument>
                                     <argument>${docker.repository}/${project.artifactId}:${project.version}</argument>
+                                </arguments>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>docker-push-latest</id>
+                            <phase>none</phase>
+                            <goals>
+                                <goal>exec</goal>
+                            </goals>
+                            <configuration>
+                                <skip>${docker.skip.push}</skip>
+                                <executable>docker</executable>
+                                <arguments>
+                                    <argument>push</argument>
+                                    <argument>${docker.repository}/${project.artifactId}:latest</argument>
                                 </arguments>
                             </configuration>
                         </execution>

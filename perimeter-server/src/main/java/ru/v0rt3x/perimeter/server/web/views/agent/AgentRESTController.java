@@ -14,6 +14,9 @@ import ru.v0rt3x.perimeter.server.web.views.flag.Flag;
 import ru.v0rt3x.perimeter.server.web.views.flag.FlagPriority;
 import ru.v0rt3x.perimeter.server.web.views.flag.FlagQueue;
 import ru.v0rt3x.perimeter.server.web.views.service.ServiceRepository;
+import ru.v0rt3x.perimeter.server.web.views.traffic.TrafficProcessor;
+import ru.v0rt3x.perimeter.server.web.views.traffic.tcp.TCPPacket;
+import ru.v0rt3x.perimeter.server.web.views.traffic.tcp.TCPTransmission;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -41,6 +44,9 @@ public class AgentRESTController {
 
     @Autowired
     private AgentTaskQueue agentTaskQueue;
+
+    @Autowired
+    private TrafficProcessor trafficProcessor;
 
     @Autowired
     private FlagQueue flagQueue;
@@ -124,6 +130,21 @@ public class AgentRESTController {
 
             agent.setTask(AgentTaskType.NOOP);
             eventProducer.saveAndNotify(agentRepository, agent);
+            return new LinkedHashMap<>();
+        }
+
+        return null;
+    }
+
+    @RequestMapping(path = "/{uuid}/transmission", method = RequestMethod.POST)
+    private Map<String, Object> recordTransmission(@PathVariable String uuid, @RequestBody TCPTransmission transmission) {
+        Agent agent = agentRepository.findByUuid(uuid);
+
+        if (agent != null) {
+            agent.setLastSeen(System.currentTimeMillis());
+
+            trafficProcessor.processTransmission(transmission);
+
             return new LinkedHashMap<>();
         }
 

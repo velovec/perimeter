@@ -97,7 +97,11 @@
                         <phase>install</phase>
                     </execution>
                     <execution>
-                        <id>docker-push</id>
+                        <id>docker-push-snapshot</id>
+                        <phase>deploy</phase>
+                    </execution>
+                    <execution>
+                        <id>docker-push-latest</id>
                         <phase>deploy</phase>
                     </execution>
                 </executions>

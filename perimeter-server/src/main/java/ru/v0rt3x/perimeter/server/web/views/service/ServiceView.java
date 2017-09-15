@@ -11,6 +11,8 @@ import ru.v0rt3x.perimeter.server.properties.PerimeterProperties;
 import ru.v0rt3x.perimeter.server.themis.ThemisClient;
 import ru.v0rt3x.perimeter.server.web.UIBaseView;
 import ru.v0rt3x.perimeter.server.web.UIView;
+import ru.v0rt3x.perimeter.server.web.views.traffic.tcp.TCPPacket;
+import ru.v0rt3x.perimeter.server.web.views.traffic.tcp.TrafficRepository;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -29,6 +31,9 @@ public class ServiceView extends UIBaseView {
     private ServiceRepository serviceRepository;
 
     @Autowired
+    private TrafficRepository trafficRepository;
+
+    @Autowired
     private ThemisClient themisClient;
 
     @Autowired
@@ -44,9 +49,17 @@ public class ServiceView extends UIBaseView {
         eventProducer.saveAndNotify(serviceRepository, service);
     }
 
+    @MessageMapping("/service/list")
+    private void listServices() {
+        eventProducer.notify("list_service", serviceRepository.findAll());
+    }
+
     @MessageMapping("/service/delete")
     private void deleteService(Service service) {
         eventProducer.deleteAndNotify(serviceRepository, service);
+        for (TCPPacket packet: trafficRepository.findAllByService(service)) {
+            eventProducer.deleteAndNotify(trafficRepository, packet);
+        }
     }
 
     @MessageMapping("/service/request_sync")

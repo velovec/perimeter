@@ -86,9 +86,18 @@ public class PerimeterAgent {
             List<Map<String, Object>> services = (List<Map<String, Object>>) parameters.get("services");
             String server = (String) parameters.get("server");
 
-            monitoringAgent.setMonitoringServices(services, server);
+            monitoringAgent.setMonitoringServices(agentID, services, server);
 
-            if ((executionResult == null) || executionResult.isDone() || executionResult.isCancelled()) {
+            if (Objects.isNull(executionResult) || executionResult.isDone() || executionResult.isCancelled()) {
+                if (Objects.nonNull(executionResult))
+                    try {
+                        Map<String, Object> result = executionResult.get();
+                    } catch (InterruptedException e) {
+                        logger.info("Monitoring was interrupted");
+                    } catch (ExecutionException e) {
+                        logger.info("Monitoring failed with exception:", e.getCause());
+                    }
+
                 executionResult = monitoringAgent.startMonitoring();
             }
         }

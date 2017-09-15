@@ -63,4 +63,13 @@ public class PerimeterClient {
             // Do Nothing
         }
     }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> putTransmission(AgentID agentID, Map<String, Object> transmissionDetails) {
+        try {
+            return restClient.postForObject(getEndpoint("agent/%s/transmission", agentID.getUuid()), transmissionDetails, LinkedHashMap.class);
+        } catch (ResourceAccessException e) {
+            return new LinkedHashMap<>();
+        }
+    }
 }

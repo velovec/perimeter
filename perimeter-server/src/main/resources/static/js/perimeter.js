@@ -22,6 +22,10 @@ function onConnect(frame) {
     setStatus("success", "done_all");
 
     stompClient.subscribe("/topic/perimeter", function (event)  { onEvent(JSON.parse(event.body)) });
+
+    if ("on_connect" in eventHandlers) {
+        eventHandlers["on_connect"]();
+    }
 }
 
 function onEvent(event) {

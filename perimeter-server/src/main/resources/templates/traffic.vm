@@ -1,7 +1,7 @@
                 #parse("components/header.vm")
                 <div class="container-fluid">
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-9">
                             <div class="card">
                                 <div class="card-header" data-background-color="purple">
                                     <h4 class="title">Traffic Info</h4>
@@ -14,21 +14,30 @@
                                             <th>Direction</th>
                                             <th>Client</th>
                                             <th>Length</th>
-                                            <th>Sequence ID</th>
-                                            <th>Time Stamp</th>
-                                            <th>Data</th>
+                                            <th>Transmission ID</th>
+                                            <th>Time</th>
+                                            <th></th>
                                         </thead>
-                                        <tbody id="traffic">
-                                            #foreach($packet in $PACKETS)
-                                            <tr id="packet_${packet.id()}">
-                                                <td><a onclick="setFilter('service', '${packet.service().name()}');">${packet.service().name()} (${packet.service().port()})</a></td>
-                                                <td><a onclick="setFilter('direction', #if($packet.direction())'in'#else'out'#end);">#if($packet.direction()) Inbound #else Outgoing #end</a></td>
-                                                <td><a onclick="setFilter('client', '${packet.client()}');">${packet.client()}</a></td>
-                                                <td>${packet.length()}</td>
-                                                <td><a onclick="setFilter('sequence', '${packet.sequence()}');">${packet.sequence()}</a></td>
-                                                <td>${packet.time()}</td>
+                                        <tbody id="packets">
+                                            #foreach($packet in $TRAFFIC)
+                                            <tr id="packet_id${packet.getId()}">
+                                                <td>${packet.getService().getName()}</td>
                                                 <td>
-                                                    <button type="button" class="btn btn-primary btn-sm" data-toggle="tab" data-target="#data_${packet.id()}">Show</button>
+                                                    #if($packet.isInbound())
+                                                    <i class="material-icons text-danger">keyboard_arrow_left</i>
+                                                    #else
+                                                    <i class="material-icons text-success">keyboard_arrow_right</i>
+                                                    #end
+                                                </td>
+                                                <td>${packet.getClientHost()}:${packet.getClientPort()}</td>
+                                                <td>${packet.getPayloadSize()}</td>
+                                                <td>${packet.getTransmission()}</td>
+                                                <td>${packet.getTime()}</td>
+                                                <td>
+                                                    <button class="btn btn-info btn-round btn-just-icon" onclick="requestTCPPacketView(${packet.getId()});">
+                                                        <i class="material-icons">search</i>
+                                                        <div class="ripple-container"></div>
+                                                    </button>
                                                 </td>
                                             </tr>
                                             #end
@@ -37,110 +46,100 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="card">
-                                        <div class="card-content">
-                                            <form>
-                                                <div class="row">
-                                                    <div class="col-md-2">
-                                                        <div class="form-group label-floating">
-                                                            <label class="control-label">Service</label>
-                                                            <select class="form-control" id="service">
-                                                                <option value="all">All</option>
-                                                                #foreach($service in $SERVICES)
-                                                                    <option value="${service.name()}">${service.name()} (${service.port()})</option>
-                                                                #end
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-1">
-                                                        <div class="form-group label-floating">
-                                                            <label class="control-label">Direction</label>
-                                                            <select class="form-control" id="direction">
-                                                                <option value="all">All</option>
-                                                                <option value="in">In</option>
-                                                                <option value="out">Out</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <div class="form-group label-floating">
-                                                            <label class="control-label">Client</label>
-                                                            <input type="text" id="client" class="form-control">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-1">
-                                                        <div class="form-group label-floating">
-                                                            <label class="control-label">Length</label>
-                                                            <input type="text" id="length" class="form-control">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <div class="form-group label-floating">
-                                                            <label class="control-label">Sequence ID</label>
-                                                            <input type="text" id="sequence" class="form-control">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-2">
-                                                        <div class="form-group label-floating">
-                                                            <label class="control-label">Sequence ID Radius</label>
-                                                            <input type="text" id="sequence_range" class="form-control" value="10000">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-md-10">
-                                                        <div class="form-group label-floating">
-                                                            <label class="control-label">Data (not implemented)</label>
-                                                            <input type="text" id="data" class="form-control" disabled>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-1">
-                                                        <div class="form-group label-floating">
-                                                            <label class="control-label">Limit</label>
-                                                            <input type="text" id="limit" class="form-control" value="50">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-1">
-                                                        <div class="form-group label-floating">
-                                                            <label class="control-label">Offset</label>
-                                                            <input type="text" id="offset" class="form-control" value="0">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </form>
+                        <div class="col-md-3">
+                            <div class="card">
+                                <div class="card-content">
+                                    <form>
+                                        <div class="row">
+                                            <div class="form-group label-floating">
+                                                <label class="control-label">Service</label>
+                                                <select class="form-control" id="filter_service">
+                                                    <option value="any">Any</option>
+                                                    #foreach($service in $SERVICES)
+                                                        <option value="${service.getId()}">${service.getName()} (${service.getPort()})</option>
+                                                    #end
+                                                </select>
+                                            </div>
                                         </div>
-                                    </div>
+                                        <div class="row">
+                                            <div class="form-group label-floating">
+                                                <label class="control-label">Direction</label>
+                                                <select class="form-control" id="direction">
+                                                    <option value="all">Both</option>
+                                                    <option value="in">Inbound</option>
+                                                    <option value="out">Outbound</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="form-group label-floating">
+                                                <label class="control-label">Client</label>
+                                                <input type="text" id="client" class="form-control">
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="form-group label-floating">
+                                                <label class="control-label">Transmission ID</label>
+                                                <input type="text" id="transmission" class="form-control">
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="form-group label-floating">
+                                                <label class="control-label">Data (not implemented)</label>
+                                                <input type="text" id="data" class="form-control" disabled>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="form-group label-floating">
+                                                <label class="control-label">Limit</label>
+                                                <input type="text" id="limit" class="form-control" value="50">
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="form-group label-floating">
+                                                <label class="control-label">Offset</label>
+                                                <input type="text" id="offset" class="form-control" value="0">
+                                            </div>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
 
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="card">
-                                        <div class="card-content">
-                                            <div class="tab-content" id="traffic_data">
-                                                #foreach($packet in $PACKETS)
-                                                <div id="data_${packet.id()}" class="tab-pane">
-                                                    <ul class="nav nav-tabs">
-                                                        <li class="active"><a data-toggle="tab" href="#data_hex_${packet.id()}">HEX</a></li>
-                                                        <li><a data-toggle="tab" href="#data_ascii_${packet.id()}">ASCII</a></li>
-                                                    </ul>
+                            <!-- Modal -->
+                            <div class="modal fade" id="packetView" tabindex="-1" role="dialog" aria-labelledby="packetView" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <!--Content-->
+                                    <div class="modal-content">
+                                        <!--Header-->
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                            <h4 class="modal-title w-100" id="packetViewTitle">Packet View</h4>
+                                        </div>
+                                        <!--Body-->
+                                        <div class="modal-body tab-pane">
+                                            <ul class="nav nav-tabs">
+                                                <li class="active"><a data-toggle="tab" href="#packetViewHEX">HEX</a></li>
+                                                <li><a data-toggle="tab" href="#packetViewASCII">ASCII</a></li>
+                                            </ul>
 
-                                                    <div class="tab-content">
-                                                        <div id="data_hex_${packet.id()}" class="tab-pane active">
-                                                            <pre>${packet.hex()}</pre>
-                                                        </div>
-                                                        <div id="data_ascii_${packet.id()}" class="tab-pane">
-                                                            <pre>${packet.ascii()}</pre>
-                                                        </div>
-                                                    </div>
+
+                                            <div class="tab-content">
+                                                <div id="packetViewHEX" class="tab-pane active">
+                                                    <pre id="packetHEX"></pre>
                                                 </div>
-                                                #end
+                                                <div id="packetViewASCII" class="tab-pane">
+                                                    <pre id="packetASCII"></pre>
+                                                </div>
                                             </div>
                                         </div>
+                                        <!--Footer-->
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        </div>
                                     </div>
+                                    <!--/.Content-->
                                 </div>
                             </div>
                         </div>
