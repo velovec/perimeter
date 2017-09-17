@@ -2,6 +2,7 @@ package ru.v0rt3x.perimeter.server.web.views.team;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -61,8 +62,8 @@ public class TeamView extends UIBaseView {
     }
 
     @MessageMapping("/team/request_sync")
-    private void syncRequest() {
-        eventProducer.notify("sync_team", themisClient.getTeamList());
+    private void syncRequest(SimpMessageHeaderAccessor headers) {
+        eventProducer.notify(headers.getSessionId(), "sync_team", themisClient.getTeamList());
     }
 
     @MessageMapping("/team/confirm_sync")

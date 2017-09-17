@@ -78,12 +78,12 @@ function onTeamSync(event) {
 }
 
 function requestTeamSync() {
-    stompClient.send("/ws/team/request_sync", {}, null);
+    stompClient.send("/app/team/request_sync", {}, null);
 }
 
 function confirmTeamSync() {
     if (team_sync_data) {
-        stompClient.send("/ws/team/confirm_sync", {}, JSON.stringify(team_sync_data));
+        stompClient.send("/app/team/confirm_sync", {}, JSON.stringify(team_sync_data));
         console.log(JSON.stringify(team_sync_data));
         notify("success", "Team synchronization started");
     } else {
@@ -125,7 +125,7 @@ function addTeam() {
     }
 
     if (valid) {
-        stompClient.send("/ws/team/add", {}, JSON.stringify({
+        stompClient.send("/app/team/add", {}, JSON.stringify({
             id: new_team_id.val(),
             name: new_team_name.val(),
             ip: new_team_ip.val()
@@ -136,13 +136,13 @@ function addTeam() {
 
 
 function toggleTeam(team) {
-    stompClient.send("/ws/team/toggle", {}, JSON.stringify({
+    stompClient.send("/app/team/toggle", {}, JSON.stringify({
         id: team
     }));
 }
 
 function deleteTeam(team) {
-    stompClient.send("/ws/team/delete", {}, JSON.stringify({
+    stompClient.send("/app/team/delete", {}, JSON.stringify({
         id: team
     }));
 }

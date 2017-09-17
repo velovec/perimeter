@@ -78,7 +78,7 @@ function onServiceSync(event) {
 }
 
 function requestServiceSync() {
-    stompClient.send("/ws/service/request_sync", {}, null);
+    stompClient.send("/app/service/request_sync", {}, null);
 }
 
 function confirmServiceSync() {
@@ -106,7 +106,7 @@ function confirmServiceSync() {
         }
 
         if (valid) {
-            stompClient.send("/ws/service/confirm_sync", {}, JSON.stringify(service_sync_data));
+            stompClient.send("/app/service/confirm_sync", {}, JSON.stringify(service_sync_data));
             $("#syncServices").modal('hide');
             notify("success", "Service synchronization started");
         }
@@ -153,7 +153,7 @@ function addService() {
     }
 
     if (valid) {
-        stompClient.send("/ws/service/add", {}, JSON.stringify({
+        stompClient.send("/app/service/add", {}, JSON.stringify({
             name: new_service_name.val(),
             port: parseInt(new_service_port.val())
         }));
@@ -162,7 +162,7 @@ function addService() {
 }
 
 function deleteService(service) {
-    stompClient.send("/ws/service/delete", {}, JSON.stringify({
+    stompClient.send("/app/service/delete", {}, JSON.stringify({
         id: service
     }));
 }

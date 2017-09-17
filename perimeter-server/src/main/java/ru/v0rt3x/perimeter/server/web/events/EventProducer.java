@@ -2,7 +2,9 @@ package ru.v0rt3x.perimeter.server.web.events;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.stereotype.Component;
 import ru.v0rt3x.perimeter.server.web.events.types.NotificationEvent;
 
@@ -21,8 +23,8 @@ public class EventProducer {
 
     public <T> List<T> saveAndNotify(CrudRepository<T, Long> repository, List<T> list) {
         return list.stream()
-                .map(object -> saveAndNotify(repository, object))
-                .collect(Collectors.toList());
+            .map(object -> saveAndNotify(repository, object))
+            .collect(Collectors.toList());
     }
 
     public <T> T saveAndNotify(CrudRepository<T, Long> repository, T object) {
@@ -44,5 +46,13 @@ public class EventProducer {
 
     public void notify(String eventType, Object eventData) {
         messageTemplate.convertAndSend("/topic/perimeter", new EventWrapper(eventType, eventData));
+    }
+
+    public void notify(String clientId, String eventType, Object eventData) {
+        SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
+        headerAccessor.setSessionId(clientId);
+        headerAccessor.setLeaveMutable(true);
+
+        messageTemplate.convertAndSendToUser(clientId, "/topic/perimeter", new EventWrapper(eventType, eventData), headerAccessor.getMessageHeaders());
     }
 }

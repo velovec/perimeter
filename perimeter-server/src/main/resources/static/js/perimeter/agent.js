@@ -45,7 +45,7 @@ function onAgentDelete(event) {
 }
 
 function deleteAgent(agent) {
-    stompClient.send("/ws/agent/delete", {}, JSON.stringify({
+    stompClient.send("/app/agent/delete", {}, JSON.stringify({
         id: agent
     }));
 }

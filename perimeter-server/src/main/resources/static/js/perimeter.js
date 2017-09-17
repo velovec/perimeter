@@ -12,9 +12,9 @@ function connect() {
 
     setStatus("warning", "autorenew");
 
-    var socket = new SockJS('/sock', undefined, options);
+    var socket = new SockJS('/perimeter', undefined, options);
     stompClient = Stomp.over(socket);
-    stompClient.debug = function (msg) {};
+    stompClient.debug = function (msg) { };
     stompClient.connect({}, onConnect, onError);
 }
 
@@ -22,6 +22,7 @@ function onConnect(frame) {
     setStatus("success", "done_all");
 
     stompClient.subscribe("/topic/perimeter", function (event)  { onEvent(JSON.parse(event.body)) });
+    stompClient.subscribe("/user/topic/perimeter", function (event)  { onEvent(JSON.parse(event.body)) });
 
     if ("on_connect" in eventHandlers) {
         eventHandlers["on_connect"]();
@@ -65,7 +66,7 @@ $(function () {
     $("#submit_flag").click(function () {
         var flag_element = $("#flag_to_submit");
 
-        stompClient.send("/ws/flag/send", {}, JSON.stringify({ "flag": flag_element.val() }));
+        stompClient.send("/app/flag/send", {}, JSON.stringify({ "flag": flag_element.val() }));
         flag_element.val("");
     });
 });

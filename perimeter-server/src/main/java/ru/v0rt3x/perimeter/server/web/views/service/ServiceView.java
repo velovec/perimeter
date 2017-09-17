@@ -2,6 +2,7 @@ package ru.v0rt3x.perimeter.server.web.views.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -49,11 +50,6 @@ public class ServiceView extends UIBaseView {
         eventProducer.saveAndNotify(serviceRepository, service);
     }
 
-    @MessageMapping("/service/list")
-    private void listServices() {
-        eventProducer.notify("list_service", serviceRepository.findAll());
-    }
-
     @MessageMapping("/service/delete")
     private void deleteService(Service service) {
         eventProducer.deleteAndNotify(serviceRepository, service);
@@ -63,8 +59,8 @@ public class ServiceView extends UIBaseView {
     }
 
     @MessageMapping("/service/request_sync")
-    private void syncRequest() {
-        eventProducer.notify("sync_service", themisClient.getServiceList());
+    private void syncRequest(SimpMessageHeaderAccessor headers) {
+        eventProducer.notify(headers.getSessionId(), "sync_service", themisClient.getServiceList());
     }
 
     @MessageMapping("/service/confirm_sync")

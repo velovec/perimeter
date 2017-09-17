@@ -1,7 +1,11 @@
 eventHandlers = {
+    update_service: onServiceUpdate,
+    delete_service: onServiceDelete,
+
     update_tcppacket: onTCPPacketUpdate,
     delete_tcppacket: onTCPPacketDelete,
-    view_tcppacket: onTCPPacketView
+    view_tcppacket: onTCPPacketView,
+    search_tcppacket: onTCPPacketSearch
 };
 
 var packet_table = $("#packets");
@@ -10,7 +14,31 @@ var packet_view = $("#packetView");
 var packet_view_hex = $("#packetHEX");
 var packet_view_ascii = $("#packetASCII");
 
+var filter_service = $("#filter_service");
+var filter_direction = $("#filter_direction");
+var filter_client = $("#filter_client");
+var filter_transmission = $("#filter_transmission");
+
 var view_id = 0;
+
+function onServiceUpdate(event) {
+    var service = $("<option></option>").attr("value", event.data.id).text(event.data.name);
+
+    var old_service = $("#service_id" + event.data.id);
+    if (old_service.length > 0) {
+        old_service.replaceWith(service);
+    } else {
+        service_table.append(service);
+    }
+}
+
+function onServiceDelete(event) {
+    var service_element = $("#service_id" + event.data.id);
+
+    if (service_element.length >= 0) {
+        service_element.remove();
+    }
+}
 
 function onTCPPacketUpdate(event) {
     var packet = $("<tr></tr>").attr("id", "packet_id" + event.data.id);
@@ -49,7 +77,7 @@ function onTCPPacketDelete(event) {
 
 function requestTCPPacketView(id) {
     view_id = id;
-    stompClient.send("/ws/packet/view", {}, JSON.stringify({
+    stompClient.send("/app/packet/view", {}, JSON.stringify({
         id: id
     }));
 }
@@ -60,4 +88,21 @@ function onTCPPacketView(event) {
         packet_view_hex.text(event.data.hex);
         packet_view.modal('show');
     }
+}
+
+function doTCPPacketSearch() {
+    stompClient.send("/app/packet/search", {}, JSON.stringify({
+        service: filter_service.val(),
+        direction: filter_direction.val(),
+        client: filter_client.val(),
+        transmission: filter_transmission.val()
+    }));
+}
+
+function onTCPPacketSearch(event) {
+    packet_table.empty();
+
+    event.data.forEach(function (packet, index, array) {
+        onTCPPacketUpdate({ data: packet });
+    });
 }
