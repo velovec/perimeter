@@ -7,15 +7,20 @@ import org.apache.commons.csv.CSVRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import org.yaml.snakeyaml.Yaml;
+import ru.v0rt3x.perimeter.server.config.ConfigManager;
 import ru.v0rt3x.perimeter.server.haproxy.dao.*;
 import ru.v0rt3x.perimeter.server.properties.PerimeterProperties;
 import ru.v0rt3x.perimeter.server.service.ServiceManager;
 import ru.v0rt3x.perimeter.server.service.dao.Service;
 
+import javax.annotation.PostConstruct;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Component
@@ -35,6 +40,35 @@ public class HAProxyManager {
 
     @Autowired
     private PerimeterProperties perimeterProperties;
+
+    @Autowired
+    private ConfigManager configManager;
+
+    @PostConstruct
+    public void setUpHAProxyManager() {
+        configManager.registerConfigProcessor("haproxy", this::processHAProxyConfig);
+    }
+
+    private void processHAProxyConfig(byte[] data) {
+        HAProxyConfigWrapper configWrapper = new Yaml().loadAs(new ByteArrayInputStream(data), HAProxyConfigWrapper.class);
+
+        mappingRepository.deleteAll();
+        backendRepository.deleteAll();
+        aclRepository.deleteAll();
+
+        backendRepository.saveAll(configWrapper.getBackends());
+        aclRepository.saveAll(configWrapper.getAcls());
+
+        serviceManager.replaceServices(configWrapper.getServices());
+
+        for (Map<String, String> mappingDefinition: configWrapper.getMappings()) {
+            setBackend(
+                mappingDefinition.get("service"),
+                mappingDefinition.get("backend"),
+                mappingDefinition.get("acl")
+            );
+        }
+    }
 
     public void setBackend(String serviceName, String backendName, String aclName) {
         Service service = serviceManager.getService(serviceName);
@@ -73,20 +107,6 @@ public class HAProxyManager {
 
     public List<HAProxyBackend> listBackends() {
         return backendRepository.findAll();
-    }
-
-    public void replaceBackends(List<HAProxyBackend> backends) {
-        backendRepository.deleteAll();
-        backendRepository.saveAll(backends);
-    }
-
-    public void replaceACLs(List<HAProxyACL> acls) {
-        aclRepository.deleteAll();
-        aclRepository.saveAll(acls);
-    }
-
-    public void clearMappings() {
-        mappingRepository.deleteAll();
     }
 
     public List<CSVRecord> getHAProxyStats() throws IOException {

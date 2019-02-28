@@ -8,7 +8,11 @@ perimeter:
         port: 8080
         protocol: http
     configurator:
-        haproxy:
-            config-path: /tmp/haproxy.cfg
-            host: 0.0.0.0
-            apply-command: docker restart haproxy
+        templates-path: config_templates
+        configurators:
+            haproxy:
+                config-path: /tmp/haproxy.cfg
+                template-file: haproxy.cfg.j2
+                apply-command: docker restart haproxy
+                overrides:
+                    host: 0.0.0.0

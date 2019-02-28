@@ -2,47 +2,31 @@ package ru.v0rt3x.perimeter.configurator.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.Map;
+
 @ConfigurationProperties(prefix = "perimeter.configurator")
 public class PerimeterConfiguratorProperties {
 
-    private HAProxyProperties haproxy = new HAProxyProperties();
+    private String templatesPath;
+    private Map<String, Configurator> configurators;
 
-    public HAProxyProperties getHaproxy() {
-        return haproxy;
+    public Map<String, Configurator> getConfigurators() {
+        return configurators;
     }
 
-    public void setHaproxy(HAProxyProperties haproxy) {
-        this.haproxy = haproxy;
+    public Configurator getConfigurator(String name) {
+        return configurators.get(name);
     }
 
-    public class HAProxyProperties {
+    public void setConfigurators(Map<String, Configurator> configurators) {
+        this.configurators = configurators;
+    }
 
-        private String host;
-        private String configPath;
-        private String applyCommand;
+    public String getTemplatesPath() {
+        return templatesPath;
+    }
 
-        public String getHost() {
-            return host;
-        }
-
-        public void setHost(String host) {
-            this.host = host;
-        }
-
-        public String getConfigPath() {
-            return configPath;
-        }
-
-        public void setConfigPath(String configPath) {
-            this.configPath = configPath;
-        }
-
-        public String getApplyCommand() {
-            return applyCommand;
-        }
-
-        public void setApplyCommand(String applyCommand) {
-            this.applyCommand = applyCommand;
-        }
+    public void setTemplatesPath(String templatesPath) {
+        this.templatesPath = templatesPath;
     }
 }

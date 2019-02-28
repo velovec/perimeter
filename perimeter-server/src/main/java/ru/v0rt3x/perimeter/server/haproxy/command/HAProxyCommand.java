@@ -91,7 +91,7 @@ public class HAProxyCommand extends PerimeterShellCommand {
         Map<String, Object> parameters = new HashMap<>();
 
         parameters.put("type", "haproxy");
-        parameters.put("configuration", configuration);
+        parameters.put("configuration", Collections.singletonMap("services", configuration));
 
         agentTask.setType("configure");
         agentTask.setParameters(parameters);

@@ -13,6 +13,7 @@ import ru.v0rt3x.perimeter.server.service.ServiceManager;
 
 import javax.annotation.PostConstruct;
 import java.io.ByteArrayInputStream;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,6 +31,7 @@ public class ConfigManager {
     private FileRouter fileRouter;
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigManager.class);
+    private final Map<String, ConfigProcessor> configProcessors = new HashMap<>();
 
     @PostConstruct
     public void setUpConfigManager() {
@@ -38,30 +40,15 @@ public class ConfigManager {
 
     private void applyConfig(String user, Matcher pathMatcher, byte[] data) {
         logger.info("User '{}' uploaded new '{}' config. Processing...", user, pathMatcher.group("name"));
-        switch (pathMatcher.group("name")) {
-            case "haproxy":
-                processHAProxyConfig(data);
-                break;
-            default:
-                logger.warn("Unsupported config file: {}", pathMatcher.group("name"));
-                break;
+        if (configProcessors.containsKey(pathMatcher.group("name"))) {
+            configProcessors.get(pathMatcher.group("name")).process(data);
+        } else {
+            logger.warn("Unsupported config file: {}", pathMatcher.group("name"));
         }
     }
 
-    private void processHAProxyConfig(byte[] data) {
-        HAProxyConfigWrapper configWrapper = new Yaml().loadAs(new ByteArrayInputStream(data), HAProxyConfigWrapper.class);
-
-        haProxyManager.clearMappings();
-        serviceManager.replaceServices(configWrapper.getServices());
-        haProxyManager.replaceBackends(configWrapper.getBackends());
-        haProxyManager.replaceACLs(configWrapper.getAcls());
-
-        for (Map<String, String> mappingDefinition: configWrapper.getMappings()) {
-            haProxyManager.setBackend(
-                mappingDefinition.get("service"),
-                mappingDefinition.get("backend"),
-                mappingDefinition.get("acl")
-            );
-        }
+    public void registerConfigProcessor(String name, ConfigProcessor configProcessor) {
+        configProcessors.put(name, configProcessor);
     }
+
 }

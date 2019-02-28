@@ -1,0 +1,36 @@
+services:
+  - name: perimeter
+    mode: http
+    port: 8080
+    check: GET /actuator
+    expect: rstatus (2|3)[0-9][0-9]
+acls:
+  - name: charles-acl
+    rules:
+      - hdr_sub(user-agent) -i "python/requests"
+  - name: prod-acl-perimeter
+    rules:
+      - hdr_sub(user-agent) -i "python/requests"
+      - nbsrv(perimeter-charles) lt 1
+backends:
+  - name: stage
+    servers:
+      - 10.20.30.2
+      - 10.20.30.4
+  - name: prod
+    servers:
+      - 10.20.30.1
+      - 10.20.30.5
+  - name: charles
+    servers:
+      - 10.20.30.3
+      - 10.20.30.6
+mappings:
+  - service: perimeter
+    backend: stage
+  - service: perimeter
+    backend: charles
+    acl: charles-acl
+  - service: perimeter
+    backend: prod
+    acl: prod-acl-perimeter
