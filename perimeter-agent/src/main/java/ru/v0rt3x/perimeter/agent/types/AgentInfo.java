@@ -2,6 +2,7 @@ package ru.v0rt3x.perimeter.agent.types;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.List;
 
 public class AgentInfo {
 
@@ -11,10 +12,9 @@ public class AgentInfo {
     private String osArch;
     private String osVersion;
 
-    private boolean isExecutor;
-    private boolean isMonitor;
+    private String type;
 
-    public static AgentInfo build(AgentType type) {
+    public static AgentInfo build(String type) {
         AgentInfo agentInfo = new AgentInfo();
         
         try {
@@ -27,8 +27,7 @@ public class AgentInfo {
         agentInfo.osArch = System.getProperty("os.arch");
         agentInfo.osVersion = System.getProperty("os.version");
 
-        agentInfo.isExecutor = type == AgentType.EXECUTOR;
-        agentInfo.isMonitor = type == AgentType.MONITOR;
+        agentInfo.type = type;
 
         return agentInfo;
     }
@@ -49,11 +48,7 @@ public class AgentInfo {
         return osVersion;
     }
 
-    public boolean isExecutor() {
-        return isExecutor;
-    }
-
-    public boolean isMonitor() {
-        return isMonitor;
+    public String getType() {
+        return type;
     }
 }

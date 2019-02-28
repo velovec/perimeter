@@ -1,0 +1,14 @@
+spring:
+    jackson:
+        date-format: com.fasterxml.jackson.databind.util.ISO8601DateFormat
+
+perimeter:
+    server:
+        host: 127.0.0.1
+        port: 8080
+        protocol: http
+    configurator:
+        haproxy:
+            config-path: /tmp/haproxy.cfg
+            host: 0.0.0.0
+            apply-command: docker restart haproxy

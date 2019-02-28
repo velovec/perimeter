@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
-import ru.v0rt3x.perimeter.agent.properties.PerimeterProperties;
+import ru.v0rt3x.perimeter.agent.properties.PerimeterAgentProperties;
 import ru.v0rt3x.perimeter.agent.types.AgentID;
 import ru.v0rt3x.perimeter.agent.types.AgentInfo;
 import ru.v0rt3x.perimeter.agent.types.AgentTask;
@@ -17,16 +17,16 @@ import java.util.Map;
 public class PerimeterClient {
 
     @Autowired
-    private PerimeterProperties perimeterProperties;
+    private PerimeterAgentProperties perimeterAgentProperties;
 
     private final RestTemplate restClient = new RestTemplate();
 
     private String getEndpoint(String endpoint, String... args) {
         return String.format(
             "%s://%s:%s/api/%s",
-            perimeterProperties.getServer().getProtocol(),
-            perimeterProperties.getServer().getHost(),
-            perimeterProperties.getServer().getPort(),
+            perimeterAgentProperties.getProtocol(),
+            perimeterAgentProperties.getHost(),
+            perimeterAgentProperties.getPort(),
             String.format(endpoint, (Object[]) args)
         );
     }
@@ -35,6 +35,8 @@ public class PerimeterClient {
         try {
             return restClient.postForObject(getEndpoint("agent/register"), agentInfo, AgentID.class);
         } catch (ResourceAccessException e) {
+            System.out.println(e.getMessage());
+
             return null;
         }
     }
@@ -47,15 +49,6 @@ public class PerimeterClient {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public Map<String, Object> reportTask(AgentID agentID, AgentTask agentTask) {
-        try {
-            return restClient.postForObject(getEndpoint("agent/%s/report", agentID.getUuid()), agentTask, LinkedHashMap.class);
-        } catch (ResourceAccessException e) {
-            return new LinkedHashMap<>();
-        }
-    }
-
     public void heartbeat(AgentID agentID) {
         try {
             restClient.getForObject(getEndpoint("agent/%s/heartbeat", agentID.getUuid()), LinkedHashMap.class);
@@ -65,9 +58,9 @@ public class PerimeterClient {
     }
 
     @SuppressWarnings("unchecked")
-    public Map<String, Object> putTransmission(AgentID agentID, Map<String, Object> transmissionDetails) {
+    public Map<String, Object> reportData(AgentID agentID, String dataType, Map<String, Object> data) {
         try {
-            return restClient.postForObject(getEndpoint("agent/%s/transmission", agentID.getUuid()), transmissionDetails, LinkedHashMap.class);
+            return restClient.postForObject(getEndpoint("agent/%s/%s", agentID.getUuid(), dataType), data, LinkedHashMap.class);
         } catch (ResourceAccessException e) {
             return new LinkedHashMap<>();
         }

@@ -11,6 +11,7 @@
 
     <artifactId>perimeter-agent</artifactId>
     <name>v0rt3x :: Perimeter :: Agent</name>
+    <packaging>pom</packaging>
 
     <dependencies>
         <dependency>
@@ -25,65 +26,5 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.pcap4j</groupId>
-            <artifactId>pcap4j-core</artifactId>
-            <version>1.7.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.pcap4j</groupId>
-            <artifactId>pcap4j-packetfactory-static</artifactId>
-            <version>1.7.0</version>
-        </dependency>
     </dependencies>
-
-    <build>
-        <resources>
-            <resource>
-                <directory>${project.basedir}/src/main/docker</directory>
-                <filtering>true</filtering>
-                <targetPath>${project.build.directory}</targetPath>
-            </resource>
-            <resource>
-                <directory>${project.basedir}/src/main/resources</directory>
-                <filtering>true</filtering>
-                <targetPath>${project.build.directory}/classes</targetPath>
-            </resource>
-        </resources>
-
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>repackage</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <mainClass>ru.v0rt3x.perimeter.agent.Application</mainClass>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>docker-build</id>
-                        <phase>install</phase>
-                    </execution>
-                    <execution>
-                        <id>docker-push-snapshot</id>
-                        <phase>deploy</phase>
-                    </execution>
-                    <execution>
-                        <id>docker-push-latest</id>
-                        <phase>deploy</phase>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 </project>

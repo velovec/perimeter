@@ -4,23 +4,21 @@ import java.util.Map;
 
 public class AgentTask {
 
-    private AgentTaskType type;
+    private String type;
 
     private Map<String, Object> parameters;
-    private Map<String, Object> result;
 
     public static AgentTask noOp() {
-        AgentTask noOpTask = new AgentTask();
-        noOpTask.setType(AgentTaskType.NOOP);
-
-        return noOpTask;
+        AgentTask noOp = new AgentTask();
+        noOp.setType("noop");
+        return noOp;
     }
 
-    public AgentTaskType getType() {
+    public String getType() {
         return type;
     }
 
-    public void setType(AgentTaskType type) {
+    public void setType(String type) {
         this.type = type;
     }
 
@@ -30,13 +28,5 @@ public class AgentTask {
 
     public void setParameters(Map<String, Object> parameters) {
         this.parameters = parameters;
-    }
-
-    public Map<String, Object> getResult() {
-        return result;
-    }
-
-    public void setResult(Map<String, Object> result) {
-        this.result = result;
     }
 }

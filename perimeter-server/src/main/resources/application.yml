@@ -1,37 +1,52 @@
 server:
     port: 8080
 
+management:
+    endpoint:
+        metrics:
+            enabled: true
+        prometheus:
+            enabled: true
+    endpoints:
+        web:
+            exposure:
+                include: 'prometheus'
+    metrics:
+        export:
+            prometheus:
+                enabled: true
+
 spring:
-    datasource:
-        type: com.zaxxer.hikari.HikariDataSource
-        url: jdbc:postgresql://127.0.0.1:5432/perimeter
-        username: postgres
-        password: P@ssw0rd
+#    datasource:
+#        type: com.zaxxer.hikari.HikariDataSource
+#        url: jdbc:postgresql://127.0.0.1:5432/perimeter
+#        username: postgres
+#        password: P@ssw0rd
     jackson:
         date-format: com.fasterxml.jackson.databind.util.ISO8601DateFormat
     mvc:
         favicon:
             enabled: false
-        static-path-pattern: /**
-    resources:
-        add-mappings: true
-        static-locations: classpath:static
     jpa:
         hibernate:
             use-new-id-generator-mappings: true
-            ddl-auto: create
-
-flyway:
-    enabled: false
-
-security:
-    basic:
+            ddl-auto: update
+    flyway:
         enabled: false
 
 perimeter:
+    shell:
+        host: 0.0.0.0
+        port: 1488
+        host-key: master.key
+        auth-storage:
+            path: auth.storage
+            key: 706572696d65746572
     team:
         ip-pattern: 10.0.%d.1
         internal-ip: 127.0.0.1
+        stats-port: 1936
+        production-backend: prod
     flag:
         ttl: 300
         pattern: ^[a-fA-F0-9]{32}=$
@@ -41,7 +56,7 @@ perimeter:
         host: 127.0.0.1
         port: 5000
         protocol: http
-        integration-enabled: true
+        integration-enabled: false
     agent:
         timeout: 20000
         delete-after: 100000

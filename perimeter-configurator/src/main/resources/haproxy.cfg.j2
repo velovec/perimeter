@@ -1,0 +1,57 @@
+global
+  spread-checks 4
+  tune.maxrewrite 1024
+  tune.bufsize 32768
+  maxconn  8000
+
+defaults
+  log  global
+  mode http
+
+  maxconn 8000
+  option forwardfor
+  option redispatch
+  retries 3
+  stats  enable
+
+  timeout http-request 10s
+  timeout queue 1m
+  timeout connect 10s
+  timeout client 1m
+  timeout server 1m
+  timeout check 10s
+
+listen haproxy-stats
+  bind {{ global.haproxy.host }}:1936
+  mode http
+  log global
+
+  maxconn 10
+
+  clitimeout    100s
+  srvtimeout    100s
+  contimeout    100s
+  timeout queue 100s
+
+  stats enable
+  stats hide-version
+  stats refresh 30s
+  stats show-node
+  stats uri /stats
+
+{% for service, definition in configuration.items() %}frontend {{ service }}
+  bind {{ global.haproxy.host }}:{{ definition.port }}
+  mode {{ definition.mode|default(tcp) }}
+  {% for mapping in definition.mappings %}{% if mapping.acl %}{% for rule in mapping.acl.rules %}acl {{ mapping.acl.name }} {{ rule }}
+  {% endfor %}use_backend {{ service }}-{{ mapping.backend.name }} if {{ mapping.acl.name }}
+  {% else %}default_backend {{ service }}-{{ mapping.backend.name }}
+  {% endif %}{% endfor %}
+{% for mapping in definition.mappings %}backend {{ service }}-{{ mapping.backend.name }}{% if definition.mode|default(tcp) == 'http' %}
+  option httpchk {{ definition.check }}{% if definition.expect %}
+  http-check expect {{ definition.expect }}{% endif %}
+  http-response set-status 200 reason "OK"{% elif definition.mode|default(tcp) == 'tcp' %}
+  option tcp-check{% endif %}
+  default-server inter 3s fall 3 rise 2{% for server in mapping.backend.servers %}
+  server {{ service }}-{{ mapping.backend.name }}{{ loop.index }} {{ server }}:{{ definition.port }} check{% endfor %}
+{% endfor %}
+{% endfor %}

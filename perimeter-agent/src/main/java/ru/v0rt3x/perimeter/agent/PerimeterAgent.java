@@ -5,22 +5,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import ru.v0rt3x.perimeter.agent.client.PerimeterClient;
-import ru.v0rt3x.perimeter.agent.executor.ExploitExecutor;
-import ru.v0rt3x.perimeter.agent.monitoring.MonitoringAgent;
-import ru.v0rt3x.perimeter.agent.properties.PerimeterProperties;
-import ru.v0rt3x.perimeter.agent.types.AgentID;
-import ru.v0rt3x.perimeter.agent.types.AgentInfo;
-import ru.v0rt3x.perimeter.agent.types.AgentTask;
-import ru.v0rt3x.perimeter.agent.types.AgentTaskType;
 
-import javax.annotation.PostConstruct;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import ru.v0rt3x.perimeter.agent.client.PerimeterClient;
+import ru.v0rt3x.perimeter.agent.types.*;
+
+import java.util.*;
 
 @Component
 public class PerimeterAgent {
@@ -28,25 +17,19 @@ public class PerimeterAgent {
     @Autowired
     private PerimeterClient client;
 
-    @Autowired
-    private PerimeterProperties properties;
-
-    @Autowired
-    private ExploitExecutor exploitExecutor;
-
-    @Autowired
-    private MonitoringAgent monitoringAgent;
-
     private AgentID agentID;
-    private AgentTask agentTask = AgentTask.noOp();
-
-    private Future<Map<String, Object>> executionResult;
 
     private static final Logger logger = LoggerFactory.getLogger(PerimeterAgent.class);
 
-    @PostConstruct
-    private void registerAgent() {
-        agentID = client.register(AgentInfo.build(properties.getAgent().getType()));
+    @Scheduled(fixedRate = 5000L)
+    private void heartbeat() {
+        if (Objects.nonNull(agentID)) {
+            client.heartbeat(agentID);
+        }
+    }
+
+    public void registerAgent(String agentType) {
+        agentID = client.register(AgentInfo.build(agentType));
 
         if (Objects.isNull(agentID)) {
             logger.error("Unable to register");
@@ -54,77 +37,21 @@ public class PerimeterAgent {
         }
     }
 
-    @Scheduled(fixedRate = 5000L)
-    private void getTask() {
-        if (agentTask.getType() == AgentTaskType.NOOP) {
-            agentTask = client.getTask(agentID);
-            logger.info("Got {} task: {}", agentTask.getType(), agentTask.getParameters());
-        } else if (agentTask.getType() == AgentTaskType.MONITOR) {
-            agentTask.setParameters(client.getTask(agentID).getParameters());
-        } else {
-            client.heartbeat(agentID);
-        }
+    public AgentTask getTask() {
+        return client.getTask(agentID);
     }
 
-    @Scheduled(fixedDelay = 3000L)
-    private void executeTask() {
-        switch (agentTask.getType()) {
-            case NOOP:
-                break;
-            case MONITOR:
-                setUpMonitoring(agentTask.getParameters());
-                break;
-            case EXECUTE:
-                executeExploit(agentTask.getParameters());
-                break;
-        }
+    public void reportData(String dataType, Map<String, Object> data) {
+        client.reportData(agentID, dataType, data);
     }
 
-    @SuppressWarnings("unchecked")
-    private void setUpMonitoring(Map<String, Object> parameters) {
-        if (parameters.containsKey("services") && parameters.containsKey("server")) {
-            List<Map<String, Object>> services = (List<Map<String, Object>>) parameters.get("services");
-            String server = (String) parameters.get("server");
+    public void reportTask(AgentTask task, Map<String, Object> data) {
+        Map<String, Object> report = new HashMap<>();
 
-            monitoringAgent.setMonitoringServices(agentID, services, server);
+        report.put("type", task.getType());
+        report.put("parameters", task.getParameters());
+        report.put("result", data);
 
-            if (Objects.isNull(executionResult) || executionResult.isDone() || executionResult.isCancelled()) {
-                if (Objects.nonNull(executionResult))
-                    try {
-                        Map<String, Object> result = executionResult.get();
-                    } catch (InterruptedException e) {
-                        logger.info("Monitoring was interrupted");
-                    } catch (ExecutionException e) {
-                        logger.info("Monitoring failed with exception:", e.getCause());
-                    }
-
-                executionResult = monitoringAgent.startMonitoring();
-            }
-        }
-    }
-
-    private void executeExploit(Map<String, Object> parameters) {
-        if (Objects.isNull(executionResult)) {
-            executionResult = exploitExecutor.executeExploit(parameters);
-            return;
-        }
-
-        if (executionResult.isDone()) {
-            try {
-                agentTask.setResult(executionResult.get());
-            } catch (InterruptedException | ExecutionException e) {
-                Map<String, Object> error = new LinkedHashMap<>();
-
-                error.put("errType", e.getClass().getSimpleName());
-                error.put("errMessage", e.getMessage());
-
-                agentTask.setResult(error);
-            } finally {
-                client.reportTask(agentID, agentTask);
-            }
-
-            executionResult = null;
-            agentTask = AgentTask.noOp();
-        }
+        reportData("report", report);
     }
 }

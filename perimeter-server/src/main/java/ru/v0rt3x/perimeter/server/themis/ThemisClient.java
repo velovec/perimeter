@@ -9,15 +9,12 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 import ru.v0rt3x.perimeter.server.properties.PerimeterProperties;
-import ru.v0rt3x.perimeter.server.web.views.flag.Flag;
-import ru.v0rt3x.perimeter.server.web.views.flag.FlagResult;
-import ru.v0rt3x.perimeter.server.web.views.service.Service;
-import ru.v0rt3x.perimeter.server.web.views.team.Team;
+import ru.v0rt3x.perimeter.server.flag.dao.Flag;
+import ru.v0rt3x.perimeter.server.flag.dao.FlagResult;
+import ru.v0rt3x.perimeter.server.service.dao.Service;
+import ru.v0rt3x.perimeter.server.team.dao.Team;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -38,9 +35,17 @@ public class ThemisClient {
         );
     }
 
+    private <T> List<T> toList(T[] array) {
+        return Objects.nonNull(array) ? Arrays.asList(array) : new ArrayList<>();
+    }
+
+    private <T> T getOrDefault(T value, T defaultValue) {
+        return Objects.nonNull(value) ? value : defaultValue;
+    }
+
     public List<Team> getTeamList() {
         try {
-            return Arrays.stream(restClient.getForObject(getEndpoint("teams"), Team[].class))
+            return toList(restClient.getForObject(getEndpoint("teams"), Team[].class)).stream()
                 .peek(team -> team.setIp(String.format(perimeterProperties.getTeam().getIpPattern(), team.getId())))
                 .collect(Collectors.toList());
         } catch (ResourceAccessException e) {
@@ -50,7 +55,7 @@ public class ThemisClient {
 
     public List<Service> getServiceList() {
         try {
-            return Arrays.asList(restClient.getForObject(
+            return toList(restClient.getForObject(
                 getEndpoint("services"), Service[].class
             ));
         } catch (ResourceAccessException e) {
@@ -60,7 +65,7 @@ public class ThemisClient {
 
     public ContestState getContestState() {
         try {
-            return ContestState.values()[restClient.getForObject(getEndpoint("contest/state"), Integer.class)];
+            return ContestState.values()[getOrDefault(restClient.getForObject(getEndpoint("contest/state"), Integer.class), ContestState.values().length - 1)];
         } catch (ResourceAccessException e) {
             return ContestState.NOT_AVAILABLE;
         }
@@ -68,7 +73,7 @@ public class ThemisClient {
 
     public Integer getContestRound() {
         try {
-            return restClient.getForObject(getEndpoint("contest/round"), Integer.class);
+            return getOrDefault(restClient.getForObject(getEndpoint("contest/round"), Integer.class), 0);
         } catch (ResourceAccessException e) {
             return 0;
         }
@@ -81,7 +86,7 @@ public class ThemisClient {
             headers.add("Content-Type", "application/json");
             HttpEntity<List<Flag>> entity = new HttpEntity<>(flags, headers);
 
-            results = Arrays.asList(restClient.postForObject(
+            results = toList(restClient.postForObject(
                 getEndpoint("submit"), entity, Integer[].class
             ));
         } catch (HttpClientErrorException e) {

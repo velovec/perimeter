@@ -1,6 +1,7 @@
 package ru.v0rt3x.perimeter.server.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import ru.v0rt3x.perimeter.server.utils.HexBin;
 
 import java.util.regex.Pattern;
 
@@ -11,6 +12,7 @@ public class PerimeterProperties {
     private FlagProperties flag = new FlagProperties();
     private ThemisProperties themis = new ThemisProperties();
     private AgentProperties agent = new AgentProperties();
+    private ShellProperties shell = new ShellProperties();
 
     public TeamProperties getTeam() {
         return team;
@@ -44,9 +46,19 @@ public class PerimeterProperties {
         this.agent = agent;
     }
 
+    public ShellProperties getShell() {
+        return shell;
+    }
+
+    public void setShell(ShellProperties shell) {
+        this.shell = shell;
+    }
+
     public class TeamProperties {
         private String ipPattern;
         private String internalIp;
+        private Integer statsPort;
+        private String productionBackend;
 
         public String getIpPattern() {
             return ipPattern;
@@ -62,6 +74,22 @@ public class PerimeterProperties {
 
         public void setInternalIp(String internalIp) {
             this.internalIp = internalIp;
+        }
+
+        public Integer getStatsPort() {
+            return statsPort;
+        }
+
+        public void setStatsPort(Integer statsPort) {
+            this.statsPort = statsPort;
+        }
+
+        public String getProductionBackend() {
+            return productionBackend;
+        }
+
+        public void setProductionBackend(String productionBackend) {
+            this.productionBackend = productionBackend;
         }
     }
 
@@ -143,6 +171,66 @@ public class PerimeterProperties {
 
         public void setDeleteAfter(Long deleteAfter) {
             this.deleteAfter = deleteAfter;
+        }
+    }
+
+    public class ShellProperties {
+        private String host;
+        private Integer port;
+        private String hostKey;
+        private AuthStorageProperties authStorage = new AuthStorageProperties();
+
+        public String getHost() {
+            return host;
+        }
+
+        public void setHost(String host) {
+            this.host = host;
+        }
+
+        public Integer getPort() {
+            return port;
+        }
+
+        public void setPort(Integer port) {
+            this.port = port;
+        }
+
+        public String getHostKey() {
+            return hostKey;
+        }
+
+        public void setHostKey(String hostKey) {
+            this.hostKey = hostKey;
+        }
+
+        public AuthStorageProperties getAuthStorage() {
+            return authStorage;
+        }
+
+        public void setAuthStorage(AuthStorageProperties authStorage) {
+            this.authStorage = authStorage;
+        }
+
+        public class AuthStorageProperties {
+            private String path;
+            private byte[] key;
+
+            public String getPath() {
+                return path;
+            }
+
+            public void setPath(String path) {
+                this.path = path;
+            }
+
+            public byte[] getKey() {
+                return key;
+            }
+
+            public void setKey(String key) {
+                this.key = HexBin.decode(key);
+            }
         }
     }
 }
