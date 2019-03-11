@@ -53,7 +53,7 @@ perimeter:
         ttl: 300
         pattern: ^(?<flag>[a-fA-F0-9]{32}=)$
         jwt:
-            enabled: true
+            enabled: false
             algorithm: EC256
             pattern: ^VolgaCTF\{(?<flag>.*)\}$
     exploit:

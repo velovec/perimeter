@@ -47,7 +47,9 @@ public class FlagProcessor {
 
         List<Flag> flags = flagRepository.findAllByOrderByCreateTimeStampDesc();
 
-        flagQueue.setThemisPublicKey(themisClient.getPublicKey());
+        if (perimeterProperties.getFlag().getJwt().isEnabled()) {
+            flagQueue.setThemisPublicKey(themisClient.getPublicKey());
+        }
 
         flags.stream()
             .filter(flag -> flag.getStatus() == QUEUED)

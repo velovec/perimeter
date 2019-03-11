@@ -11,7 +11,7 @@
 
     <artifactId>perimeter-agent</artifactId>
     <name>v0rt3x :: Perimeter :: Agent</name>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
 
     <dependencies>
         <dependency>

@@ -2,7 +2,7 @@ FROM @docker.baseImage@
 
 ENTRYPOINT ["java", "-jar", "/opt/perimeter/perimeter.jar", "--spring.config.location=/opt/perimeter/perimeter.yml"]
 WORKDIR "/opt/perimeter"
-EXPOSE 8080
+EXPOSE 8080 1488
 
 COPY classes/application.yml /opt/perimeter/perimeter.yml
 COPY @project.artifactId@-@project.version@.jar /opt/perimeter/perimeter.jar
