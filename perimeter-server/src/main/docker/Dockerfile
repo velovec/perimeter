@@ -1,6 +1,6 @@
 FROM @docker.baseImage@
 
-ENTRYPOINT ["java", "-jar", "/opt/perimeter/perimeter.jar", "--spring.config.location=/opt/perimeter/perimeter.yml"]
+ENTRYPOINT ["java", "-jar", "/opt/perimeter/perimeter.jar", "--spring.config.location=classpath:application.yml,/opt/perimeter/perimeter.yml"]
 WORKDIR "/opt/perimeter"
 EXPOSE 8080 1488
 

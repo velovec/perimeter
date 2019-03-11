@@ -1,6 +1,6 @@
 FROM @docker.baseImage@
 
-ENTRYPOINT ["java", "-jar", "/opt/themis/themis.jar", "--spring.config.location=/opt/themis/themis.yml"]
+ENTRYPOINT ["java", "-jar", "/opt/themis/themis.jar", "--spring.config.location=classpath:application.yml,/opt/themis/themis.yml"]
 WORKDIR "/opt/themis"
 EXPOSE 5000
 

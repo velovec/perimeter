@@ -34,23 +34,6 @@ docker exec -it postgres psql -U postgres -c 'CREATE DATABASE perimeter;'
 Create config for Themis Mock Server:
 
 ```
-server:
-    port: 5000
-    address: 0.0.0.0
-
-spring:
-    jackson:
-        date-format: com.fasterxml.jackson.databind.util.ISO8601DateFormat
-    mvc:
-        favicon:
-            enabled: false
-    jpa:
-        hibernate:
-            use-new-id-generator-mappings: true
-            ddl-auto: update
-    flyway:
-        enabled: false
-
 themis:
     network:
         internal: 10.20.30.0/31  # Internal network
@@ -90,41 +73,12 @@ docker run -d --name themis --net perimeter -v <path to config>:/opt/themis/them
 Create config for Perimeter Server:
 
 ```
-server:
-    port: 8080
-
-management:
-    endpoint:
-        metrics:
-            enabled: true
-        prometheus:
-            enabled: true
-    endpoints:
-        web:
-            exposure:
-                include: 'prometheus'
-    metrics:
-        export:
-            prometheus:
-                enabled: true
-
 spring:
     datasource:
         type: com.zaxxer.hikari.HikariDataSource
         url: jdbc:postgresql://postgres:5432/perimeter
         username: postgres
         password: P@ssw0rd
-    jackson:
-        date-format: com.fasterxml.jackson.databind.util.ISO8601DateFormat
-    mvc:
-        favicon:
-            enabled: false
-    jpa:
-        hibernate:
-            use-new-id-generator-mappings: true
-            ddl-auto: update
-    flyway:
-        enabled: false
 
 perimeter:
     shell:
@@ -172,10 +126,6 @@ docker run -d --name perimeter --net perimeter -v <path to config>:/opt/perimete
 Create Perimeter Configuration Agent config:
 
 ```
-spring:
-    jackson:
-        date-format: com.fasterxml.jackson.databind.util.ISO8601DateFormat
-
 perimeter:
     server:
         host: perimeter                                 # Perimeter Server host
@@ -206,10 +156,6 @@ docker run -d --name perimeter-configurator --net perimeter \
 Create Perimeter Executor Agent config
 
 ```
-spring:
-    jackson:
-        date-format: com.fasterxml.jackson.databind.util.ISO8601DateFormat
-
 perimeter:
     server:
         host: perimeter

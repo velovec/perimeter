@@ -1,6 +1,6 @@
 FROM @docker.baseImage@
 
-ENTRYPOINT ["java", "-jar", "/opt/perimeter/perimeter-executor.jar", "--spring.config.location=/opt/perimeter/perimeter-executor.yml"]
+ENTRYPOINT ["java", "-jar", "/opt/perimeter/perimeter-executor.jar", "--spring.config.location=classpath:application.yml,/opt/perimeter/perimeter-executor.yml"]
 WORKDIR "/opt/perimeter"
 
 RUN apk update && \
