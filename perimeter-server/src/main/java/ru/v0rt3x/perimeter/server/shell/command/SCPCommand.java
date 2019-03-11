@@ -1,7 +1,6 @@
 package ru.v0rt3x.perimeter.server.shell.command;
 
 import ru.v0rt3x.perimeter.server.files.FileRouter;
-import ru.v0rt3x.perimeter.server.shell.PerimeterShellAuthenticator;
 import ru.v0rt3x.perimeter.server.shell.PerimeterShellCommand;
 import ru.v0rt3x.perimeter.server.shell.annotations.ShellCommand;
 
@@ -26,7 +25,8 @@ public class SCPCommand extends PerimeterShellCommand {
             console.write(new byte[] {0});
 
             char[] op = new char[1];
-            console.read(op);
+            if (console.read(op) == 0)
+                return;
 
             switch (op[0]) {
                 case 'T':

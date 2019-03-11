@@ -3,6 +3,7 @@ package ru.v0rt3x.perimeter.server.properties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import ru.v0rt3x.perimeter.server.utils.HexBin;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @ConfigurationProperties(prefix = "perimeter")
@@ -55,18 +56,12 @@ public class PerimeterProperties {
     }
 
     public class TeamProperties {
-        private String ipPattern;
         private String internalIp;
         private Integer statsPort;
         private String productionBackend;
-
-        public String getIpPattern() {
-            return ipPattern;
-        }
-
-        public void setIpPattern(String ipPattern) {
-            this.ipPattern = ipPattern;
-        }
+        private String baseNetwork;
+        private int subnetCidr;
+        private int vulnboxAddress;
 
         public String getInternalIp() {
             return internalIp;
@@ -91,11 +86,37 @@ public class PerimeterProperties {
         public void setProductionBackend(String productionBackend) {
             this.productionBackend = productionBackend;
         }
+
+
+        public String getBaseNetwork() {
+            return baseNetwork;
+        }
+
+        public void setBaseNetwork(String baseNetwork) {
+            this.baseNetwork = baseNetwork;
+        }
+
+        public int getSubnetCidr() {
+            return subnetCidr;
+        }
+
+        public void setSubnetCidr(int subnetCidr) {
+            this.subnetCidr = subnetCidr;
+        }
+
+        public int getVulnboxAddress() {
+            return vulnboxAddress;
+        }
+
+        public void setVulnboxAddress(int vulnboxAddress) {
+            this.vulnboxAddress = vulnboxAddress;
+        }
     }
 
     public class FlagProperties {
         private int ttl;
         private Pattern pattern;
+        private JwtProperties jwt = new JwtProperties();
 
         public Pattern getPattern() {
             return pattern;
@@ -111,6 +132,44 @@ public class PerimeterProperties {
 
         public void setTtl(int ttl) {
             this.ttl = ttl;
+        }
+
+        public JwtProperties getJwt() {
+            return jwt;
+        }
+
+        public void setJwt(JwtProperties jwt) {
+            this.jwt = jwt;
+        }
+
+        public class JwtProperties {
+            private boolean enabled;
+            private Pattern pattern;
+            private String algorithm;
+
+            public boolean isEnabled() {
+                return enabled;
+            }
+
+            public void setEnabled(boolean enabled) {
+                this.enabled = enabled;
+            }
+
+            public Pattern getPattern() {
+                return pattern;
+            }
+
+            public void setPattern(String pattern) {
+                this.pattern = Pattern.compile(pattern);
+            }
+
+            public String getAlgorithm() {
+                return algorithm;
+            }
+
+            public void setAlgorithm(String algorithm) {
+                this.algorithm = algorithm;
+            }
         }
     }
 

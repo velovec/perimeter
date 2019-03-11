@@ -1,15 +1,15 @@
 package ru.v0rt3x.perimeter.server.service;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import ru.v0rt3x.perimeter.server.haproxy.HAProxyManager;
 import ru.v0rt3x.perimeter.server.haproxy.dao.HAProxyBackend;
+import ru.v0rt3x.perimeter.server.properties.PerimeterProperties;
 import ru.v0rt3x.perimeter.server.service.dao.Service;
 import ru.v0rt3x.perimeter.server.service.dao.ServiceRepository;
 
@@ -27,6 +27,9 @@ public class ServiceManager {
 
     @Autowired
     private HAProxyManager haProxyManager;
+
+    @Autowired
+    private PerimeterProperties perimeterProperties;
 
     public List<Service> listServices() {
         return serviceRepository.findAll();
@@ -61,18 +64,18 @@ public class ServiceManager {
     public void checkServices() {
         try {
             Map<String, Pair<Service, HAProxyBackend>> serviceBackendMap = haProxyManager.listMappings().stream()
-                .filter(haProxyMapping -> Objects.isNull(haProxyMapping.getAcl()))
+                .filter(haProxyMapping -> haProxyMapping.getBackend().getName().equals(perimeterProperties.getTeam().getProductionBackend()))
                 .collect(Collectors.toMap(
                     mapping -> String.format("%s-%s", mapping.getService().getName(), mapping.getBackend().getName()),
-                    mapping -> new ImmutablePair<>(mapping.getService(), mapping.getBackend())
+                    mapping -> Pair.of(mapping.getService(), mapping.getBackend())
                 ));
 
             haProxyManager.getHAProxyStats().stream()
                 .filter(record -> "BACKEND".equals(record.get(1)))
                 .filter(record -> serviceBackendMap.containsKey(record.get(0)))
                 .forEach(record -> setServiceStatus(
-                    serviceBackendMap.get(record.get(0)).getLeft().getName(), record.get(17),
-                    serviceBackendMap.get(record.get(0)).getRight().getServers().size(),
+                    serviceBackendMap.get(record.get(0)).getFirst().getName(), record.get(17),
+                    serviceBackendMap.get(record.get(0)).getSecond().getServers().size(),
                     Integer.parseInt(record.get(19))
                 ));
         } catch (IOException e) {

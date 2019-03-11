@@ -1,6 +1,6 @@
 package ru.v0rt3x.perimeter.server.utils;
 
-import com.google.common.io.ByteStreams;
+import sun.misc.IOUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -37,15 +37,11 @@ public class RSAUtils {
         int length = 0;
         int shift = 24;
 
-        for (int i = 0; i < bytes.length; i++) {
-            length += bytes[i] << shift;
+        for (int aByte : bytes) {
+            length += aByte << shift;
             shift -= 8;
         }
 
-        byte[] val = new byte[length];
-
-        ByteStreams.readFully(in, val);
-
-        return val;
+        return IOUtils.readFully(in, length, true);
     }
 }

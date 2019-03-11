@@ -43,13 +43,19 @@ perimeter:
             path: auth.storage
             key: 706572696d65746572
     team:
-        ip-pattern: 10.0.%d.1
+        base-network: 10.20.30.32
+        subnet-cidr: 31
+        vulnbox-address: 2
         internal-ip: 127.0.0.1
         stats-port: 1936
         production-backend: prod
     flag:
         ttl: 300
-        pattern: ^[a-fA-F0-9]{32}=$
+        pattern: ^(?<flag>[a-fA-F0-9]{32}=)$
+        jwt:
+            enabled: true
+            algorithm: EC256
+            pattern: ^VolgaCTF\{(?<flag>.*)\}$
     exploit:
         execution-interval: 60000
     themis:

@@ -41,8 +41,8 @@ public abstract class PerimeterShellCommand implements Command, Runnable, Interr
     protected List<String> args;
     protected Map<String, String> kwargs;
 
-    private boolean isRunning = true;
-    private boolean exited = false;
+    private volatile boolean isRunning = true;
+    private volatile boolean exited = false;
 
     protected PerimeterShellCommandManager commandManager;
     protected ConfigurableApplicationContext context;

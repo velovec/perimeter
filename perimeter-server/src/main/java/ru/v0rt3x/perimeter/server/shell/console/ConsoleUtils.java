@@ -1,12 +1,7 @@
 package ru.v0rt3x.perimeter.server.shell.console;
 
-import org.apache.commons.lang3.ArrayUtils;
-
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
 
@@ -78,7 +73,7 @@ public class ConsoleUtils {
     }
 
     public String read() throws IOException {
-        return read(null, false);
+        return read("", false);
     }
 
     public String read(String query) throws IOException {
@@ -92,7 +87,7 @@ public class ConsoleUtils {
     public boolean readYesNo(String query) throws IOException {
         while (true) {
             String result = read(String.format(
-                    "%1$s (y/N): ", query
+                "%1$s (y/N): ", query
             ), false);
 
             switch (result.toLowerCase()) {
@@ -116,12 +111,14 @@ public class ConsoleUtils {
         write(query);
 
         while (inputInProgress) {
-            inputStreamReader.read(charBuffer);
+            if (inputStreamReader.read(charBuffer) == 0)
+                break;
+
             switch (charBuffer[0]) {
                 case '\r':
                 case '\n':
                     inputInProgress = false;
-                    write("\r\n");
+                    newLine();
                     break;
                 case '\t':
                     List<String> autoCompleteList = autoComplete(inputData.toString());
@@ -131,9 +128,9 @@ public class ConsoleUtils {
                         cursorPosition = inputData.length();
                         write(secret ? secret(inputData.length()) : inputData.toString());
                     } else if (autoCompleteList.size() > 1) {
-                        write("\r\n");
+                        newLine();
                         for (String commandName: autoCompleteList) {
-                            write(String.format("\t%1$s\r\n", commandName));
+                            writeLine("\t%1$s", commandName);
                         }
                         write(query);
                         write(secret ? secret(inputData.length()) : inputData.toString());
@@ -169,7 +166,8 @@ public class ConsoleUtils {
                     break;
                 case (char)0x1B:
                     char[] subCharBuffer = new char[2];
-                    inputStreamReader.read(subCharBuffer);
+                    if (inputStreamReader.read(subCharBuffer) == 0)
+                        continue;
                     if (subCharBuffer[0] == (char)0x5B) {
                         switch (subCharBuffer[1]) {
                             case (char)0x44: // Left Arrow
@@ -228,6 +226,7 @@ public class ConsoleUtils {
             }
         }
 
+        newLine();
         return inputData.toString();
     }
 
@@ -254,11 +253,11 @@ public class ConsoleUtils {
         List<String> borders = new ArrayList<>();
 
         for (Integer field: fields) {
-            String border = "";
+            StringBuilder border = new StringBuilder();
             for (int i = 0; i < field + 2; i++) {
-                border += "-";
+                border.append("-");
             }
-            borders.add(border);
+            borders.add(border.toString());
         }
 
         return "+" + String.join("+", borders) + "+";
@@ -269,7 +268,6 @@ public class ConsoleUtils {
      */
     @Deprecated
     public void write(Map<?, ?> mapObject) throws IOException {
-        //noinspection deprecation
         write(mapObject, null, null);
     }
 
@@ -316,15 +314,15 @@ public class ConsoleUtils {
     public void write(Throwable exc) throws IOException {
         writeLine("Traceback (most recent call last):");
 
-        StackTraceElement[] stackTrace = exc.getStackTrace();
-        ArrayUtils.reverse(stackTrace);
+        List<StackTraceElement> stackTrace = Arrays.asList(exc.getStackTrace());
+        Collections.reverse(stackTrace);
 
         for (StackTraceElement st: stackTrace) {
             writeLine(
-                    "  File \"%s\", line %d. in %s",
-                    st.getFileName().replace(".java", ".py"),
-                    st.getLineNumber(),
-                    st.getMethodName()
+                "  File \"%s\", line %d. in %s",
+                st.getFileName().replace(".java", ".py"),
+                st.getLineNumber(),
+                st.getMethodName()
             );
             writeLine("    source code is hidden");
         }
@@ -332,13 +330,26 @@ public class ConsoleUtils {
     }
 
     public void writeLine(String format, Object... args) throws IOException {
-        write(format + "\r\n", args);
+        write(format, args);
+        newLine();
+    }
+
+    public void newLine() throws IOException {
+        lock();
+        outputStreamWriter.write("\r\n");
+        outputStreamWriter.flush();
+        unlock();
     }
 
     public void write(String format, Object... args) throws IOException {
         lock();
         if (format != null) {
-            outputStreamWriter.write(String.format(format, args));
+            String[] data = String.format(format, args).split("\r?\n");
+
+            for (int i = 0; i < data.length; i++) {
+                outputStreamWriter.write(data[i]);
+                if (i < data.length - 1) outputStreamWriter.write("\r\n");
+            }
             outputStreamWriter.flush();
         }
         unlock();
@@ -353,6 +364,13 @@ public class ConsoleUtils {
 
     public int read(byte[] buffer) throws IOException {
         return inputStream.read(buffer);
+    }
+
+    public void error(byte[] buffer) throws IOException {
+        lock();
+        errorStream.write(buffer);
+        errorStream.flush();
+        unlock();
     }
 
     public void write(byte[] buffer) throws IOException {

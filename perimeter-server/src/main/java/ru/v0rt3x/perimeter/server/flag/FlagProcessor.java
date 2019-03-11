@@ -47,6 +47,8 @@ public class FlagProcessor {
 
         List<Flag> flags = flagRepository.findAllByOrderByCreateTimeStampDesc();
 
+        flagQueue.setThemisPublicKey(themisClient.getPublicKey());
+
         flags.stream()
             .filter(flag -> flag.getStatus() == QUEUED)
             .peek(flag -> stats[flag.getPriority().ordinal()]++)
@@ -59,6 +61,7 @@ public class FlagProcessor {
 
         flagStats.setStats(stats);
     }
+
 
     @Scheduled(fixedRate = 10000L)
     private void watchContestStatus() {
@@ -80,24 +83,26 @@ public class FlagProcessor {
 
     @Scheduled(fixedRate = 5000L)
     private void processQueue() {
+        if (contestState.equals(ContestState.PAUSED) || contestState.equals(ContestState.COMPLETED))
+            return;
+
         List<Flag> flagsToSend = new ArrayList<>();
         List<Flag> flagsToUpdate = new ArrayList<>();
 
-        while (flagsToSend.size() < 25) {
+        while (true) {
             Flag flag = flagQueue.pollFlag();
 
             if (flag == null)
                 break;
 
             if (flag.getCreateTimeStamp() + perimeterProperties.getFlag().getTtl() * 1000 <= System.currentTimeMillis()) {
-                flag.setStatus(REJECTED);
-
-                flagStats.incrementByStatus(flag.getStatus());
-                flagStats.decrementByPriority(flag.getPriority());
-
                 flagsToUpdate.add(flag);
-                flagQueue.addToHistory(flag);
+                continue;
+            }
 
+            FlagInfo flagInfo = themisClient.getFlagInfo(flag);
+            if (!flagInfo.isValid() || flagInfo.isExpired()) {
+                flagsToUpdate.add(flag);
                 continue;
             }
 
@@ -105,62 +110,53 @@ public class FlagProcessor {
         }
 
         if (flagsToUpdate.size() > 0) {
+            flagsToUpdate.forEach(flag -> {
+                flag.setStatus(REJECTED);
+
+                flagStats.incrementByStatus(flag.getStatus());
+                flagStats.decrementByPriority(flag.getPriority());
+
+                flagQueue.addToHistory(flag);
+            });
+
             flagRepository.saveAll(flagsToUpdate);
         }
 
         if (flagsToSend.size() > 0) {
-            List<FlagResult> results = themisClient.sendFlags(flagsToSend);
-            processResults(flagsToSend, results);
+            flagsToSend.forEach(flag -> {
+                FlagResult result = themisClient.submitFlag(flag);
+                processResults(flag, result);
+            });
         }
     }
 
-    private void processResults(List<Flag> flags, List<FlagResult> results) {
-        int resultsCount = results.size();
-        int flagsCount = flags.size();
+    private void processResults(Flag flag, FlagResult result) {
+        switch (result) {
+            case FLAG_ACCEPTED:
+            case FLAG_EXPIRED:
+            case FLAG_BELONGS_ATTACKER:
+            case FLAG_ALREADY_ACCEPTED:
+            case FLAG_NOT_FOUND:
+                flag.setStatusByResult(result);
 
-        if (resultsCount != flagsCount) {
-            if (resultsCount == 1) {
-                logger.warn("ThemisError: {}", results.get(0));
+                flagStats.decrementByPriority(flag.getPriority());
+                flagStats.incrementByStatus(flag.getStatus());
 
-                flags.parallelStream()
-                    .peek(flag -> flagStats.decrementByPriority(flag.getPriority()))
-                    .forEach(flagQueue::enqueueFlag);
-            } else {
-                logger.error("Invalid Themis response: Got {} results but expected {}", resultsCount, flagsCount);
-            }
-        } else {
-            for (int id = 0; id < resultsCount; id++) {
-                Flag flag = flags.get(id);
-                FlagResult result = results.get(id);
-
-                switch (result) {
-                    case FLAG_ACCEPTED:
-                    case FLAG_EXPIRED:
-                    case FLAG_BELONGS_ATTACKER:
-                    case FLAG_ALREADY_ACCEPTED:
-                    case FLAG_NOT_FOUND:
-                        flag.setStatusByResult(result);
-
-                        flagStats.decrementByPriority(flag.getPriority());
-                        flagStats.incrementByStatus(flag.getStatus());
-
-                        flagRepository.save(flag);
-                        flagQueue.addToHistory(flag);
-                        break;
-                    case CONTEST_NOT_STARTED:
-                    case CONTEST_PAUSED:
-                    case CONTEST_COMPLETED:
-                    case LIMIT_EXCEEDED:
-                    case SERVICE_IS_DOWN:
-                        logger.warn("ThemisError: {} : {}", flag, result);
-                        flagStats.decrementByPriority(flag.getPriority());
-                        flagQueue.enqueueFlag(flag);
-                        break;
-                    default:
-                        logger.warn("Unexpected result: {} : {}", flag, result);
-                        break;
-                }
-            }
+                flagRepository.save(flag);
+                flagQueue.addToHistory(flag);
+                break;
+            case CONTEST_NOT_STARTED:
+            case CONTEST_PAUSED:
+            case CONTEST_COMPLETED:
+            case LIMIT_EXCEEDED:
+            case SERVICE_IS_DOWN:
+                logger.warn("ThemisError: {} : {}", flag, result);
+                flagStats.decrementByPriority(flag.getPriority());
+                flagQueue.enqueueFlag(flag);
+                break;
+            default:
+                logger.warn("Unexpected result: {} : {}", flag, result);
+                break;
         }
     }
 }

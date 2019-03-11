@@ -8,11 +8,14 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
+import ru.v0rt3x.perimeter.server.flag.FlagInfo;
 import ru.v0rt3x.perimeter.server.properties.PerimeterProperties;
 import ru.v0rt3x.perimeter.server.flag.dao.Flag;
 import ru.v0rt3x.perimeter.server.flag.dao.FlagResult;
 import ru.v0rt3x.perimeter.server.service.dao.Service;
 import ru.v0rt3x.perimeter.server.team.dao.Team;
+import ru.v0rt3x.perimeter.server.themis.dao.Identity;
+import ru.v0rt3x.perimeter.server.utils.NetCalc;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,18 +23,22 @@ import java.util.stream.Collectors;
 @Component
 public class ThemisClient {
 
+    /*
+     * Source: https://github.com/themis-project/themis-finals-backend/blob/master/lib/server/application.rb
+     */
+
     @Autowired
     private PerimeterProperties perimeterProperties;
 
     private final RestTemplate restClient = new RestTemplate();
 
-    private String getEndpoint(String endpoint) {
+    private String getEndpoint(String endpoint, Object... args) {
         return String.format(
             "%s://%s:%d/api/%s",
             perimeterProperties.getThemis().getProtocol(),
             perimeterProperties.getThemis().getHost(),
             perimeterProperties.getThemis().getPort(),
-            endpoint
+            String.format(endpoint, args)
         );
     }
 
@@ -43,64 +50,90 @@ public class ThemisClient {
         return Objects.nonNull(value) ? value : defaultValue;
     }
 
+    public Identity getIdentity() {
+        try {
+            return getOrDefault(restClient.getForObject(getEndpoint("identity"), Identity.class), Identity.unknown());
+        } catch (ResourceAccessException e) {
+            return Identity.unknown();
+        }
+    }
+
+    public Integer getContestRound() {
+        try {
+            return getOrDefault(restClient.getForObject(getEndpoint("competition/round"), Integer.class), 0);
+        } catch (ResourceAccessException e) {
+            return 0;
+        }
+    }
+
+    public ContestState getContestState() {
+        try {
+            return ContestState.values()[getOrDefault(
+                restClient.getForObject(getEndpoint("competition/stage"), Integer.class), ContestState.values().length - 1
+            )];
+        } catch (ResourceAccessException e) {
+            return ContestState.NOT_AVAILABLE;
+        }
+    }
+
     public List<Team> getTeamList() {
         try {
             return toList(restClient.getForObject(getEndpoint("teams"), Team[].class)).stream()
-                .peek(team -> team.setIp(String.format(perimeterProperties.getTeam().getIpPattern(), team.getId())))
+                .peek(team -> {
+                    String teamSubnet = NetCalc.getSubnet(
+                        perimeterProperties.getTeam().getBaseNetwork(),
+                        perimeterProperties.getTeam().getSubnetCidr(),
+                        team.getId()
+                    );
+
+                    team.setIp(NetCalc.getAddress(
+                        teamSubnet, perimeterProperties.getTeam().getSubnetCidr(),
+                        perimeterProperties.getTeam().getVulnboxAddress()
+                    ));
+                })
                 .collect(Collectors.toList());
         } catch (ResourceAccessException e) {
             return new ArrayList<>();
         }
     }
 
-    public List<Service> getServiceList() {
+    public String getPublicKey() {
         try {
-            return toList(restClient.getForObject(
-                getEndpoint("services"), Service[].class
-            ));
+            return restClient.getForObject(getEndpoint("capsule/v1/public_key"), String.class);
         } catch (ResourceAccessException e) {
-            return new ArrayList<>();
+            return null;
         }
     }
 
-    public ContestState getContestState() {
-        try {
-            return ContestState.values()[getOrDefault(restClient.getForObject(getEndpoint("contest/state"), Integer.class), ContestState.values().length - 1)];
-        } catch (ResourceAccessException e) {
-            return ContestState.NOT_AVAILABLE;
-        }
-    }
-
-    public Integer getContestRound() {
-        try {
-            return getOrDefault(restClient.getForObject(getEndpoint("contest/round"), Integer.class), 0);
-        } catch (ResourceAccessException e) {
-            return 0;
-        }
-    }
-
-    public List<FlagResult> sendFlags(List<Flag> flags) {
-        List<Integer> results;
+    public FlagResult submitFlag(Flag flag) {
         try {
             HttpHeaders headers = new HttpHeaders();
-            headers.add("Content-Type", "application/json");
-            HttpEntity<List<Flag>> entity = new HttpEntity<>(flags, headers);
+            headers.add("Content-Type", "text/plain");
+            HttpEntity<String> entity = new HttpEntity<>(flag.getFlag(), headers);
 
-            results = toList(restClient.postForObject(
-                getEndpoint("submit"), entity, Integer[].class
-            ));
+            return FlagResult.values()[getOrDefault(
+                restClient.postForObject(getEndpoint("flag/v1/submit"), entity, Integer.class), 1
+            )];
         } catch (HttpClientErrorException e) {
             if (e.getRawStatusCode() == 400) {
-                results = Collections.singletonList(Integer.valueOf(e.getResponseBodyAsString()));
+                return FlagResult.values()[Integer.valueOf(e.getResponseBodyAsString())];
             } else {
                 throw new RuntimeException(String.format(
                     "Themis Error: %s\n%s", e.getRawStatusCode(), e.getResponseBodyAsString()
                 ));
             }
         }
+    }
 
-        return results.stream()
-            .map(result -> FlagResult.values()[result])
-            .collect(Collectors.toList());
+    public FlagInfo getFlagInfo(Flag flag) {
+        try {
+            return restClient.getForObject(getEndpoint("flag/v1/info/%s", flag.getFlag()), FlagInfo.class);
+        } catch (HttpClientErrorException e) {
+            if (e.getRawStatusCode() == 404) {
+                return FlagInfo.notFound(flag);
+            }
+        } catch (ResourceAccessException e) {}
+
+        return null;
     }
 }

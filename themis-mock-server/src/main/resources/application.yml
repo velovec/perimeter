@@ -1,0 +1,49 @@
+server:
+    port: 5000
+    address: 0.0.0.0
+
+spring:
+#    datasource:
+#        type: com.zaxxer.hikari.HikariDataSource
+#        url: jdbc:postgresql://127.0.0.1:5432/perimeter
+#        username: postgres
+#        password: P@ssw0rd
+    jackson:
+        date-format: com.fasterxml.jackson.databind.util.ISO8601DateFormat
+    mvc:
+        favicon:
+            enabled: false
+    jpa:
+        hibernate:
+            use-new-id-generator-mappings: true
+            ddl-auto: update
+    flyway:
+        enabled: false
+
+themis:
+    network:
+        internal: 10.20.30.0/31
+        team: 10.20.30.32/27
+        team-subnet-cidr: 31
+    teams:
+        - id: 1
+          name: v0rt3x
+          guest: false
+        - id: 2
+          name: MagicHat
+          guest: true
+    duration: 300000
+    jwt:
+        algorithm: EC256
+        public-key: |
+            -----BEGIN PUBLIC KEY-----
+            MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEQgb5npLHd0Bk61bNnjK632uwmBfr
+            F7I8hoPgaOZjyhh+BrPDO6CL6D/aW/yPObXXm7SpZogmRwGROcOA3yUleg==
+            -----END PUBLIC KEY-----
+        private_key: |
+            -----BEGIN PRIVATE KEY-----
+            MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgPGJGAm4X1fvBuC1z
+            SpO/4Izx6PXfNMaiKaS5RUkFqEGhRANCAARCBvmeksd3QGTrVs2eMrrfa7CYF+sX
+            sjyGg+Bo5mPKGH4Gs8M7oIvoP9pb/I85tdebtKlmiCZHAZE5w4DfJSV6
+            -----END PRIVATE KEY-----
+

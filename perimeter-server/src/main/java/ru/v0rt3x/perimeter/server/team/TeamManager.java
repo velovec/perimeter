@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import ru.v0rt3x.perimeter.server.properties.PerimeterProperties;
 import ru.v0rt3x.perimeter.server.team.dao.Team;
 import ru.v0rt3x.perimeter.server.team.dao.TeamRepository;
+import ru.v0rt3x.perimeter.server.utils.NetCalc;
 
 import java.util.List;
 
@@ -23,7 +24,18 @@ public class TeamManager {
     }
 
     public void addTeam(int teamId, String name, boolean isGuest) {
-        addTeam(teamId, name, String.format(perimeterProperties.getTeam().getIpPattern(), teamId), isGuest);
+        String teamSubnet = NetCalc.getSubnet(
+            perimeterProperties.getTeam().getBaseNetwork(),
+            perimeterProperties.getTeam().getSubnetCidr(),
+            teamId
+        );
+
+        String ip = NetCalc.getAddress(
+            teamSubnet, perimeterProperties.getTeam().getSubnetCidr(),
+            perimeterProperties.getTeam().getVulnboxAddress()
+        );
+
+        addTeam(teamId, name, ip, isGuest);
     }
 
     public void addTeam(int teamId, String name, String ip, boolean isGuest) {
@@ -44,5 +56,10 @@ public class TeamManager {
     public void setActive(Team team, boolean isActive) {
         team.setActive(isActive);
         teamRepository.save(team);
+    }
+
+    public void replaceTeams(List<Team> teamList) {
+        teamRepository.deleteAll();
+        teamRepository.saveAll(teamList);
     }
 }
