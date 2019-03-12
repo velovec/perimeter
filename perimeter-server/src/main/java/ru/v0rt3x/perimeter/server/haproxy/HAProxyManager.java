@@ -6,8 +6,8 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import org.yaml.snakeyaml.Yaml;
+
 import ru.v0rt3x.perimeter.server.config.ConfigManager;
 import ru.v0rt3x.perimeter.server.haproxy.dao.*;
 import ru.v0rt3x.perimeter.server.properties.PerimeterProperties;

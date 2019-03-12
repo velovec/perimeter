@@ -1,9 +1,9 @@
 package ru.v0rt3x.perimeter.server.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
 import ru.v0rt3x.perimeter.server.utils.HexBin;
 
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @ConfigurationProperties(prefix = "perimeter")

@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
 import ru.v0rt3x.perimeter.server.flag.dao.Flag;
 import ru.v0rt3x.perimeter.server.flag.dao.FlagPriority;
 import ru.v0rt3x.perimeter.server.flag.dao.FlagRepository;
@@ -24,7 +25,9 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Matcher;
 
 import static ru.v0rt3x.perimeter.server.flag.dao.FlagPriority.*;

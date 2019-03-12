@@ -10,9 +10,9 @@ import org.springframework.context.ConfigurableApplicationContext;
 import ru.v0rt3x.perimeter.server.shell.annotations.CommandAction;
 import ru.v0rt3x.perimeter.server.shell.command.exception.NotImplementedException;
 import ru.v0rt3x.perimeter.server.shell.console.CommandLineUtils;
-import ru.v0rt3x.perimeter.server.shell.console.Table;
 import ru.v0rt3x.perimeter.server.shell.console.ConsoleUtils;
 import ru.v0rt3x.perimeter.server.shell.console.InterruptHandler;
+import ru.v0rt3x.perimeter.server.shell.console.Table;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;

@@ -2,7 +2,10 @@ package ru.v0rt3x.perimeter.server.haproxy.dao;
 
 import ru.v0rt3x.perimeter.server.service.dao.Service;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 
 @Entity
 public class HAProxyMapping {

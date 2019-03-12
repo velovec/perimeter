@@ -9,15 +9,17 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 import ru.v0rt3x.perimeter.server.flag.FlagInfo;
-import ru.v0rt3x.perimeter.server.properties.PerimeterProperties;
 import ru.v0rt3x.perimeter.server.flag.dao.Flag;
 import ru.v0rt3x.perimeter.server.flag.dao.FlagResult;
-import ru.v0rt3x.perimeter.server.service.dao.Service;
+import ru.v0rt3x.perimeter.server.properties.PerimeterProperties;
 import ru.v0rt3x.perimeter.server.team.dao.Team;
 import ru.v0rt3x.perimeter.server.themis.dao.Identity;
 import ru.v0rt3x.perimeter.server.utils.NetCalc;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component

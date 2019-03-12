@@ -14,7 +14,6 @@ import ru.v0rt3x.perimeter.server.utils.RSAUtils;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.security.KeyFactory;

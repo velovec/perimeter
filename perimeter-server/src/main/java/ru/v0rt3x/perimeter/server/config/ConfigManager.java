@@ -4,15 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.yaml.snakeyaml.Yaml;
 
 import ru.v0rt3x.perimeter.server.files.FileRouter;
-import ru.v0rt3x.perimeter.server.haproxy.HAProxyConfigWrapper;
-import ru.v0rt3x.perimeter.server.haproxy.HAProxyManager;
-import ru.v0rt3x.perimeter.server.service.ServiceManager;
 
 import javax.annotation.PostConstruct;
-import java.io.ByteArrayInputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -20,12 +15,6 @@ import java.util.regex.Pattern;
 
 @Component
 public class ConfigManager {
-
-    @Autowired
-    private HAProxyManager haProxyManager;
-
-    @Autowired
-    private ServiceManager serviceManager;
 
     @Autowired
     private FileRouter fileRouter;

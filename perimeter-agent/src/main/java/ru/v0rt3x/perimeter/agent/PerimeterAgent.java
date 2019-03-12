@@ -7,9 +7,13 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import ru.v0rt3x.perimeter.agent.client.PerimeterClient;
-import ru.v0rt3x.perimeter.agent.types.*;
+import ru.v0rt3x.perimeter.agent.types.AgentID;
+import ru.v0rt3x.perimeter.agent.types.AgentInfo;
+import ru.v0rt3x.perimeter.agent.types.AgentTask;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 @Component
 public class PerimeterAgent {

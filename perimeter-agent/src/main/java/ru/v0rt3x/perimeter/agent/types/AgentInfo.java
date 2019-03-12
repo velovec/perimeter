@@ -2,7 +2,6 @@ package ru.v0rt3x.perimeter.agent.types;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.List;
 
 public class AgentInfo {
 
