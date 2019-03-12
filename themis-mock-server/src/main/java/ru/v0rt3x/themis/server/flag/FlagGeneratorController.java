@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import ru.v0rt3x.themis.server.properties.ThemisProperties;
 import ru.v0rt3x.themis.server.utils.PEMUtils;
+import ru.v0rt3x.themis.server.utils.RandomUtils;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -24,6 +25,9 @@ public class FlagGeneratorController {
 
     @Autowired
     private ThemisProperties themisProperties;
+
+    @Autowired
+    private FlagCollector flagCollector;
 
     private Algorithm algorithm;
 
@@ -83,8 +87,14 @@ public class FlagGeneratorController {
 
     @RequestMapping(path = "/api/flag/generator", method = RequestMethod.GET)
     public String generate() {
+        String flag = generateFlag();
+
+        if (RandomUtils.probabilityOf(75.0)) {
+            flagCollector.saveFlag(flag);
+        }
+
         return JWT.create()
-            .withClaim("flag", generateFlag())
+            .withClaim("flag", flag)
             .sign(algorithm);
     }
 }

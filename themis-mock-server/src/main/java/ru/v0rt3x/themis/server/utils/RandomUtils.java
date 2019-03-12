@@ -12,7 +12,7 @@ public class RandomUtils {
     }
 
     public static boolean probabilityOf(double percentage) {
-        return percentage > 100.0 - (random.nextDouble() * 100.0);
+        return percentage < 100.0 - (random.nextDouble() * 100.0);
     }
 
     public static <T> T setWithProbability(double percentage, T positive, T negative) {

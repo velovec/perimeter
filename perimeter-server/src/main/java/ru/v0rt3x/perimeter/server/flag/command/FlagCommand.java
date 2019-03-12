@@ -1,6 +1,6 @@
 package ru.v0rt3x.perimeter.server.flag.command;
 
-import ru.v0rt3x.perimeter.server.flag.FlagStats;
+import ru.v0rt3x.perimeter.server.flag.FlagProcessor;
 import ru.v0rt3x.perimeter.server.shell.PerimeterShellCommand;
 import ru.v0rt3x.perimeter.server.shell.annotations.CommandAction;
 import ru.v0rt3x.perimeter.server.shell.annotations.ShellCommand;
@@ -8,14 +8,14 @@ import ru.v0rt3x.perimeter.server.shell.command.exception.NotImplementedExceptio
 
 import java.io.IOException;
 
-@ShellCommand(command = "flag", description = "Flag processor (submit flag, view queue stats)")
-public class FlagCommand extends PerimeterShellCommand { // TODO: Add command action for manual flag submission
+@ShellCommand(command = "flag", description = "Flag processor (clear queue, view stats)")
+public class FlagCommand extends PerimeterShellCommand {
 
-    private FlagStats flagStats;
+    private FlagProcessor flagProcessor;
 
     @Override
     protected void init() throws IOException {
-        flagStats = context.getBean(FlagStats.class);
+        flagProcessor = context.getBean(FlagProcessor.class);
     }
 
     @Override
@@ -27,11 +27,18 @@ public class FlagCommand extends PerimeterShellCommand { // TODO: Add command ac
     public void stats() throws IOException {
         if (kwargs.containsKey("watch") && Boolean.parseBoolean(kwargs.get("watch"))) {
             while (isRunning()) {
-                console.write(flagStats.toTable());
+                console.write(flagProcessor.getStatsAsTable());
                 sleep((kwargs.containsKey("delay")) ? Long.parseLong(kwargs.get("delay")) : 1000L);
             }
         } else {
-            console.write(flagStats.toTable());
+            console.write(flagProcessor.getStatsAsTable());
+        }
+    }
+
+    @CommandAction("Clear all flags")
+    public void clear_all() throws IOException {
+        if (console.readYesNo("Are you sure?")) {
+            flagProcessor.clearQueue();
         }
     }
 

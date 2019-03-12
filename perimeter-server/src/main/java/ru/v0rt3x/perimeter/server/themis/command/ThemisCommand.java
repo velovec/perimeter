@@ -1,7 +1,7 @@
 package ru.v0rt3x.perimeter.server.themis.command;
 
 import ru.v0rt3x.perimeter.server.flag.FlagInfo;
-import ru.v0rt3x.perimeter.server.flag.FlagQueue;
+import ru.v0rt3x.perimeter.server.flag.FlagProcessor;
 import ru.v0rt3x.perimeter.server.flag.dao.Flag;
 import ru.v0rt3x.perimeter.server.flag.dao.FlagPriority;
 import ru.v0rt3x.perimeter.server.flag.dao.FlagResult;
@@ -46,7 +46,7 @@ public class ThemisCommand extends PerimeterShellCommand {
     public void public_key() throws IOException {
         String publicKey = themisClient.getPublicKey();
 
-        context.getBean(FlagQueue.class).setThemisPublicKey(publicKey);
+        context.getBean(FlagProcessor.class).setThemisPublicKey(publicKey);
 
         console.writeLine("Public Key:");
         console.writeLine(publicKey);

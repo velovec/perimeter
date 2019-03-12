@@ -37,6 +37,7 @@ spring:
 logging:
     level:
         org.hibernate.engine.jdbc.env.internal.LobCreatorBuilderImpl: ERROR
+        ru.v0rt3x.perimeter.server.flag.FlagProcessor: INFO
 
 perimeter:
     shell:

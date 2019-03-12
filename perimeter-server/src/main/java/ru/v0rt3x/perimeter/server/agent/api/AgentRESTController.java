@@ -12,11 +12,11 @@ import ru.v0rt3x.perimeter.server.agent.AgentTask;
 import ru.v0rt3x.perimeter.server.agent.AgentTaskQueue;
 import ru.v0rt3x.perimeter.server.exploit.dao.ExploitExecutionResult;
 import ru.v0rt3x.perimeter.server.exploit.dao.ExploitExecutionResultRepository;
+import ru.v0rt3x.perimeter.server.flag.FlagProcessor;
 import ru.v0rt3x.perimeter.server.properties.PerimeterProperties;
 import ru.v0rt3x.perimeter.server.exploit.dao.Exploit;
 import ru.v0rt3x.perimeter.server.exploit.dao.ExploitRepository;
 import ru.v0rt3x.perimeter.server.flag.dao.Flag;
-import ru.v0rt3x.perimeter.server.flag.FlagQueue;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -43,7 +43,7 @@ public class AgentRESTController {
     private AgentTaskQueue agentTaskQueue;
 
     @Autowired
-    private FlagQueue flagQueue;
+    private FlagProcessor flagProcessor;
 
     private static final Logger logger = LoggerFactory.getLogger(AgentRESTController.class);
 
@@ -142,7 +142,7 @@ public class AgentRESTController {
             int hits = ((List<String>) teamExecution.get("flags")).parallelStream()
                 .filter(Objects::nonNull)
                 .map(flag -> Flag.newFlag(flag, exploit.getPriority()))
-                .map(flagQueue::enqueueFlag)
+                .map(flagProcessor::addFlag)
                 .mapToInt(x -> x ? 1 : 0)
                 .sum();
 

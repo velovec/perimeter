@@ -1,18 +1,16 @@
 package ru.v0rt3x.perimeter.server.flag.dao;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
 public interface FlagRepository extends CrudRepository<Flag, Long> {
 
-    List<Flag> findAllByOrderByCreateTimeStampDesc();
+    List<Flag> findAllByStatusOrderByCreateTimeStampDesc(FlagStatus status);
 
-    List<Flag> findAllByOrderByLastUpdateTimeStampDesc();
+    List<Flag> findAllByStatusAndPriorityOrderByCreateTimeStampDesc(FlagStatus status, FlagPriority priority);
 
-    Page<Flag> findAllByOrderByLastUpdateTimeStampDesc(Pageable pageable);
+    Flag findFirstByStatusAndPriorityOrderByCreateTimeStamp(FlagStatus status, FlagPriority priority);
 
     Integer countAllByStatus(FlagStatus status);
 
