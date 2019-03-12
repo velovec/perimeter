@@ -10,6 +10,8 @@ import ru.v0rt3x.perimeter.server.agent.dao.Agent;
 import ru.v0rt3x.perimeter.server.agent.dao.AgentRepository;
 import ru.v0rt3x.perimeter.server.agent.AgentTask;
 import ru.v0rt3x.perimeter.server.agent.AgentTaskQueue;
+import ru.v0rt3x.perimeter.server.exploit.dao.ExploitExecutionResult;
+import ru.v0rt3x.perimeter.server.exploit.dao.ExploitExecutionResultRepository;
 import ru.v0rt3x.perimeter.server.properties.PerimeterProperties;
 import ru.v0rt3x.perimeter.server.exploit.dao.Exploit;
 import ru.v0rt3x.perimeter.server.exploit.dao.ExploitRepository;
@@ -30,6 +32,9 @@ public class AgentRESTController {
 
     @Autowired
     private ExploitRepository exploitRepository;
+
+    @Autowired
+    private ExploitExecutionResultRepository executionResultRepository;
 
     @Autowired
     private PerimeterProperties perimeterProperties;
@@ -106,25 +111,50 @@ public class AgentRESTController {
 
     @SuppressWarnings("unchecked")
     private void processExecutionReport(Map<String, Object> parameters, Map<String, Object> result) {
-        if (Objects.nonNull(result)) {
-            if (result.containsKey("flags") && parameters.containsKey("exploit")) {
-                Map<String, Object> exploitData = (Map<String, Object>) parameters.get("exploit");
-                Exploit exploit = exploitRepository.findById((Integer) exploitData.get("id"));
-                if (Objects.nonNull(exploit)) {
-                    int hits = ((List<String>) result.get("flags")).parallelStream()
-                        .filter(Objects::nonNull)
-                        .map(flag -> Flag.newFlag(flag, exploit.getPriority()))
-                        .map(flagQueue::enqueueFlag)
-                        .mapToInt(x -> x ? 1 : 0)
-                        .sum();
+        if (Objects.isNull(result))
+            return;
 
-                    exploit.setHits(exploit.getHits() + hits);
-                    exploitRepository.save(exploit);
-                } else {
-                    logger.warn("Got flags from unregistered exploit: {}", exploitData);
-                }
-            }
+        if (!result.containsKey("execution") || !parameters.containsKey("exploit"))
+            return;
+
+        Map<String, Object> exploitData = (Map<String, Object>) parameters.get("exploit");
+        Exploit exploit = exploitRepository.findById((Integer) exploitData.get("id"));
+
+        if (Objects.isNull(exploit))  {
+            logger.warn("Got flags from unregistered exploit: {}", exploitData);
+            return;
         }
+
+        Map<String, Object> execution = (Map<String, Object>) result.get("execution");
+        for (String team: execution.keySet()) {
+            ExploitExecutionResult executionResult = executionResultRepository.findByExploitAndTeam(exploit, team);
+
+            if (Objects.isNull(executionResult)) {
+                executionResult = new ExploitExecutionResult();
+
+                executionResult.setExploit(exploit);
+                executionResult.setTeam(team);
+                executionResult.setHits(0);
+            }
+
+            Map<String, Object> teamExecution = (Map<String, Object>) execution.get(team);
+
+            int hits = ((List<String>) teamExecution.get("flags")).parallelStream()
+                .filter(Objects::nonNull)
+                .map(flag -> Flag.newFlag(flag, exploit.getPriority()))
+                .map(flagQueue::enqueueFlag)
+                .mapToInt(x -> x ? 1 : 0)
+                .sum();
+
+            executionResult.setHits(executionResult.getHits() + hits);
+            executionResult.setExitCode((Integer) teamExecution.get("exitCode"));
+
+            exploit.setHits(exploit.getHits() + hits);
+
+            executionResultRepository.save(executionResult);
+        }
+
+        exploitRepository.save(exploit);
     }
 
     @Scheduled(fixedRate = 5000L)

@@ -17,11 +17,11 @@ management:
                 enabled: true
 
 spring:
-#    datasource:
-#        type: com.zaxxer.hikari.HikariDataSource
-#        url: jdbc:postgresql://127.0.0.1:5432/perimeter
-#        username: postgres
-#        password: P@ssw0rd
+    datasource:
+        type: com.zaxxer.hikari.HikariDataSource
+        url: jdbc:postgresql://127.0.0.1:5432/perimeter
+        username: postgres
+        password: P@ssw0rd
     jackson:
         date-format: com.fasterxml.jackson.databind.util.ISO8601DateFormat
     mvc:
@@ -33,6 +33,10 @@ spring:
             ddl-auto: update
     flyway:
         enabled: false
+
+logging:
+    level:
+        org.hibernate.engine.jdbc.env.internal.LobCreatorBuilderImpl: ERROR
 
 perimeter:
     shell:
@@ -53,7 +57,7 @@ perimeter:
         ttl: 300
         pattern: ^(?<flag>[a-fA-F0-9]{32}=)$
         jwt:
-            enabled: false
+            enabled: true
             algorithm: EC256
             pattern: ^VolgaCTF\{(?<flag>.*)\}$
     exploit:

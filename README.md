@@ -79,6 +79,8 @@ SCP is used to provide ability to manage configuration and exploits using `scp`
 
 ##### VulnBox
 
+TBD
+
 ##### Agent
 
 List available remote agents (both executors and configurators) and tasks running
@@ -86,6 +88,12 @@ List available remote agents (both executors and configurators) and tasks runnin
 ##### Flag
 
 Flag queue management and statistics
+
+Flag queue statistic can be accessed using command
+
+```
+flag stats
+```
 
 ##### Team
 
@@ -156,6 +164,13 @@ or can be executed manually using command
 
 ```
 exploit exec <name>
+```
+
+Perimeter Server also collects exploit execution statistics (last exit code and hits per team).
+It can be accessed using command
+
+```
+exploit stats <name>
 ```
 
 ##### Themis

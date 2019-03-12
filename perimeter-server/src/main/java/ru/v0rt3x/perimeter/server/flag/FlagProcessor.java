@@ -125,14 +125,15 @@ public class FlagProcessor {
         }
 
         if (flagsToSend.size() > 0) {
-            flagsToSend.forEach(flag -> {
+            for (Flag flag: flagsToSend) {
                 FlagResult result = themisClient.submitFlag(flag);
-                processResults(flag, result);
-            });
+                if (!processResults(flag, result))
+                    break;
+            }
         }
     }
 
-    private void processResults(Flag flag, FlagResult result) {
+    private boolean processResults(Flag flag, FlagResult result) {
         switch (result) {
             case FLAG_ACCEPTED:
             case FLAG_EXPIRED:
@@ -146,19 +147,22 @@ public class FlagProcessor {
 
                 flagRepository.save(flag);
                 flagQueue.addToHistory(flag);
-                break;
+                return true;
+            case SERVICE_IS_DOWN:
+                flagStats.decrementByPriority(flag.getPriority());
+                flagQueue.enqueueFlag(flag);
+                return true;
             case CONTEST_NOT_STARTED:
             case CONTEST_PAUSED:
             case CONTEST_COMPLETED:
             case LIMIT_EXCEEDED:
-            case SERVICE_IS_DOWN:
                 logger.warn("ThemisError: {} : {}", flag, result);
                 flagStats.decrementByPriority(flag.getPriority());
                 flagQueue.enqueueFlag(flag);
-                break;
+                return false;
             default:
-                logger.warn("Unexpected result: {} : {}", flag, result);
-                break;
+                logger.error("Unexpected result: {} : {}", flag, result);
+                return false;
         }
     }
 }
