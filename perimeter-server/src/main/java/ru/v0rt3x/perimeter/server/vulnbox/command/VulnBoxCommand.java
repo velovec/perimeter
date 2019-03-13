@@ -11,8 +11,7 @@ import ru.v0rt3x.perimeter.server.shell.command.exception.NotImplementedExceptio
 import ru.v0rt3x.perimeter.server.shell.console.Table;
 import ru.v0rt3x.perimeter.server.utils.SSHUtils;
 import ru.v0rt3x.perimeter.server.vulnbox.VulnBoxUserInfo;
-import ru.v0rt3x.perimeter.server.vulnbox.VulnBoxUtils;
-import ru.v0rt3x.perimeter.server.vulnbox.iptables.IPTablesRule;
+import ru.v0rt3x.perimeter.server.utils.iptables.IPTablesRule;
 
 import java.io.IOException;
 
@@ -41,7 +40,7 @@ public class VulnBoxCommand extends PerimeterShellCommand {
             Table services = new Table("Name", "Type", "Source", "Destination", "Chain", "Rule");
 
             console.writeLine("Detecting Docker services...");
-            VulnBoxUtils.detectDockerServices(session, error)
+            SSHUtils.detectDockerServices(session, error)
                 .forEach((service, rules) -> {
                     boolean isFirst = true;
                     for (IPTablesRule rule : rules) {
@@ -55,7 +54,7 @@ public class VulnBoxCommand extends PerimeterShellCommand {
                 });
 
             console.writeLine("Detecting LXC services...");
-            VulnBoxUtils.detectLXCServices(session, error)
+            SSHUtils.detectLXCServices(session, error)
                 .forEach((service, rules) -> {
                     boolean isFirst = true;
                     for (IPTablesRule rule : rules) {

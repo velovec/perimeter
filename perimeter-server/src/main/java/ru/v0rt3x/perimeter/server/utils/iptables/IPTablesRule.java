@@ -1,4 +1,4 @@
-package ru.v0rt3x.perimeter.server.vulnbox.iptables;
+package ru.v0rt3x.perimeter.server.utils.iptables;
 
 public class IPTablesRule {
 
