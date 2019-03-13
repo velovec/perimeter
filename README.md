@@ -79,7 +79,9 @@ SCP is used to provide ability to manage configuration and exploits using `scp`
 
 ##### VulnBox
 
-TBD
+Helper command for vulnbox management:
+
+* `detect_services` - Detect running Docker/LXC services and corresponding ports
 
 ##### Agent
 

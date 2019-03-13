@@ -1,7 +1,5 @@
 package ru.v0rt3x.perimeter.server.vulnbox.command;
 
-import com.jcraft.jsch.Channel;
-import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 
@@ -10,15 +8,13 @@ import ru.v0rt3x.perimeter.server.shell.PerimeterShellCommand;
 import ru.v0rt3x.perimeter.server.shell.annotations.CommandAction;
 import ru.v0rt3x.perimeter.server.shell.annotations.ShellCommand;
 import ru.v0rt3x.perimeter.server.shell.command.exception.NotImplementedException;
+import ru.v0rt3x.perimeter.server.shell.console.Table;
 import ru.v0rt3x.perimeter.server.utils.SSHUtils;
 import ru.v0rt3x.perimeter.server.vulnbox.VulnBoxUserInfo;
+import ru.v0rt3x.perimeter.server.vulnbox.VulnBoxUtils;
+import ru.v0rt3x.perimeter.server.vulnbox.iptables.IPTablesRule;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 @ShellCommand(command = "vulnbox", description = "VulnBox manager")
 public class VulnBoxCommand extends PerimeterShellCommand {
@@ -33,45 +29,53 @@ public class VulnBoxCommand extends PerimeterShellCommand {
         throw new NotImplementedException();
     }
 
-    @CommandAction("Scan VulnBox LXC containers")
-    public void lxc() throws IOException {
-        try {
-            Session session = getSSHSession();
-
-            for (String line: executeCommand(session, "lxc ls")) {
-                console.writeLine(line);
-            }
-
-            for (String line: executeCommand(session, "sudo iptables -t nat -L | grep DNAT")) {
-                console.writeLine(line);
-            }
-
-            session.disconnect();
-        } catch (JSchException e) {
-            console.write(e);
-        }
-    }
-
-    @CommandAction("Execute command on VulnBox")
-    public void exec() throws IOException {
-        if (args.size() < 1) {
-            console.writeLine("lxc [--user <user>] [--port <port>] [--host <host>] [--password <password>] <command>");
-            exit(1);
+    @CommandAction("Detect VulnBox services")
+    public void detect_services() throws IOException {
+        if (kwargs.containsKey("help")) {
+            console.writeLine("vulnbox detect_services [--user <user>] [--port <port>] [--host <host>] [--password <password>]");
             return;
         }
 
         try {
             Session session = getSSHSession();
+            Table services = new Table("Name", "Type", "Source", "Destination", "Chain", "Rule");
 
-            for (String line: executeCommand(session, String.join(" ", args))) {
-                console.writeLine(line);
-            }
+            console.writeLine("Detecting Docker services...");
+            VulnBoxUtils.detectDockerServices(session, error)
+                .forEach((service, rules) -> {
+                    boolean isFirst = true;
+                    for (IPTablesRule rule : rules) {
+                        services.addRow(
+                            isFirst ? service : "", isFirst ? "Docker" : "",
+                            rule.getSource(), rule.getDestination(),
+                            rule.getTarget(), rule.getExtra()
+                        );
+                        isFirst = false;
+                    }
+                });
 
+            console.writeLine("Detecting LXC services...");
+            VulnBoxUtils.detectLXCServices(session, error)
+                .forEach((service, rules) -> {
+                    boolean isFirst = true;
+                    for (IPTablesRule rule : rules) {
+                        services.addRow(
+                            isFirst ? service : "", isFirst ? "LXC" : "",
+                            rule.getSource(), rule.getDestination(),
+                            rule.getTarget(), rule.getExtra()
+                        );
+                        isFirst = false;
+                    }
+                });
+            console.newLine();
+
+            console.write(services);
             session.disconnect();
         } catch (JSchException e) {
             console.write(e);
         }
     }
+
 
     @Override
     protected void onInterrupt() {
@@ -87,31 +91,5 @@ public class VulnBoxCommand extends PerimeterShellCommand {
             Integer.parseInt(kwargs.getOrDefault("port", "22")),
             kwargs.get("password"), new VulnBoxUserInfo(console)
         );
-    }
-
-    private List<String> executeCommand(Session session, String command) throws JSchException, IOException {
-        Channel execChannel = session.openChannel("exec");
-
-        execChannel.setInputStream(null);
-        ((ChannelExec) execChannel).setErrStream(error);
-
-        ((ChannelExec) execChannel).setCommand(command);
-
-        BufferedReader reader = new BufferedReader(new InputStreamReader(execChannel.getInputStream()));
-        execChannel.connect();
-
-        List<String> output = new ArrayList<>();
-
-        String line = null;
-        while (!execChannel.isClosed() || Objects.nonNull(line)) {
-            line = reader.readLine();
-            output.add(line);
-
-            sleep(100L);
-        }
-
-        execChannel.disconnect();
-
-        return output;
     }
 }
