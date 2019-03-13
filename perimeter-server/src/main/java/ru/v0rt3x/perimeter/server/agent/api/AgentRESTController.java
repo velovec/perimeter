@@ -46,6 +46,7 @@ public class AgentRESTController {
     private FlagProcessor flagProcessor;
 
     private static final Logger logger = LoggerFactory.getLogger(AgentRESTController.class);
+    private static final Object taskQueueLock = new Object();
 
     @RequestMapping(path = "/register", method = RequestMethod.POST)
     private Agent registerAgent(@RequestBody Agent agent) {
@@ -74,11 +75,14 @@ public class AgentRESTController {
         if (agent != null) {
             agent.setLastSeen(System.currentTimeMillis());
 
-            AgentTask task = agentTaskQueue.hasTasks(agent.getType()) ? agentTaskQueue.getTask(agent.getType()) : AgentTask.noop();
+            synchronized (taskQueueLock) {
+                AgentTask task = agentTaskQueue.hasTasks(agent.getType()) ? agentTaskQueue.getTask(agent.getType()) : AgentTask.noop();
 
-            agent.setTask(task.getType());
-            agentRepository.save(agent);
-            return task;
+                agent.setTask(task.getType());
+                agentRepository.save(agent);
+
+                return task;
+            }
         }
 
         return null;
