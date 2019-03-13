@@ -9,7 +9,7 @@ perimeter:
         protocol: http
     executor:
         tmp-directory: /tmp/perimeter/exploit
-        execution-timeout: 120000
+        execution-timeout: 60000
         command-line:
           python: python %exploit% %team%
           go: go run %exploit% %team%

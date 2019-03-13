@@ -56,7 +56,7 @@ public class VulnBoxCommand extends PerimeterShellCommand {
         }
     }
 
-    private void serviceListToTable(Map<String, List<IPTablesRule>> services, String type, Table table) throws IOException {
+    private void serviceListToTable(Map<String, List<IPTablesRule>> services, String type, Table table) {
         services.forEach((service, rules) -> {
             boolean isFirst = true;
             for (IPTablesRule rule : rules) {
