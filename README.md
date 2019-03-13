@@ -83,6 +83,19 @@ Helper command for vulnbox management:
 
 * `detect_services` - Detect running Docker/LXC services and corresponding ports
 
+Example output for `detect_services` command
+
+```
++----------+--------+------------+-------------+------------+---------------------------------+
+| Name     | Type   | Source     | Destination | Chain      | Rule                            |
++----------+--------+------------+-------------+------------+---------------------------------+
+| haproxy  | Docker | 10.20.30.3 | 10.20.30.3  | MASQUERADE | tcp dpt:1936                    |
+|          |        | 0.0.0.0/0  | 0.0.0.0/0   | DNAT       | tcp dpt:1936 to:10.20.30.3:1936 |
+| postgres | Docker | 10.20.30.2 | 10.20.30.2  | MASQUERADE | tcp dpt:5432                    |
+|          |        | 0.0.0.0/0  | 0.0.0.0/0   | DNAT       | tcp dpt:5432 to:10.20.30.2:5432 |
++----------+--------+------------+-------------+------------+---------------------------------+
+``` 
+
 ##### Agent
 
 List available remote agents (both executors and configurators) and tasks running
