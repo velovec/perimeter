@@ -14,6 +14,8 @@ import ru.v0rt3x.perimeter.server.vulnbox.VulnBoxUserInfo;
 import ru.v0rt3x.perimeter.server.utils.iptables.IPTablesRule;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 @ShellCommand(command = "vulnbox", description = "VulnBox manager")
 public class VulnBoxCommand extends PerimeterShellCommand {
@@ -40,32 +42,11 @@ public class VulnBoxCommand extends PerimeterShellCommand {
             Table services = new Table("Name", "Type", "Source", "Destination", "Chain", "Rule");
 
             console.writeLine("Detecting Docker services...");
-            SSHUtils.detectDockerServices(session, error)
-                .forEach((service, rules) -> {
-                    boolean isFirst = true;
-                    for (IPTablesRule rule : rules) {
-                        services.addRow(
-                            isFirst ? service : "", isFirst ? "Docker" : "",
-                            rule.getSource(), rule.getDestination(),
-                            rule.getTarget(), rule.getExtra()
-                        );
-                        isFirst = false;
-                    }
-                });
+            serviceListToTable(SSHUtils.detectDockerServices(session, error), "Docker", services);
 
             console.writeLine("Detecting LXC services...");
-            SSHUtils.detectLXCServices(session, error)
-                .forEach((service, rules) -> {
-                    boolean isFirst = true;
-                    for (IPTablesRule rule : rules) {
-                        services.addRow(
-                            isFirst ? service : "", isFirst ? "LXC" : "",
-                            rule.getSource(), rule.getDestination(),
-                            rule.getTarget(), rule.getExtra()
-                        );
-                        isFirst = false;
-                    }
-                });
+            serviceListToTable(SSHUtils.detectLXCServices(session, error), "LXC", services);
+
             console.newLine();
 
             console.write(services);
@@ -75,6 +56,19 @@ public class VulnBoxCommand extends PerimeterShellCommand {
         }
     }
 
+    private void serviceListToTable(Map<String, List<IPTablesRule>> services, String type, Table table) throws IOException {
+        services.forEach((service, rules) -> {
+            boolean isFirst = true;
+            for (IPTablesRule rule : rules) {
+                table.addRow(
+                    isFirst ? service : "", isFirst ? type : "",
+                    rule.getSource(), rule.getDestination(),
+                    rule.getTarget(), rule.getExtra()
+                );
+                isFirst = false;
+            }
+        });
+    }
 
     @Override
     protected void onInterrupt() {
