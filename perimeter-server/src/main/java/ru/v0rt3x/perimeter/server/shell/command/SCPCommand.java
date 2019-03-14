@@ -67,6 +67,9 @@ public class SCPCommand extends PerimeterShellCommand {
                     exit(1);
                     break;
             }
+        } else {
+            console.writeLine("This command is used by SCP. It should not be used manually.");
+            exit(1);
         }
     }
 

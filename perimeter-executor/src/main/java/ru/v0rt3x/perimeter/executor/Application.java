@@ -24,12 +24,6 @@ public class Application {
         ConfigurableApplicationContext ctx = SpringApplication.run(Application.class, args);
 
         ctx.registerShutdownHook();
-
-        ExploitExecutor executor = ctx.getBean(ExploitExecutor.class);
-
-        while (ctx.isRunning()) {
-            executor.executeExploit();
-        }
     }
 
 }

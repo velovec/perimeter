@@ -12,6 +12,20 @@ public class SetEnvCommand extends PerimeterShellCommand {
     protected void init() throws IOException {}
 
     public void execute() throws IOException {
+        for (int i = 0; i < args.size(); i++) {
+            if (args.get(i).contains("=")) {
+                String[] arg = args.get(i).split("=", 2);
+
+                kwargs.put(arg[0], arg[1]);
+            } else {
+                if (i < args.size() - 1) {
+                    kwargs.put(args.get(i++), args.get(i));
+                } else {
+                    getEnvironment().getEnv().remove(args.get(i));
+                }
+            }
+        }
+
         if (kwargs.containsKey("USER")) {
             kwargs.remove("USER");
             console.writeLine("USER variable cannot be changed");

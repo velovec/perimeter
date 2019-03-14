@@ -358,6 +358,7 @@ public class ConsoleUtils {
     public void error(String format, Object... args) throws IOException {
         lock();
         errorStreamWriter.write(String.format(format, args));
+        errorStreamWriter.write("\r\n");
         errorStreamWriter.flush();
         unlock();
     }

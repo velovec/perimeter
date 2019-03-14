@@ -13,6 +13,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @ShellCommand(command = "users", description = "Manage users settings")
 public class UserProfileCommand extends PerimeterShellCommand {
@@ -43,6 +44,11 @@ public class UserProfileCommand extends PerimeterShellCommand {
         String userName = (args.size() > 0) ? args.get(0) : getEnvironment().getEnv().get("USER");
 
         Map<String, Object> authUser = authManager.getUser(userName);
+        if (Objects.isNull(authUser)) {
+            console.error("User '{}' not found", userName);
+            exit(1);
+            return;
+        }
 
         Map<String, String> userAttributes = new HashMap<>();
 
@@ -95,7 +101,13 @@ public class UserProfileCommand extends PerimeterShellCommand {
     public void delete() throws IOException {
         String userName = (args.size() > 0) ? args.get(0) : null;
 
-        if (userName != null) {
+        if (Objects.nonNull(userName)) {
+            if (userName.equals(getEnvironment().getEnv().get("USER"))) {
+                console.writeLine("Unable to delete yourself");
+                exit(1);
+                return;
+            }
+
             if (authManager.userExists(userName)) {
                 if (console.readYesNo("Do you really want to delete this user?")) {
                     authManager.deleteUser(userName);
