@@ -78,11 +78,11 @@ public class VulnBoxCommand extends PerimeterShellCommand {
     private Session getSSHSession() throws JSchException, IOException {
         PerimeterProperties perimeterProperties = context.getBean(PerimeterProperties.class);
 
-        String host = getEnv("VBOX_HOST", kwargs.getOrDefault("host", perimeterProperties.getTeam().getInternalIp()));
-        int port = Integer.parseInt(getEnv("VBOX_PORT", kwargs.getOrDefault("port", "22")));
+        String host = kwargs.getOrDefault("host", getEnv("VBOX_HOST", perimeterProperties.getTeam().getInternalIp()));
+        int port = Integer.parseInt(kwargs.getOrDefault("port", getEnv("VBOX_PORT", "22")));
 
-        String user = getEnv("VBOX_USER", kwargs.getOrDefault("user", getEnv("USER")));
-        String password = getEnv("VBOX_PASSWORD", kwargs.get("password"));
+        String user = kwargs.getOrDefault("user", getEnv("VBOX_USER", getEnv("USER")));
+        String password = kwargs.getOrDefault("password", getEnv("VBOX_PASS"));
 
         console.writeLine("Establishing SSH connection to %s@%s:%d", user, host, port);
 
