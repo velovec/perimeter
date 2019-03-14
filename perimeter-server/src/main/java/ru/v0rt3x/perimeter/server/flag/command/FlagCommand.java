@@ -25,14 +25,7 @@ public class FlagCommand extends PerimeterShellCommand {
 
     @CommandAction("Show queue stats")
     public void stats() throws IOException {
-        if (kwargs.containsKey("watch") && Boolean.parseBoolean(kwargs.get("watch"))) {
-            while (isRunning()) {
-                console.write(flagProcessor.getStatsAsTable());
-                sleep((kwargs.containsKey("delay")) ? Long.parseLong(kwargs.get("delay")) : 1000L);
-            }
-        } else {
-            console.write(flagProcessor.getStatsAsTable());
-        }
+        console.write(flagProcessor.getStatsAsTable());
     }
 
     @CommandAction("Clear all flags")

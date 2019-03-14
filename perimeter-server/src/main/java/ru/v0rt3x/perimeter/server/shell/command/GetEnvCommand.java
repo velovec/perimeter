@@ -14,7 +14,7 @@ public class GetEnvCommand extends PerimeterShellCommand {
 
     @Override
     protected void execute() throws IOException {
-        console.write(new Table(getEnvironment().getEnv(), "variable", "value"));
+        console.write(new Table(getEnv(), "variable", "value"));
     }
 
     @Override

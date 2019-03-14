@@ -9,6 +9,7 @@ import ru.v0rt3x.perimeter.server.flag.dao.FlagPriority;
 import ru.v0rt3x.perimeter.server.flag.dao.FlagStatus;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/flag")
@@ -26,5 +27,10 @@ public class FlagRESTController {
             .map(flagProcessor::addFlag)
             .mapToInt(x -> x ? 1 : 0)
             .sum();
+    }
+
+    @RequestMapping(path = "/stats", method = RequestMethod.GET)
+    public Map<String, Object> getFlagStats() {
+        return flagProcessor.getStats();
     }
 }

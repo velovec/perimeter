@@ -54,7 +54,7 @@ public class SCPCommand extends PerimeterShellCommand {
 
                     console.write(new byte[] {0});
 
-                    if (!fileRouter.routeFile(getEnvironment().getEnv().get("USER"), targetName, fileContents.toByteArray())) {
+                    if (!fileRouter.routeFile(getEnv("USER"), targetName, fileContents.toByteArray())) {
                         logger.warn("No route for file '{}' found", targetName);
                     }
                     break;

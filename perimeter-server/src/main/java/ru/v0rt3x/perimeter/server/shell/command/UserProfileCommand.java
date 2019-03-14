@@ -41,7 +41,7 @@ public class UserProfileCommand extends PerimeterShellCommand {
 
     @CommandAction("Show user profile")
     public void show() throws IOException {
-        String userName = (args.size() > 0) ? args.get(0) : getEnvironment().getEnv().get("USER");
+        String userName = (args.size() > 0) ? args.get(0) : getEnv("USER");
 
         Map<String, Object> authUser = authManager.getUser(userName);
         if (Objects.isNull(authUser)) {
@@ -102,7 +102,7 @@ public class UserProfileCommand extends PerimeterShellCommand {
         String userName = (args.size() > 0) ? args.get(0) : null;
 
         if (Objects.nonNull(userName)) {
-            if (userName.equals(getEnvironment().getEnv().get("USER"))) {
+            if (userName.equals(getEnv("USER"))) {
                 console.writeLine("Unable to delete yourself");
                 exit(1);
                 return;
@@ -124,7 +124,7 @@ public class UserProfileCommand extends PerimeterShellCommand {
 
     @CommandAction("Set SSH public key")
     public void set_key() throws IOException {
-        authManager.setUserKey(getEnvironment().getEnv().get("USER"), console.readLine());
+        authManager.setUserKey(getEnv("USER"), console.readLine());
     }
 
     @CommandAction("Set user attribute")
@@ -135,7 +135,7 @@ public class UserProfileCommand extends PerimeterShellCommand {
             return;
         }
 
-        authManager.setAttribute(getEnvironment().getEnv().get("USER"), args.get(0), String.join(" ", args.subList(1, args.size() - 1)));
+        authManager.setAttribute(getEnv("USER"), args.get(0), String.join(" ", args.subList(1, args.size() - 1)));
     }
 
     @Override

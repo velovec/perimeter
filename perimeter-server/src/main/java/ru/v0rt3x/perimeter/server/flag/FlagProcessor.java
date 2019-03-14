@@ -25,9 +25,7 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 
 import static ru.v0rt3x.perimeter.server.flag.dao.FlagPriority.*;
@@ -279,6 +277,22 @@ public class FlagProcessor {
             flagRepository.countAllByStatus(ACCEPTED),
             flagRepository.countAllByStatus(REJECTED)
         );
+
+        return stats;
+    }
+
+    public Map<String, Object> getStats() {
+        Map<String, Object> stats = new HashMap<>();
+
+        Map<String, Object> queued = new HashMap<>();
+
+        queued.put("low", flagRepository.countAllByStatusAndPriority(QUEUED, LOW));
+        queued.put("normal", flagRepository.countAllByStatusAndPriority(QUEUED, NORMAL));
+        queued.put("high", flagRepository.countAllByStatusAndPriority(QUEUED, HIGH));
+
+        stats.put("queued", queued);
+        stats.put("accepted", flagRepository.countAllByStatus(ACCEPTED));
+        stats.put("rejected", flagRepository.countAllByStatus(REJECTED));
 
         return stats;
     }

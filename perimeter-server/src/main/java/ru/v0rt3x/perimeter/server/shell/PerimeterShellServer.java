@@ -1,7 +1,10 @@
 package ru.v0rt3x.perimeter.server.shell;
 
+import org.apache.sshd.common.session.Session;
+import org.apache.sshd.common.util.net.SshdSocketAddress;
 import org.apache.sshd.server.SshServer;
-import org.apache.sshd.server.forward.RejectAllForwardingFilter;
+import org.apache.sshd.server.forward.AcceptAllForwardingFilter;
+import org.apache.sshd.server.forward.ForwardingFilter;
 import org.apache.sshd.server.keyprovider.AbstractGeneratorHostKeyProvider;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +32,9 @@ public class PerimeterShellServer {
     @Autowired
     private PerimeterProperties perimeterProperties;
 
+    @Autowired
+    private PerimeterShellForwardingFilter forwardingFilter;
+
     @PostConstruct
     public void setUpShellServer() {
         shellServer = SshServer.setUpDefaultServer();
@@ -51,7 +57,7 @@ public class PerimeterShellServer {
         shellServer.setShellFactory(shellFactory);
         shellServer.setCommandFactory(commandFactory);
 
-        shellServer.setForwardingFilter(RejectAllForwardingFilter.INSTANCE);
+        shellServer.setForwardingFilter(forwardingFilter);
     }
 
     public void start() throws IOException {

@@ -33,7 +33,7 @@ public class PasswordCommand extends PerimeterShellCommand {
                         byte[] digest = md.digest();
 
                         authManager.setPassword(
-                            getEnvironment().getEnv().get("USER"),
+                            getEnv("USER"),
                             String.format("%064x", new java.math.BigInteger(1, digest))
                         );
 

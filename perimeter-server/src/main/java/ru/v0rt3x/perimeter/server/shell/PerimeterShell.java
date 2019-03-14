@@ -2,6 +2,8 @@ package ru.v0rt3x.perimeter.server.shell;
 
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
+import org.apache.sshd.server.Signal;
+import org.apache.sshd.server.SignalListener;
 import org.apache.sshd.server.command.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class PerimeterShell implements Command, Runnable, ExitCallback, InterruptHandler {
+public class PerimeterShell implements Command, Runnable, ExitCallback, InterruptHandler, SignalListener {
 
     private final PerimeterShellCommandManager commandManager;
 
@@ -65,6 +67,8 @@ public class PerimeterShell implements Command, Runnable, ExitCallback, Interrup
     public void start(Environment env) throws IOException {
         environment = env;
 
+        environment.addSignalListener(this);
+
         console = new ConsoleUtils(input, output, error);
 
         console.addCompletions(commandManager.listCommands());
@@ -83,6 +87,8 @@ public class PerimeterShell implements Command, Runnable, ExitCallback, Interrup
             subCommand.destroy();
         }
         commandThread.interrupt();
+
+        environment.removeSignalListener(this);
     }
 
     @Override
@@ -186,5 +192,17 @@ public class PerimeterShell implements Command, Runnable, ExitCallback, Interrup
     @Override
     public void onSUBEvent() {
         isRunning = false;
+    }
+
+    @Override
+    public void signal(Signal signal) {
+        switch (signal) {
+            case INT:
+            case KILL:
+            case TERM:
+            case HUP:
+                isRunning = false;
+                break;
+        }
     }
 }

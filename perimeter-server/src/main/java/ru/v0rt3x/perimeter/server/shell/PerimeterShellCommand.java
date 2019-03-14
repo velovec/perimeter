@@ -2,6 +2,8 @@ package ru.v0rt3x.perimeter.server.shell;
 
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
+import org.apache.sshd.server.Signal;
+import org.apache.sshd.server.SignalListener;
 import org.apache.sshd.server.command.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,10 +19,11 @@ import ru.v0rt3x.perimeter.server.shell.console.Table;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public abstract class PerimeterShellCommand implements Command, Runnable, InterruptHandler {
+public abstract class PerimeterShellCommand implements Command, Runnable, InterruptHandler, SignalListener {
 
     protected InputStream input;
     protected OutputStream output;
@@ -91,6 +94,8 @@ public abstract class PerimeterShellCommand implements Command, Runnable, Interr
         commandThread.start();
 
         isRunning = true;
+
+        environment.addSignalListener(this);
     }
 
     @Override
@@ -98,6 +103,8 @@ public abstract class PerimeterShellCommand implements Command, Runnable, Interr
         isRunning = false;
         onInterrupt();
         commandThread.interrupt();
+
+        environment.removeSignalListener(this);
     }
 
     @Override
@@ -108,7 +115,7 @@ public abstract class PerimeterShellCommand implements Command, Runnable, Interr
             init();
 
             String action = null;
-            if (args.size() > 0) {
+            if ((args.size() > 0) && hasMethod(args.get(0))) {
                 action = args.get(0);
                 args.remove(0);
             }
@@ -125,6 +132,11 @@ public abstract class PerimeterShellCommand implements Command, Runnable, Interr
         }
 
         isRunning = false;
+    }
+
+    private boolean hasMethod(String name) {
+        return Arrays.stream(getClass().getDeclaredMethods())
+            .anyMatch(method -> method.getName().equals(name));
     }
 
     protected abstract void init() throws IOException;
@@ -151,6 +163,30 @@ public abstract class PerimeterShellCommand implements Command, Runnable, Interr
 
     protected Environment getEnvironment() {
         return environment;
+    }
+
+    protected Map<String, String> getEnv() {
+        return environment.getEnv();
+    }
+
+    protected String getEnv(String key) {
+        return environment.getEnv().get(key);
+    }
+
+    protected String getEnv(String key, String defaultValue) {
+        return environment.getEnv().getOrDefault(key, defaultValue);
+    }
+
+    protected void setEnv(String key, String value) {
+        environment.getEnv().put(key, value);
+    }
+
+    protected void setEnv(Map<String, String> env) {
+        for (String immutableKey: new String[] {"USER", "LINES", "COLUMNS"}) {
+            env.remove(immutableKey);
+        }
+
+        environment.getEnv().putAll(env);
     }
 
     protected boolean isRunning() {
@@ -204,5 +240,16 @@ public abstract class PerimeterShellCommand implements Command, Runnable, Interr
     @Override
     public void onSUBEvent() {
         destroy();
+    }
+
+    @Override
+    public void signal(Signal signal) {
+        switch (signal) {
+            case INT:
+            case KILL:
+            case TERM:
+            case HUP:
+                destroy();
+        }
     }
 }

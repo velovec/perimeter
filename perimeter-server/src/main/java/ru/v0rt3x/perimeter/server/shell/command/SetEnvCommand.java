@@ -2,6 +2,7 @@ package ru.v0rt3x.perimeter.server.shell.command;
 
 import ru.v0rt3x.perimeter.server.shell.PerimeterShellCommand;
 import ru.v0rt3x.perimeter.server.shell.annotations.ShellCommand;
+import ru.v0rt3x.perimeter.server.shell.console.Table;
 
 import java.io.IOException;
 
@@ -11,27 +12,34 @@ public class SetEnvCommand extends PerimeterShellCommand {
     @Override
     protected void init() throws IOException {}
 
-    public void execute() throws IOException {
+    @Override
+    protected void execute() throws IOException {
+        console.writeLine("A: %s K: %s", args, kwargs);
         for (int i = 0; i < args.size(); i++) {
-            if (args.get(i).contains("=")) {
+            String argument = args.get(i);
+
+            if (argument.contains("=")) {
                 String[] arg = args.get(i).split("=", 2);
 
-                kwargs.put(arg[0], arg[1]);
+                setEnv(arg[0], arg[1]);
+                console.writeLine("%s; %s", arg[0], arg[1]);
             } else {
-                if (i < args.size() - 1) {
-                    kwargs.put(args.get(i++), args.get(i));
+                if (i + 1 < args.size()) {
+                    String value = args.get(i + 1);
+                    setEnv(argument, value);
+                    console.writeLine("%s; %s", argument, value);
+                    i++;
                 } else {
-                    getEnvironment().getEnv().remove(args.get(i));
+                    console.error("Not enough arguments");
+                    exit(1);
+                    return;
                 }
             }
         }
 
-        if (kwargs.containsKey("USER")) {
-            kwargs.remove("USER");
-            console.writeLine("USER variable cannot be changed");
-        }
+        setEnv(kwargs);
 
-        getEnvironment().getEnv().putAll(kwargs);
+        console.write(new Table(getEnv(), "variable", "value"));
     }
 
     @Override
