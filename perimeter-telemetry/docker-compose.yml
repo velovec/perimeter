@@ -1,0 +1,44 @@
+version: "3.5"
+
+networks:
+  private:
+    name: perimeter
+
+services:
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - './prometheus.yml:/etc/prometheus/prometheus.yml:Z'
+      - './prom_data:/prometheus:Z'
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - private
+    ports:
+      - '9090:9090'
+    restart: always
+
+  perimeter-exporter:
+    image: v0rt3x/perimeter-exporter
+    volumes:
+      - './perimeter-exporter.yml:/etc/perimeter_exporter/config.yml:Z'
+    command:
+      - '--config.file=/etc/perimeter_exporter/config.yml'
+    networks:
+      - private
+    ports:
+      - '9900:9900'
+    restart: always  
+
+  grafana:
+    image: grafana/grafana:latest
+    depends_on:
+      - prometheus
+    ports:
+      - '3000:3000'
+    volumes:
+      - './grafana_data:/var/lib/grafana'
+    networks:
+      - private
+    restart: always
