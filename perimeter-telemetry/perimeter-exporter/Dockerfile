@@ -1,8 +1,5 @@
 FROM golang:latest as builder
 
-ENV http_proxy http://xz.avp.ru:8080
-ENV https_proxy http://xz.avp.ru:8080
-
 WORKDIR /go/src/perimeter_exporter
 COPY . .
 RUN go get -d -v ./...
