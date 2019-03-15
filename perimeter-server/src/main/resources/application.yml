@@ -67,7 +67,7 @@ perimeter:
         host: 127.0.0.1
         port: 5000
         protocol: http
-        integration-enabled: false
+        integration-enabled: true
     agent:
         timeout: 20000
         delete-after: 100000

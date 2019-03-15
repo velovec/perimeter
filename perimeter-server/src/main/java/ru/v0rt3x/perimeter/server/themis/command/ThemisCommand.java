@@ -23,10 +23,12 @@ import java.util.Objects;
 public class ThemisCommand extends PerimeterShellCommand {
 
     private ThemisClient themisClient;
+    private PerimeterProperties.ThemisProperties themisProperties;
 
     @Override
     protected void init() throws IOException {
         themisClient = context.getBean(ThemisClient.class);
+        themisProperties = context.getBean(PerimeterProperties.class).getThemis();
     }
 
     @Override
@@ -36,6 +38,11 @@ public class ThemisCommand extends PerimeterShellCommand {
 
     @CommandAction("Get contest status from Themis")
     public void status() throws IOException {
+        if (!themisProperties.isIntegrationEnabled()) {
+            console.writeLine("Themis integration disabled");
+            return;
+        }
+
         console.writeLine("We are: %s", themisClient.getIdentity().getName());
 
         console.writeLine("Contest status: %s", themisClient.getContestState());
@@ -44,6 +51,11 @@ public class ThemisCommand extends PerimeterShellCommand {
 
     @CommandAction("Get JWT public key from Themis")
     public void public_key() throws IOException {
+        if (!themisProperties.isIntegrationEnabled()) {
+            console.writeLine("Themis integration disabled");
+            return;
+        }
+
         String publicKey = themisClient.getPublicKey();
 
         context.getBean(FlagProcessor.class).setThemisPublicKey(publicKey);
@@ -98,6 +110,11 @@ public class ThemisCommand extends PerimeterShellCommand {
 
     @CommandAction("Sync team list from Themis")
     public void sync() throws IOException {
+        if (!themisProperties.isIntegrationEnabled()) {
+            console.writeLine("Themis integration disabled");
+            return;
+        }
+
         Table teamListTable = new Table("ID", "Name", "IP", "Is Guest");
 
         List<Team> teamList = themisClient.getTeamList();

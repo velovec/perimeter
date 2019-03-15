@@ -55,8 +55,10 @@ public class FlagProcessor {
 
     @PostConstruct
     private void initQueue() {
-        if (perimeterProperties.getFlag().getJwt().isEnabled()) {
+        if (perimeterProperties.getThemis().isIntegrationEnabled() && perimeterProperties.getFlag().getJwt().isEnabled()) {
             setThemisPublicKey(themisClient.getPublicKey());
+        } else {
+            setThemisPublicKey(perimeterProperties.getThemis().getPublicKey());
         }
 
         flagHistory.addAll(flagRepository.findAllByStatusOrderByCreateTimeStampDesc(ACCEPTED));

@@ -178,6 +178,7 @@ public class PerimeterProperties {
         private String host = "localhost";
         private Integer port = 80;
         private boolean integrationEnabled = true;
+        private String publicKey;
 
         public String getProtocol() {
             return protocol;
@@ -209,6 +210,14 @@ public class PerimeterProperties {
 
         public void setIntegrationEnabled(boolean integrationEnabled) {
             this.integrationEnabled = integrationEnabled;
+        }
+
+        public String getPublicKey() {
+            return publicKey;
+        }
+
+        public void setPublicKey(String publicKey) {
+            this.publicKey = publicKey;
         }
     }
 
