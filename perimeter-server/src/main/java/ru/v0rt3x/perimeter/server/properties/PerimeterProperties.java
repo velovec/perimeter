@@ -14,6 +14,7 @@ public class PerimeterProperties {
     private ThemisProperties themis = new ThemisProperties();
     private AgentProperties agent = new AgentProperties();
     private ShellProperties shell = new ShellProperties();
+    private GitServerProperties git = new GitServerProperties();
 
     public TeamProperties getTeam() {
         return team;
@@ -53,6 +54,14 @@ public class PerimeterProperties {
 
     public void setShell(ShellProperties shell) {
         this.shell = shell;
+    }
+
+    public GitServerProperties getGit() {
+        return git;
+    }
+
+    public void setGit(GitServerProperties git) {
+        this.git = git;
     }
 
     public class TeamProperties {
@@ -299,6 +308,19 @@ public class PerimeterProperties {
             public void setKey(String key) {
                 this.key = HexBin.decode(key);
             }
+        }
+    }
+
+    public class GitServerProperties {
+
+        private String root;
+
+        public String getRoot() {
+            return root;
+        }
+
+        public void setRoot(String root) {
+            this.root = root;
         }
     }
 }

@@ -71,3 +71,5 @@ perimeter:
     agent:
         timeout: 20000
         delete-after: 100000
+    git:
+        root: git

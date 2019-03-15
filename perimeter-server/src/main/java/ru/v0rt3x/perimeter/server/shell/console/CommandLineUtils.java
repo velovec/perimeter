@@ -143,5 +143,10 @@ public class CommandLineUtils {
         public Map<String, String> getKeywordArgs() {
             return kwargs;
         }
+
+        @Override
+        public String toString() {
+            return String.format("Command: %s Args: %s KWArgs: %s", cmd, args, kwargs);
+        }
     }
 }
