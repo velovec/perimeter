@@ -1,0 +1,43 @@
+version: "3.5"
+
+networks:
+  private:
+    name: perimeter-local
+  public:
+    name: perimeter-public
+
+services:
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - './perimeter-monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:Z'
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - private
+    ports:
+      - '9090:9090'
+    restart: always
+
+  perimeter-exporter:
+    image: v0rt3x/perimeter-exporter
+    command:
+      - '-api.endpoint-address'
+      - 'perimeter:8080'
+    networks:
+      - private
+    ports:
+      - '9900:9900'
+    restart: always  
+
+  grafana:
+    image: grafana/grafana:latest
+    depends_on:
+      - prometheus
+    ports:
+      - '3000:3000'
+    networks:
+      - private
+      - public
+    restart: always
