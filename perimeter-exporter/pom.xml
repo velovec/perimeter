@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>perimeter-core</artifactId>
+        <groupId>ru.v0rt3x.ctf</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>perimeter-exporter</artifactId>
+    <name>v0rt3x :: Perimeter :: Prometheus :: Exporter</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>ru.v0rt3x.ctf</groupId>
+            <artifactId>perimeter-server</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}</directory>
+                <filtering>true</filtering>
+                <targetPath>${project.build.directory}</targetPath>
+            </resource>
+        </resources>
+
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>docker-build</id>
+                        <phase>install</phase>
+                    </execution>
+                    <execution>
+                        <id>docker-image-prune</id>
+                        <phase>install</phase>
+                    </execution>                    
+                    <execution>
+                        <id>docker-push-snapshot</id>
+                        <phase>deploy</phase>
+                    </execution>
+                    <execution>
+                        <id>docker-push-latest</id>
+                        <phase>deploy</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

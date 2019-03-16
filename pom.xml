@@ -18,6 +18,7 @@
         <module>perimeter-executor</module>
         <module>perimeter-configurator</module>
         <module>themis-mock-server</module>
+        <module>perimeter-exporter</module>
     </modules>
 
     <parent>
@@ -196,6 +197,22 @@
                                 <arguments>
                                     <argument>push</argument>
                                     <argument>${docker.repository}/${project.artifactId}:latest</argument>
+                                </arguments>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>docker-image-prune</id>
+                            <phase>none</phase>
+                            <goals>
+                                <goal>exec</goal>
+                            </goals>
+                            <configuration>
+                                <skip>${docker.skip.image.prune}</skip>
+                                <executable>docker</executable>
+                                <arguments>
+                                    <argument>image</argument>
+                                    <argument>prune</argument>
+                                    <argument>-f</argument>
                                 </arguments>
                             </configuration>
                         </execution>
