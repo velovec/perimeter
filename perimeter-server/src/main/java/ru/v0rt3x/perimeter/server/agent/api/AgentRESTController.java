@@ -37,9 +37,6 @@ public class AgentRESTController {
     private ExploitExecutionResultRepository executionResultRepository;
 
     @Autowired
-    private PerimeterProperties perimeterProperties;
-
-    @Autowired
     private AgentTaskQueue agentTaskQueue;
 
     @Autowired
@@ -161,20 +158,4 @@ public class AgentRESTController {
         exploitRepository.save(exploit);
     }
 
-    @Scheduled(fixedRate = 5000L)
-    private void checkAgentsStatus() {
-        agentRepository.findAll().parallelStream().forEach(
-            agent -> {
-                boolean isAvailable = System.currentTimeMillis() - agent.getLastSeen() < perimeterProperties.getAgent().getTimeout();
-                if (agent.isAvailable() != isAvailable) {
-                    agent.setAvailable(isAvailable);
-                    agentRepository.save(agent);
-                }
-
-                if (System.currentTimeMillis() - agent.getLastSeen() > perimeterProperties.getAgent().getDeleteAfter()) {
-                    agentRepository.delete(agent);
-                }
-            }
-        );
-    }
 }
