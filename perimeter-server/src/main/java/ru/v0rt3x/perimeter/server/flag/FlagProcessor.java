@@ -5,6 +5,8 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.Metrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +65,34 @@ public class FlagProcessor {
 
         flagHistory.addAll(flagRepository.findAllByStatusOrderByCreateTimeStampDesc(ACCEPTED));
         flagHistory.addAll(flagRepository.findAllByStatusOrderByCreateTimeStampDesc(REJECTED));
+    }
+
+    @PostConstruct
+    private void setUpMetrics() {
+        Gauge.builder("flag_processor_flags_in_queue", flagRepository, (r) -> (double) r.countAllByStatus(ACCEPTED))
+            .tag("status", "accepted")
+            .tag("priority", "unknown")
+            .register(Metrics.globalRegistry);
+
+        Gauge.builder("flag_processor_flags_in_queue", flagRepository, (r) -> (double) r.countAllByStatus(REJECTED))
+            .tag("status", "rejected")
+            .tag("priority", "unknown")
+            .register(Metrics.globalRegistry);
+
+        Gauge.builder("flag_processor_flags_in_queue", flagRepository, (r) -> (double) r.countAllByStatusAndPriority(QUEUED, HIGH))
+            .tag("status", "queued")
+            .tag("priority", "high")
+            .register(Metrics.globalRegistry);
+
+        Gauge.builder("flag_processor_flags_in_queue", flagRepository, (r) -> (double) r.countAllByStatusAndPriority(QUEUED, NORMAL))
+            .tag("status", "queued")
+            .tag("priority", "normal")
+            .register(Metrics.globalRegistry);
+
+        Gauge.builder("flag_processor_flags_in_queue", flagRepository, (r) -> (double) r.countAllByStatusAndPriority(QUEUED, LOW))
+            .tag("status", "queued")
+            .tag("priority", "low")
+            .register(Metrics.globalRegistry);
     }
 
     public boolean addFlag(Flag flag) {
