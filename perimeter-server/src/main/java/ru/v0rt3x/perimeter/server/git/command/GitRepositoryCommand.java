@@ -122,7 +122,7 @@ public class GitRepositoryCommand extends PerimeterShellCommand {
         }
 
         try {
-        repositoryManager.deleteRepository(args.get(0));
+            repositoryManager.deleteRepository(args.get(0));
         } catch (IOException e) {
             console.writeLine("Unable to delete repository: %s", e.getMessage());
         }

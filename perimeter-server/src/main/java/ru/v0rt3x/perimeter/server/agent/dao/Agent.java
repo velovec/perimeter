@@ -25,7 +25,7 @@ public class Agent {
     private String task;
 
     private Long lastSeen;
-    private boolean isAvailable;
+    private boolean available;
 
     private String type;
 
@@ -94,11 +94,11 @@ public class Agent {
     }
 
     public boolean isAvailable() {
-        return isAvailable;
+        return available;
     }
 
     public void setAvailable(boolean available) {
-        isAvailable = available;
+        this.available = available;
     }
 
     public String getType() {
