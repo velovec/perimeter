@@ -85,7 +85,6 @@ public class AgentRESTController {
         return null;
     }
 
-    @SuppressWarnings("unchecked")
     @RequestMapping(path = "/{uuid}/report", method = RequestMethod.POST)
     private Map<String, Object> reportTask(@PathVariable String uuid, @RequestBody AgentTask task) {
         Agent agent = agentRepository.findByUuid(uuid);
