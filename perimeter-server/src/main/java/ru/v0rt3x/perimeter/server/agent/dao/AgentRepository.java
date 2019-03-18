@@ -10,5 +10,5 @@ public interface AgentRepository extends CrudRepository<Agent, Long> {
 
     Agent findByUuid(String uuid);
 
-    long countByAvailable(boolean available);
+    long countByAvailableAndTypeAndTask(boolean active, String type, String task);
 }

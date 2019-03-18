@@ -27,12 +27,24 @@ public class AgentManager {
 
     @PostConstruct
     public void setUpMetrics() {
-        Gauge.builder("remote_agents", agentRepository, AgentRepository::count)
-            .tag("status", "registered")
+        Gauge.builder("remote_agents", agentRepository, (r) -> r.countByAvailableAndTypeAndTask(true, "execute", "noop"))
+            .tag("type", "execute")
+            .tag("task", "noop")
             .register(Metrics.globalRegistry);
 
-        Gauge.builder("remote_agents", agentRepository, (r) -> r.countByAvailable(true))
-            .tag("status", "active")
+        Gauge.builder("remote_agents", agentRepository, (r) -> r.countByAvailableAndTypeAndTask(true, "execute", "execute"))
+            .tag("type", "execute")
+            .tag("task", "execute")
+            .register(Metrics.globalRegistry);
+
+        Gauge.builder("remote_agents", agentRepository, (r) -> r.countByAvailableAndTypeAndTask(true, "configure", "noop"))
+            .tag("type", "configure")
+            .tag("task", "noop")
+            .register(Metrics.globalRegistry);
+
+        Gauge.builder("remote_agents", agentRepository, (r) -> r.countByAvailableAndTypeAndTask(true, "configure", "configure"))
+            .tag("type", "configure")
+            .tag("task", "configure")
             .register(Metrics.globalRegistry);
     }
 
