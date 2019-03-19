@@ -10,6 +10,7 @@ import io.micrometer.core.instrument.Metrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -181,14 +182,21 @@ public class FlagProcessor {
         }
     }
 
-    Flag getFlag() {
+    Queue<Flag> getFlags(int flagsToCollect) {
+        Queue<Flag> flags = new LinkedList<>();
+
         for (FlagPriority priority : new FlagPriority[] { HIGH, NORMAL, LOW }) {
-            Flag flag = flagRepository.findFirstByStatusAndPriorityOrderByCreateTimeStamp(QUEUED, priority);
-            if (Objects.nonNull(flag))
-                return flag;
+            List<Flag> flagList = flagRepository.findAllByStatusAndPriorityOrderByCreateTimeStampDesc(QUEUED, priority, PageRequest.of(0, flagsToCollect));
+
+            flagsToCollect -= flagList.size();
+
+            flags.addAll(flagList);
+
+            if (flagsToCollect == 0)
+                break;
         }
 
-        return null;
+        return flags;
     }
 
     @Scheduled(fixedRate = 5000L)
@@ -196,8 +204,9 @@ public class FlagProcessor {
         if (contestState.equals(ContestState.PAUSED) || contestState.equals(ContestState.COMPLETED))
             return;
 
+        Queue<Flag> flags = getFlags(200);
         while (true) {
-            Flag flag = getFlag();
+            Flag flag = flags.poll();
 
             if (flag == null)
                 break;
@@ -211,7 +220,7 @@ public class FlagProcessor {
             }
 
             FlagInfo flagInfo = themisClient.getFlagInfo(flag);
-            if (!flagInfo.isValid() || flagInfo.isExpired()) {
+            if (Objects.isNull(flagInfo) || !flagInfo.isValid() || flagInfo.isExpired()) {
                 flag.setStatus(REJECTED);
                 logger.debug("Flag rejected by Themis: {}", flag.getFlag());
                 flagHistory.add(flag);
@@ -224,6 +233,17 @@ public class FlagProcessor {
             if (!processResults(flag, result)) {
                 break;
             }
+        }
+    }
+
+    @Scheduled(fixedRate = 5000L)
+    public void checkFlagsExpiration() {
+        long createdBefore = System.currentTimeMillis() - perimeterProperties.getFlag().getTtl() * 1000;
+
+        for (Flag flag: flagRepository.findAllByStatusAndCreateTimeStampLessThan(QUEUED, createdBefore)) {
+            flag.setStatus(REJECTED);
+            flagHistory.add(flag);
+            flagRepository.save(flag);
         }
     }
 

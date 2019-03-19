@@ -1,5 +1,6 @@
 package ru.v0rt3x.perimeter.server.flag.command;
 
+import ru.v0rt3x.perimeter.server.exploit.ExploitManager;
 import ru.v0rt3x.perimeter.server.flag.FlagProcessor;
 import ru.v0rt3x.perimeter.server.shell.PerimeterShellCommand;
 import ru.v0rt3x.perimeter.server.shell.annotations.CommandAction;
@@ -32,6 +33,8 @@ public class FlagCommand extends PerimeterShellCommand {
     public void clear_all() throws IOException {
         if (console.readYesNo("Are you sure?")) {
             flagProcessor.clearQueue();
+
+            context.getBean(ExploitManager.class).clearStats();
         }
     }
 
