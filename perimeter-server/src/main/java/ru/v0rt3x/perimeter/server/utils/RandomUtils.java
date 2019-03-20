@@ -1,5 +1,6 @@
 package ru.v0rt3x.perimeter.server.utils;
 
+import java.util.List;
 import java.util.Random;
 
 public class RandomUtils {
@@ -9,6 +10,10 @@ public class RandomUtils {
     @SafeVarargs
     public static <T> T oneOf(T... args) {
         return args[Math.abs(random.nextInt() % args.length)];
+    }
+
+    public static <T> T oneOf(List<T> args) {
+        return args.get(Math.abs(random.nextInt() % args.size()));
     }
 
     public static boolean probabilityOf(double percentage) {

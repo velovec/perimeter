@@ -7,6 +7,7 @@ import ru.v0rt3x.perimeter.server.properties.PerimeterProperties;
 import ru.v0rt3x.perimeter.server.team.dao.Team;
 import ru.v0rt3x.perimeter.server.team.dao.TeamRepository;
 import ru.v0rt3x.perimeter.server.utils.NetCalc;
+import ru.v0rt3x.perimeter.server.utils.RandomUtils;
 
 import java.util.List;
 
@@ -61,5 +62,9 @@ public class TeamManager {
     public void replaceTeams(List<Team> teamList) {
         teamRepository.deleteAll();
         teamRepository.saveAll(teamList);
+    }
+
+    public Team getRandomTeam() {
+        return RandomUtils.oneOf(teamRepository.findAllByActive(true));
     }
 }

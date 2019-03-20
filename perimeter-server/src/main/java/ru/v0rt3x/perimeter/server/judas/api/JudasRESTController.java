@@ -11,6 +11,9 @@ import ru.v0rt3x.perimeter.server.flag.dao.FlagPriority;
 import ru.v0rt3x.perimeter.server.flag.dao.FlagStatus;
 import ru.v0rt3x.perimeter.server.judas.JudasConfig;
 import ru.v0rt3x.perimeter.server.judas.JudasTarget;
+import ru.v0rt3x.perimeter.server.service.ServiceManager;
+import ru.v0rt3x.perimeter.server.service.dao.Service;
+import ru.v0rt3x.perimeter.server.team.TeamManager;
 
 import java.util.Objects;
 
@@ -21,15 +24,27 @@ public class JudasRESTController {
     @Autowired
     private FlagProcessor flagProcessor;
 
+    @Autowired
+    private ServiceManager serviceManager;
+
+    @Autowired
+    private TeamManager teamManager;
+
     @RequestMapping(path = "/target/{port:[0-9]+}/", method = RequestMethod.GET)
     public JudasTarget getTarget(@PathVariable("port") int port) {
+        Service service = serviceManager.getService(port);
+
+        if (Objects.isNull(service))
+            return null;
+
+        if (!service.getMode().equals("http"))
+            return null;
+
         JudasTarget target = new JudasTarget();
 
-        // TODO: Make it choose random / specific team
-        // TODO: Remove hardcode
         target.setProtocol("http");
-        target.setHost("10.20.30.1");
-        target.setPort(5000);
+        target.setHost(teamManager.getRandomTeam().getIp());
+        target.setPort(service.getPort());
 
         return target;
     }

@@ -82,4 +82,8 @@ public class ServiceManager {
             logger.error("Unable to check service status: {}", e.getMessage());
         }
     }
+
+    public Service getService(int port) {
+        return serviceRepository.findByPort(port);
+    }
 }

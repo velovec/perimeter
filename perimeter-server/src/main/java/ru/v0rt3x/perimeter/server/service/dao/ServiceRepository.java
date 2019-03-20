@@ -11,4 +11,6 @@ public interface ServiceRepository extends CrudRepository<Service, Long> {
     Service findByName(String name);
 
     Service findById(Integer id);
+
+    Service findByPort(int port);
 }
