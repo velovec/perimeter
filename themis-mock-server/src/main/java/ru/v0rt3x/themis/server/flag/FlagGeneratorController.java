@@ -20,7 +20,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.RSAPrivateKey;
 
-@RestController("/api/flag/generate")
+@RestController
+@RequestMapping("/api/flag/generator")
 public class FlagGeneratorController {
 
     @Autowired
@@ -85,7 +86,7 @@ public class FlagGeneratorController {
         }
     }
 
-    @RequestMapping(path = "/api/flag/generator", method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     public String generate() {
         String flag = generateFlag();
 
@@ -93,8 +94,10 @@ public class FlagGeneratorController {
             flagCollector.saveFlag(flag);
         }
 
-        return JWT.create()
+        String wrappedFlag = JWT.create()
             .withClaim("flag", flag)
             .sign(algorithm);
+
+        return String.format("VolgaCTF{%s}", wrappedFlag);
     }
 }

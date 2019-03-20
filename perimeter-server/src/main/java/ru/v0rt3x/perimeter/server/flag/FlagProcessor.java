@@ -30,6 +30,7 @@ import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.*;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static ru.v0rt3x.perimeter.server.flag.dao.FlagPriority.*;
 import static ru.v0rt3x.perimeter.server.flag.dao.FlagStatus.*;
@@ -347,5 +348,11 @@ public class FlagProcessor {
         stats.put("rejected", flagRepository.countAllByStatus(REJECTED));
 
         return stats;
+    }
+
+    public Pattern getFlagPattern() {
+        PerimeterProperties.FlagProperties flagProperties = perimeterProperties.getFlag();
+
+        return flagProperties.getJwt().isEnabled() ? flagProperties.getJwt().getPattern() : flagProperties.getPattern();
     }
 }
