@@ -3,9 +3,11 @@ FROM @docker.baseImage@
 ENTRYPOINT ["java", "-jar", "/opt/perimeter/perimeter-executor.jar", "--spring.config.location=classpath:application.yml,/opt/perimeter/perimeter-executor.yml"]
 WORKDIR "/opt/perimeter"
 
-RUN apk update && \
-    apk add python go bash && \
-    rm -rf /var/cache/apk/*
+RUN apt update && \
+    apt upgrade -qy && \
+    apt dist-upgrade -qy && \
+    apt install -qy golang openjdk-8-jdk && \
+    rm -rf /var/cache/apt/*
 
 COPY classes/application.yml /opt/perimeter/perimeter-executor.yml
 COPY @project.artifactId@-@project.version@.jar /opt/perimeter/perimeter-executor.jar

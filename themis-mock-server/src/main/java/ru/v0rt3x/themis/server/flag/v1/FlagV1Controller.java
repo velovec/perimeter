@@ -41,9 +41,9 @@ public class FlagV1Controller {
         if (!request.getHeader("Content-Type").equals("text/plain"))
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(SubmitResult.ERROR_FLAG_INVALID.ordinal());
 
-//        String remoteAddress = request.getRemoteAddr();
-//        if (!networkManager.isTeamNetwork(remoteAddress) || Objects.isNull(teamManager.getTeamByNetwork(remoteAddress)))
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(SubmitResult.ERROR_ACCESS_DENIED.ordinal());
+        String remoteAddress = request.getRemoteAddr();
+        if (!networkManager.isTeamNetwork(remoteAddress) || Objects.isNull(teamManager.getTeamByNetwork(remoteAddress)))
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(SubmitResult.ERROR_ACCESS_DENIED.ordinal());
 
         if (Objects.isNull(flag) || !FLAG_PATTERN.matcher(flag).matches())
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(SubmitResult.ERROR_FLAG_INVALID.ordinal());

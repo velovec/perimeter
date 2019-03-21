@@ -22,7 +22,7 @@ defaults
   timeout check 10s
 
 listen haproxy-stats
-  bind {{ host }}:1936
+  bind {{ listen|default("0.0.0.0") }}:1936
   mode http
   log global
 
@@ -40,7 +40,7 @@ listen haproxy-stats
   stats uri /stats
 
 {% for service, definition in services.items() %}frontend {{ service }}
-  bind {{ haproxy.host }}:{{ definition.port }}
+  bind {{ listen|default("0.0.0.0") }}:{{ definition.port }}
   mode {{ definition.mode|default(tcp) }}
   {% for mapping in definition.mappings %}{% if mapping.acl %}{% for rule in mapping.acl.rules %}acl {{ mapping.acl.name }} {{ rule }}
   {% endfor %}use_backend {{ service }}-{{ mapping.backend.name }} if {{ mapping.acl.name }}

@@ -1,0 +1,71 @@
+themis:
+    network:
+        internal: 10.255.255.0/24
+        team: 10.255.0.0/19
+        team-subnet-cidr: 24
+    teams:
+        - id: 1
+          name: v0rt3x
+          guest: false
+        - id: 2
+          name: MagicHat
+          guest: true
+        - id: 3
+          name: Singularity
+          guest: false
+        - id: 4
+          name: h3xd4mp
+          guest: false
+        - id: 5
+          name: Balala1kaCr3w
+          guest: false
+        - id: 6
+          name: P1x3ls
+          guest: false
+        - id: 7
+          name: l33tm0r3
+          guest: false
+        - id: 8
+          name: Currupted Reflections
+          guest: false
+        - id: 9
+          name: SiBears
+          guest: false
+        - id: 10
+          name: Lights Out
+          guest: false
+        - id: 11
+          name: WeAreScientists
+          guest: false
+        - id: 12
+          name: JustDoIt
+          guest: false
+        - id: 13
+          name: 1337@H@x0r$:~$
+          guest: false
+        - id: 14
+          name: "p#0N1X"
+          guest: false
+        - id: 15
+          name: void*
+          guest: false
+        - id: 16
+          name: S1ayer
+          guest: false
+        - id: 17
+          name: SpaceSheeps
+          guest: false
+    duration: 36000000 # 10 hour
+    jwt:
+        algorithm: EC256
+        public-key: |
+            -----BEGIN PUBLIC KEY-----
+            MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEQgb5npLHd0Bk61bNnjK632uwmBfr
+            F7I8hoPgaOZjyhh+BrPDO6CL6D/aW/yPObXXm7SpZogmRwGROcOA3yUleg==
+            -----END PUBLIC KEY-----
+        private_key: |
+            -----BEGIN PRIVATE KEY-----
+            MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgPGJGAm4X1fvBuC1z
+            SpO/4Izx6PXfNMaiKaS5RUkFqEGhRANCAARCBvmeksd3QGTrVs2eMrrfa7CYF+sX
+            sjyGg+Bo5mPKGH4Gs8M7oIvoP9pb/I85tdebtKlmiCZHAZE5w4DfJSV6
+            -----END PRIVATE KEY-----

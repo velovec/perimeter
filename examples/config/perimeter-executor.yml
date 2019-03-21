@@ -1,0 +1,13 @@
+perimeter:
+    server:
+        host: 10.255.0.3
+        port: 8080
+        protocol: http
+    executor:
+        tmp-directory: /tmp/perimeter/exploit
+        execution-timeout: 60000
+        command-line:
+          python: python %exploit% %team%
+          go: go run %exploit% %team%
+          java: javac %exploit%; java %exploit% %team%
+          shell: bash %exploit% %team%

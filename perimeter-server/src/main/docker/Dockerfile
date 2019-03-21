@@ -4,6 +4,7 @@ ENTRYPOINT ["java", "-jar", "/opt/perimeter/perimeter.jar", "--spring.config.loc
 WORKDIR "/opt/perimeter"
 EXPOSE 8080 1488
 
+RUN mkdir -p /opt/perimeter/sshd
 COPY classes/application.yml /opt/perimeter/perimeter.yml
 COPY @project.artifactId@-@project.version@.jar /opt/perimeter/perimeter.jar
 

@@ -1,0 +1,14 @@
+perimeter:
+    server:
+        host: 10.255.0.3
+        port: 8080
+        protocol: http
+    configurator:
+        templates-path: config_templates
+        configurators:
+            haproxy:
+                config-path: /etc/haproxy/haproxy.cfg
+                template-file: haproxy.cfg.j2
+                apply-command: /usr/bin/docker restart haproxy
+                overrides:
+                    listen: 0.0.0.0
