@@ -1,7 +1,5 @@
 package ru.v0rt3x.perimeter.server.judas.api;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,7 +8,8 @@ import ru.v0rt3x.perimeter.server.flag.dao.Flag;
 import ru.v0rt3x.perimeter.server.flag.dao.FlagPriority;
 import ru.v0rt3x.perimeter.server.flag.dao.FlagStatus;
 import ru.v0rt3x.perimeter.server.judas.JudasConfig;
-import ru.v0rt3x.perimeter.server.judas.JudasTarget;
+import ru.v0rt3x.perimeter.server.judas.JudasManager;
+import ru.v0rt3x.perimeter.server.judas.dao.JudasTarget;
 import ru.v0rt3x.perimeter.server.service.ServiceManager;
 import ru.v0rt3x.perimeter.server.service.dao.Service;
 import ru.v0rt3x.perimeter.server.team.TeamManager;
@@ -25,28 +24,12 @@ public class JudasRESTController {
     private FlagProcessor flagProcessor;
 
     @Autowired
-    private ServiceManager serviceManager;
-
-    @Autowired
-    private TeamManager teamManager;
+    private JudasManager judasManager;
 
     @RequestMapping(path = "/target/{port:[0-9]+}/", method = RequestMethod.GET)
     public JudasTarget getTarget(@PathVariable("port") int port) {
-        Service service = serviceManager.getService(port);
+        return judasManager.getTarget(port);
 
-        if (Objects.isNull(service))
-            return null;
-
-        if (!service.getMode().equals("http"))
-            return null;
-
-        JudasTarget target = new JudasTarget();
-
-        target.setProtocol("http");
-        target.setHost(teamManager.getRandomTeam().getIp());
-        target.setPort(service.getPort());
-
-        return target;
     }
 
     @RequestMapping(path = "/config/", method = RequestMethod.GET)
