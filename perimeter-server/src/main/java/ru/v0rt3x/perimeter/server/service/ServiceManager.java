@@ -1,5 +1,6 @@
 package ru.v0rt3x.perimeter.server.service;
 
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,7 @@ import org.springframework.data.util.Pair;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import ru.v0rt3x.perimeter.server.git.GitRepositoryManager;
 import ru.v0rt3x.perimeter.server.haproxy.HAProxyManager;
 import ru.v0rt3x.perimeter.server.haproxy.dao.HAProxyBackend;
 import ru.v0rt3x.perimeter.server.properties.PerimeterProperties;
@@ -31,6 +33,9 @@ public class ServiceManager {
     @Autowired
     private PerimeterProperties perimeterProperties;
 
+    @Autowired
+    private GitRepositoryManager repositoryManager;
+
     public List<Service> listServices() {
         return serviceRepository.findAll();
     }
@@ -44,6 +49,7 @@ public class ServiceManager {
     public void replaceServices(List<Service> services) {
         serviceRepository.deleteAll();
         serviceRepository.saveAll(services);
+        createGitRepositories(services);
     }
 
     private void setServiceStatus(String serviceName, String status, int serversMax, int serversActive) {
@@ -58,6 +64,18 @@ public class ServiceManager {
         service.setServersActive(serversActive);
 
         serviceRepository.save(service);
+    }
+
+    private void createGitRepositories(List<Service> services) {
+        for (Service service: services) {
+            if (!repositoryManager.hasRepository(service.getName())) {
+                try {
+                    repositoryManager.createRepository(service.getName());
+                } catch (IOException | GitAPIException e) {
+                    logger.error("Unable to create Git repository for service '{}': {}", service.getName(), e.getMessage());
+                }
+            }
+        }
     }
 
     @Scheduled(fixedRate = 5000L)

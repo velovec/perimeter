@@ -21,6 +21,9 @@ public class Service {
     private int serversMax;
     private int serversActive;
 
+    private String preCommitScript;
+    private String deployScript;
+
     public int getId() {
         return id;
     }
@@ -100,5 +103,21 @@ public class Service {
 
     public String getStatusString() {
         return "UP".equals(status) ? String.format("%s (%d/%d)", status, serversActive, serversMax) : status;
+    }
+
+    public String getPreCommitScript() {
+        return preCommitScript;
+    }
+
+    public void setPreCommitScript(String preCommitScript) {
+        this.preCommitScript = preCommitScript;
+    }
+
+    public String getDeployScript() {
+        return deployScript;
+    }
+
+    public void setDeployScript(String deployScript) {
+        this.deployScript = deployScript;
     }
 }

@@ -4,6 +4,8 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.ReceivePack;
 
 import ru.v0rt3x.perimeter.server.git.command.GitPackCommand;
+import ru.v0rt3x.perimeter.server.git.hooks.GitPostReceiveHook;
+import ru.v0rt3x.perimeter.server.git.hooks.GitPreReceiveHook;
 import ru.v0rt3x.perimeter.server.shell.annotations.ShellCommand;
 
 import java.io.IOException;
@@ -18,7 +20,12 @@ public class GitReceivePackCommand extends GitPackCommand {
 
     @Override
     protected void pack(Repository repository) throws IOException {
-        (new ReceivePack(repository)).receive(input, output, error);
+        ReceivePack receivePack = new ReceivePack(repository);
+
+        receivePack.setPreReceiveHook(context.getBean(GitPreReceiveHook.class));
+        receivePack.setPostReceiveHook(context.getBean(GitPostReceiveHook.class));
+
+        receivePack.receive(input, output, error);
     }
 
 }

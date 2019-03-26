@@ -4,6 +4,12 @@ services:
     port: 8080
     check: GET /actuator
     expect: rstatus (2|3)[0-9][0-9]
+    pre-commit-script: |
+        #!/bin/bash
+        exit 0
+    deploy-script: |
+        #!/bin/bash
+        exit 0
 acls:
   - name: charles-acl
     rules:

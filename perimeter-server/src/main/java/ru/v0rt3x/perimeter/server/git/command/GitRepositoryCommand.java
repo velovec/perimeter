@@ -15,6 +15,7 @@ import ru.v0rt3x.perimeter.server.shell.annotations.CommandAction;
 import ru.v0rt3x.perimeter.server.shell.annotations.ShellCommand;
 import ru.v0rt3x.perimeter.server.shell.command.exception.NotImplementedException;
 import ru.v0rt3x.perimeter.server.shell.console.Table;
+import ru.v0rt3x.perimeter.server.utils.GitUtils;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -64,7 +65,7 @@ public class GitRepositoryCommand extends PerimeterShellCommand {
 
             repos.addRow(
                 gitRepo.getId(), gitRepo.getName(),
-                getLastCommits(repository).next().getShortMessage()
+                GitUtils.getCommitLog(repository).next().getShortMessage()
             );
         }
 
@@ -92,7 +93,7 @@ public class GitRepositoryCommand extends PerimeterShellCommand {
 
         Table lastCommits = new Table("ID", "Author", "Commit Message");
 
-        RevWalk revCommits = getLastCommits(repository);
+        RevWalk revCommits = GitUtils.getCommitLog(repository);
         for (int i = 0; i < Integer.parseInt(kwargs.getOrDefault("commits", "5")); i++) {
             RevCommit commit = revCommits.next();
 
@@ -125,17 +126,6 @@ public class GitRepositoryCommand extends PerimeterShellCommand {
             repositoryManager.deleteRepository(args.get(0));
         } catch (IOException e) {
             console.writeLine("Unable to delete repository: %s", e.getMessage());
-        }
-    }
-
-    private RevWalk getLastCommits(Repository repository) throws IOException {
-        try (RevWalk revWalk = new RevWalk(repository)) {
-            revWalk.sort(RevSort.COMMIT_TIME_DESC);
-            for (Ref ref: repository.getRefDatabase().getRefs()) {
-                revWalk.markStart(revWalk.parseCommit(ref.getLeaf().getObjectId()));
-            }
-
-            return revWalk;
         }
     }
 

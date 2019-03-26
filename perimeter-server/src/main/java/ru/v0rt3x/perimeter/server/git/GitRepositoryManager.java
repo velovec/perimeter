@@ -125,4 +125,8 @@ public class GitRepositoryManager {
                 .forEach(File::delete);
         }
     }
+
+    public GitRepo getGitRepository(String name) {
+        return gitRepository.findByName(name);
+    }
 }

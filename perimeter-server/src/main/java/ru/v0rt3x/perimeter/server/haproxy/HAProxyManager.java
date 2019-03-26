@@ -13,6 +13,7 @@ import ru.v0rt3x.perimeter.server.haproxy.dao.*;
 import ru.v0rt3x.perimeter.server.properties.PerimeterProperties;
 import ru.v0rt3x.perimeter.server.service.ServiceManager;
 import ru.v0rt3x.perimeter.server.service.dao.Service;
+import ru.v0rt3x.perimeter.server.utils.YAMLUtils;
 
 import javax.annotation.PostConstruct;
 import java.io.ByteArrayInputStream;
@@ -50,7 +51,8 @@ public class HAProxyManager {
     }
 
     private void processHAProxyConfig(byte[] data) {
-        HAProxyConfigWrapper configWrapper = new Yaml().loadAs(new ByteArrayInputStream(data), HAProxyConfigWrapper.class);
+        HAProxyConfigWrapper configWrapper = YAMLUtils.getParser(HAProxyConfigWrapper.class)
+            .loadAs(new ByteArrayInputStream(data), HAProxyConfigWrapper.class);
 
         mappingRepository.deleteAll();
         backendRepository.deleteAll();

@@ -28,4 +28,3 @@ hs_err_pid*
 target/
 auth.storage
 master.key
-git/
