@@ -14,12 +14,12 @@ public class Service {
     private String name;
     private String mode;
     private int port;
-    private String status;
+    private String status = "DOWN";
     @Column(name = "httpcheck")
     private String check;
     private String expect;
-    private int serversMax;
-    private int serversActive;
+    private int serversMax = 0;
+    private int serversActive = 0;
 
     private String preCommitScript;
     private String deployScript;

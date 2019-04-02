@@ -14,6 +14,8 @@ import ru.v0rt3x.perimeter.server.exploit.dao.ExploitRepository;
 import ru.v0rt3x.perimeter.server.flag.dao.Flag;
 import ru.v0rt3x.perimeter.server.flag.dao.FlagPriority;
 import ru.v0rt3x.perimeter.server.flag.dao.FlagRepository;
+import ru.v0rt3x.perimeter.server.service.dao.Service;
+import ru.v0rt3x.perimeter.server.service.dao.ServiceRepository;
 import ru.v0rt3x.perimeter.server.shell.PerimeterShellCommand;
 import ru.v0rt3x.perimeter.server.shell.annotations.ShellCommand;
 import ru.v0rt3x.perimeter.server.shell.console.ConsoleColor;
@@ -38,6 +40,7 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
     private AgentRepository agentRepository;
     private ExploitRepository exploitRepository;
     private ExploitExecutionResultRepository resultRepository;
+    private ServiceRepository serviceRepository;
 
     private ThemisClient themisClient;
 
@@ -67,6 +70,7 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
         agentRepository = context.getBean(AgentRepository.class);
         exploitRepository = context.getBean(ExploitRepository.class);
         resultRepository = context.getBean(ExploitExecutionResultRepository.class);
+        serviceRepository = context.getBean(ServiceRepository.class);
 
         themisClient = context.getBean(ThemisClient.class);
     }
@@ -78,11 +82,11 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                try {
-                    redraw();
-                } catch (IOException e) {
-                    // TODO: Add error dialog
-                }
+            try {
+                redraw();
+            } catch (IOException e) {
+                // TODO: Add error dialog
+            }
             }
         }, 0L, 5000L);
 
@@ -103,6 +107,7 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
             drawFlagStats();
             drawAgentInfo();
             drawExploitStats();
+            drawServiceStatus();
             drawSize();
         }
     }
@@ -118,10 +123,9 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
     }
 
     private void drawThemisInfo() throws IOException {
-        if ((curses.getScreenHeight() < 8) || (curses.getScreenWidth() < 38))
+        Rectangle themisInfo = Rectangle.newRect(2, 40, 6, 23);
+        if (!curses.isPossibleToRender(themisInfo))
             return;
-
-        Rectangle themisInfo = Rectangle.newRect(2, 2, 6, 37);
 
         curses.draw(themisInfo, BLUE, BRIGHT_WHITE, "Themis Info");
 
@@ -131,10 +135,9 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
     }
 
     private void drawFlagStats() throws IOException {
-        if ((curses.getScreenHeight() < 15) || (curses.getScreenWidth() < 63))
+        Rectangle flagStats = Rectangle.newRect(9, 40, 12, 23);
+        if (!curses.isPossibleToRender(flagStats))
             return;
-
-        Rectangle flagStats = Rectangle.newRect(2, 40, 12, 23);
 
         curses.draw(flagStats, MAGENTA, BRIGHT_WHITE, "Flag Queue");
 
@@ -157,10 +160,9 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
     }
 
     private void drawLastFlags() throws IOException {
-        if ((curses.getScreenHeight() < 15) || (curses.getScreenWidth() < 39))
+        Rectangle flagHistory = Rectangle.newRect(2, 2, Math.max(3, curses.getScreenHeight() - 4), 37);
+        if (!curses.isPossibleToRender(flagHistory))
             return;
-
-        Rectangle flagHistory = Rectangle.newRect(9, 2, curses.getScreenHeight() - 11, 37);
 
         curses.draw(flagHistory, GREEN, BRIGHT_WHITE, "Flag History");
 
@@ -188,10 +190,9 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
     }
 
     private void drawAgentInfo() throws IOException {
-        if ((curses.getScreenHeight() < 15) || (curses.getScreenWidth() < 99))
+        Rectangle agentInfo = Rectangle.newRect(2, 64, 19, 34);
+        if (!curses.isPossibleToRender(agentInfo))
             return;
-
-        Rectangle agentInfo = Rectangle.newRect(2, 64, 12, 34);
 
         curses.draw(agentInfo, YELLOW, BRIGHT_WHITE, "Agent Info");
 
@@ -207,15 +208,15 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
             curses.write(agentInfo, line + 5, 2, null, BRIGHT_WHITE, NORMAL, curses.wrapLine(agent.getHostName(), 12));
             curses.write(agentInfo, line + 5, 15, null, BRIGHT_WHITE, NORMAL, curses.wrapLine(agent.getType(), 8));
             curses.write(agentInfo, line + 5, 24, null, BRIGHT_WHITE, NORMAL, curses.wrapLine(Objects.nonNull(agent.getTask()) ? agent.getTask() : "noop", 8));
+
             line++;
         }
     }
 
     private void drawExploitStats() throws IOException {
-        if ((curses.getScreenHeight() < 25) || (curses.getScreenWidth() < 99))
+        Rectangle exploitStats = Rectangle.newRect(22, 40, Math.max(7, curses.getScreenHeight() - 24), 58);
+        if (!curses.isPossibleToRender(exploitStats))
             return;
-
-        Rectangle exploitStats = Rectangle.newRect(15, 40, curses.getScreenHeight() - 17, 58);
 
         curses.draw(exploitStats, RED, BRIGHT_WHITE, "Exploit Statistics");
 
@@ -237,6 +238,30 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
             curses.write(exploitStats, line + 5, 24, null, BRIGHT_WHITE, NORMAL, curses.wrapLine(exploit.getPriority().toString(), 8));
             curses.write(exploitStats, line + 5, 33, null, BRIGHT_WHITE, NORMAL, String.format("%07d", exploit.getHits()));
             curses.write(exploitStats, line + 5, 41, null, BRIGHT_WHITE, NORMAL, curses.wrapLine(isFailed ? "FAILED" : "SUCCESS", 7));
+
+            line++;
+        }
+    }
+
+    private void drawServiceStatus() throws IOException {
+        Rectangle serviceStatus = Rectangle.newRect(2, 99, 19, 31);
+        if (!curses.isPossibleToRender(serviceStatus))
+            return;
+
+        curses.draw(serviceStatus, GREEN, BRIGHT_WHITE, "Service Status");
+
+        curses.write(serviceStatus, 2, 2, null, BRIGHT_WHITE, BOLD, String.format("Services Registered: %s", serviceRepository.count()));
+
+        curses.write(serviceStatus, 4, 2, null, BRIGHT_WHITE, BOLD, "Name");
+        curses.write(serviceStatus, 4, 15, null, BRIGHT_WHITE, BOLD, "Port");
+        curses.write(serviceStatus, 4, 21, null, BRIGHT_WHITE, BOLD, "Status");
+
+        int line = 0;
+        for (Service service: serviceRepository.findAll()) {
+            curses.write(serviceStatus, line + 5, 2, null, BRIGHT_WHITE, NORMAL, curses.wrapLine(service.getName(), 12));
+            curses.write(serviceStatus, line + 5, 15, null, BRIGHT_WHITE, NORMAL, String.format("%-5d", service.getPort()));
+            curses.write(serviceStatus, line + 5, 21, null, BRIGHT_WHITE, NORMAL, curses.wrapLine(service.getStatusString(), 8));
+
             line++;
         }
     }

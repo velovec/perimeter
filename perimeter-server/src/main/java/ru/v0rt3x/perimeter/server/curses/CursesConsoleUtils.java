@@ -178,8 +178,9 @@ public class CursesConsoleUtils {
         this.screenSizeChangeHandler = screenSizeHandler;
     }
 
-    public Rectangle getScreen() {
-        return screen;
+    public boolean isPossibleToRender(Rectangle rect) {
+        return (screen.getHeight() - 1 >= rect.getX() + rect.getHeight()) &&
+            (screen.getWidth() - 1>= rect.getY() + rect.getWidth());
     }
 
     public String wrapLine(String line, int length) {
