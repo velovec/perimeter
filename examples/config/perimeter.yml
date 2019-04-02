@@ -6,6 +6,13 @@ spring:
         password: P@ssw0rd
 
 perimeter:
+    shell:
+        host: 0.0.0.0
+        port: 1488
+        host-key: sshd/master.key
+        auth-storage:
+            path: sshd/auth.storage
+            key: 706572696d65746572
     team:
         base-network: 10.255.0.0
         subnet-cidr: 24

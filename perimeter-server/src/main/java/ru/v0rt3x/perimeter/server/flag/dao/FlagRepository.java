@@ -16,4 +16,6 @@ public interface FlagRepository extends CrudRepository<Flag, Long> {
     Integer countAllByStatusAndPriority(FlagStatus status, FlagPriority priority);
 
     List<Flag> findAllByStatusAndCreateTimeStampLessThan(FlagStatus status, long createdBefore);
+
+    List<Flag> findAllByOrderByCreateTimeStampDesc(Pageable page);
 }

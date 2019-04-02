@@ -23,4 +23,12 @@ public class RandomUtils {
     public static <T> T setWithProbability(double percentage, T positive, T negative) {
         return probabilityOf(percentage) ? positive : negative;
     }
+
+    public static String randomHexString(int length) {
+        byte[] randomBytes = new byte[(length % 2 == 0) ? length / 2 : (length + 1) / 2];
+
+        random.nextBytes(randomBytes);
+
+        return HexBin.encode(randomBytes).substring(0, length - 1);
+    }
 }

@@ -17,11 +17,11 @@ management:
                 enabled: true
 
 spring:
-    datasource:
-        type: com.zaxxer.hikari.HikariDataSource
-        url: jdbc:postgresql://127.0.0.1:5432/perimeter
-        username: postgres
-        password: P@ssw0rd
+#    datasource:
+#        type: com.zaxxer.hikari.HikariDataSource
+#        url: jdbc:postgresql://127.0.0.1:5432/perimeter
+#        username: postgres
+#        password: P@ssw0rd
     jackson:
         date-format: com.fasterxml.jackson.databind.util.ISO8601DateFormat
     mvc:
@@ -47,9 +47,9 @@ perimeter:
     shell:
         host: 0.0.0.0
         port: 1488
-        host-key: sshd/master.key
+        host-key: master.key
         auth-storage:
-            path: sshd/auth.storage
+            path: auth.storage
             key: 706572696d65746572
     team:
         base-network: 10.20.30.32
@@ -71,7 +71,12 @@ perimeter:
         host: 127.0.0.1
         port: 5000
         protocol: http
-        integration-enabled: true
+        integration-enabled: false
+        public-key: |
+            -----BEGIN PUBLIC KEY-----
+            MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEQgb5npLHd0Bk61bNnjK632uwmBfr
+            F7I8hoPgaOZjyhh+BrPDO6CL6D/aW/yPObXXm7SpZogmRwGROcOA3yUleg==
+            -----END PUBLIC KEY-----
     agent:
         timeout: 20000
         delete-after: 100000
