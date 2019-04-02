@@ -47,9 +47,9 @@ perimeter:
     shell:
         host: 0.0.0.0
         port: 1488
-        host-key: master.key
+        host-key: sshd/master.key
         auth-storage:
-            path: auth.storage
+            path: sshd/auth.storage
             key: 706572696d65746572
     team:
         base-network: 10.20.30.32
@@ -71,12 +71,7 @@ perimeter:
         host: 127.0.0.1
         port: 5000
         protocol: http
-        integration-enabled: false
-        public-key: |
-            -----BEGIN PUBLIC KEY-----
-            MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEQgb5npLHd0Bk61bNnjK632uwmBfr
-            F7I8hoPgaOZjyhh+BrPDO6CL6D/aW/yPObXXm7SpZogmRwGROcOA3yUleg==
-            -----END PUBLIC KEY-----
+        integration-enabled: true
     agent:
         timeout: 20000
         delete-after: 100000

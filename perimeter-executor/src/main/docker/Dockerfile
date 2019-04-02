@@ -6,7 +6,7 @@ WORKDIR "/opt/perimeter"
 RUN apt update && \
     apt upgrade -qy && \
     apt dist-upgrade -qy && \
-    apt install -qy golang openjdk-8-jdk && \
+    apt install -qy golang openjdk-8-jdk python python-pip python-requests && \
     rm -rf /var/cache/apt/*
 
 COPY classes/application.yml /opt/perimeter/perimeter-executor.yml

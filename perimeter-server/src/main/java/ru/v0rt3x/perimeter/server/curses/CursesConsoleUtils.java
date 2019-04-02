@@ -53,45 +53,44 @@ public class CursesConsoleUtils {
         return Integer.parseInt(env.getEnv().get("LINES"));
     }
 
-    public void init(ConsoleColor borderColor, ConsoleColor bgColor, ConsoleColor textColor, String title) throws IOException {
+    public void init(ConsoleColor borderColor, ConsoleColor textColor, String title) throws IOException {
         if (!checkTTY())
             throw new IOException("PTY is not available. Use '-t' SSH option or interactive shell.");
 
+        this.clear();
         this.screen = Rectangle.newRect(0, 0, getScreenHeight(), getScreenWidth());
 
         synchronized (lock) {
-            draw(this.screen, borderColor, bgColor);
+            draw(this.screen, borderColor);
             write(this.screen, 0, getScreenWidth() / 2 - title.length() / 2, borderColor, textColor, ConsoleTextStyle.BOLD, String.format("-[ %s ]-", title));
         }
 
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                if (isScreenSizeChanged()) {
-                    try {
-                        clear();
+            if (isScreenSizeChanged()) {
+                try {
+                    init(borderColor, textColor, title);
 
-                        init(borderColor, bgColor, textColor, title);
-
-                        if (Objects.nonNull(screenSizeChangeHandler)) {
-                            screenSizeChangeHandler.onScreenSizeChange();
-                        }
-                    } catch (IOException e) {
-                        // do nothing
+                    if (Objects.nonNull(screenSizeChangeHandler)) {
+                        screenSizeChangeHandler.onScreenSizeChange();
                     }
+                } catch (IOException e) {
+                    // do nothing
                 }
+            }
             }
         }, 2000L, 2000L);
     }
 
-    public void draw(Rectangle rect, ConsoleColor borderColor, ConsoleColor bgColor, ConsoleColor textColor, String title) throws IOException {
+    public void draw(Rectangle rect, ConsoleColor borderColor, ConsoleColor textColor, String title) throws IOException {
         title = String.format("-[ %s ]-", title);
 
-        draw(rect, borderColor, bgColor);
+        draw(rect, borderColor);
         write(rect, 0, rect.getWidth() / 2 - title.length() / 2, borderColor, textColor, ConsoleTextStyle.BOLD, title);
     }
 
-    public void draw(Rectangle rect, ConsoleColor borderColor, ConsoleColor bgColor) throws IOException {
+    public void draw(Rectangle rect, ConsoleColor borderColor) throws IOException {
         int minX = rect.getX(), minY = rect.getY(), maxX = rect.getX() + rect.getHeight(), maxY = rect.getY() + rect.getWidth();
 
         write(ANSIUtils.CursorPosition(minX, minY));
@@ -99,8 +98,6 @@ public class CursesConsoleUtils {
             for (int y = minY; y < maxY; y++) {
                 if ((x == minX) || (x == maxX - 1) || (y == minY) || (y == maxY - 1)) {
                     write(ANSIUtils.CursorPosition(x, y), ANSIUtils.RenderString(" ", ConsoleColor.BRIGHT_WHITE, borderColor));
-                } else {
-                    write(ANSIUtils.CursorPosition(x, y), ANSIUtils.RenderString(" ", ConsoleColor.BRIGHT_WHITE, bgColor));
                 }
             }
         }
@@ -187,9 +184,11 @@ public class CursesConsoleUtils {
 
     public String wrapLine(String line, int length) {
         if (line.length() > length) {
-            line = line.substring(0, length - 2) + "~";
+            line = line.substring(0, length - 1) + "~";
         }
 
-        return line.toUpperCase();
+        String formatString = String.format("%%-%ds", length);
+
+        return String.format(formatString, line).toUpperCase();
     }
 }

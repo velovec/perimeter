@@ -9,6 +9,7 @@ import ru.v0rt3x.perimeter.server.curses.CursesInputHandler;
 import ru.v0rt3x.perimeter.server.curses.utils.KeyCode;
 import ru.v0rt3x.perimeter.server.curses.utils.Rectangle;
 import ru.v0rt3x.perimeter.server.exploit.dao.Exploit;
+import ru.v0rt3x.perimeter.server.exploit.dao.ExploitExecutionResultRepository;
 import ru.v0rt3x.perimeter.server.exploit.dao.ExploitRepository;
 import ru.v0rt3x.perimeter.server.flag.dao.Flag;
 import ru.v0rt3x.perimeter.server.flag.dao.FlagPriority;
@@ -16,9 +17,10 @@ import ru.v0rt3x.perimeter.server.flag.dao.FlagRepository;
 import ru.v0rt3x.perimeter.server.shell.PerimeterShellCommand;
 import ru.v0rt3x.perimeter.server.shell.annotations.ShellCommand;
 import ru.v0rt3x.perimeter.server.shell.console.ConsoleColor;
-import ru.v0rt3x.perimeter.server.utils.RandomUtils;
+import ru.v0rt3x.perimeter.server.themis.ThemisClient;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -35,6 +37,9 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
     private FlagRepository flagRepository;
     private AgentRepository agentRepository;
     private ExploitRepository exploitRepository;
+    private ExploitExecutionResultRepository resultRepository;
+
+    private ThemisClient themisClient;
 
     private final Object lock = new Object();
 
@@ -61,11 +66,14 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
         flagRepository = context.getBean(FlagRepository.class);
         agentRepository = context.getBean(AgentRepository.class);
         exploitRepository = context.getBean(ExploitRepository.class);
+        resultRepository = context.getBean(ExploitExecutionResultRepository.class);
+
+        themisClient = context.getBean(ThemisClient.class);
     }
 
     @Override
     protected void execute() throws IOException {
-        curses.init(CYAN, BLACK, BRIGHT_WHITE, "Perimeter Shell");
+        curses.init(CYAN, BRIGHT_WHITE, "Perimeter Shell");
 
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -90,6 +98,7 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
         }
 
         synchronized (lock) {
+            drawThemisInfo();
             drawLastFlags();
             drawFlagStats();
             drawAgentInfo();
@@ -104,43 +113,56 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
         if (this.freeze) {
             curses.write(0, curses.getScreenWidth() - 7, CYAN, BRIGHT_WHITE, BOLD, "FREEZE");
         } else {
-            curses.draw(Rectangle.newLine(0, curses.getScreenWidth() - 7, 6), CYAN, BLACK);
+            curses.draw(Rectangle.newLine(0, curses.getScreenWidth() - 7, 6), CYAN);
         }
+    }
+
+    private void drawThemisInfo() throws IOException {
+        if ((curses.getScreenHeight() < 8) || (curses.getScreenWidth() < 38))
+            return;
+
+        Rectangle themisInfo = Rectangle.newRect(2, 2, 6, 37);
+
+        curses.draw(themisInfo, BLUE, BRIGHT_WHITE, "Themis Info");
+
+
+        curses.write(themisInfo, 2, 2, null, BRIGHT_WHITE, BOLD, String.format("State: %s", themisClient.getContestState()));
+        curses.write(themisInfo, 3, 2, null, BRIGHT_WHITE, BOLD, String.format("Round: %d", themisClient.getContestRound()));
     }
 
     private void drawFlagStats() throws IOException {
         if ((curses.getScreenHeight() < 15) || (curses.getScreenWidth() < 63))
             return;
 
-        Rectangle flagStats = Rectangle.newRect(2, 39, 12, 23);
+        Rectangle flagStats = Rectangle.newRect(2, 40, 12, 23);
 
-        curses.draw(flagStats, MAGENTA, BLACK, BRIGHT_WHITE, "Flag Queue");
+        curses.draw(flagStats, MAGENTA, BRIGHT_WHITE, "Flag Queue");
 
-        curses.write(flagStats, 2, 2, BLACK, BRIGHT_WHITE, BOLD, "Queued");
-        curses.write(flagStats, 4, 2, BLACK, BRIGHT_WHITE, BOLD, "\u2523 Low");
-        curses.write(flagStats, 5, 2, BLACK, BRIGHT_WHITE, BOLD, "\u2523 Normal");
-        curses.write(flagStats, 6, 2, BLACK, BRIGHT_WHITE, BOLD, "\u2517 High");
+        curses.write(flagStats, 2, 2, null, BRIGHT_WHITE, BOLD, "Queued");
+        curses.write(flagStats, 4, 2, null, BRIGHT_WHITE, BOLD, "\u2523 Low");
+        curses.write(flagStats, 5, 2, null, BRIGHT_WHITE, BOLD, "\u2523 Normal");
+        curses.write(flagStats, 6, 2, null, BRIGHT_WHITE, BOLD, "\u2517 High");
 
-        curses.write(flagStats, 8, 2, BLACK, BRIGHT_WHITE, BOLD, "Accepted");
-        curses.write(flagStats, 9, 2, BLACK, BRIGHT_WHITE, BOLD, "Rejected");
+        curses.write(flagStats, 8, 2, null, BRIGHT_WHITE, BOLD, "Accepted");
+        curses.write(flagStats, 9, 2, null, BRIGHT_WHITE, BOLD, "Rejected");
 
         int offset = flagStats.getWidth() - 11;
 
-        curses.write(flagStats, 4, offset, BLACK, BRIGHT_WHITE, NORMAL, String.format(" %08d", flagRepository.countAllByStatusAndPriority(QUEUED, FlagPriority.LOW)));
-        curses.write(flagStats, 5, offset, BLACK, BRIGHT_WHITE, NORMAL, String.format(" %08d", flagRepository.countAllByStatusAndPriority(QUEUED, FlagPriority.NORMAL)));
-        curses.write(flagStats, 6, offset, BLACK, BRIGHT_WHITE, NORMAL, String.format(" %08d", flagRepository.countAllByStatusAndPriority(QUEUED, FlagPriority.HIGH)));
+        curses.write(flagStats, 4, offset, null, BRIGHT_WHITE, NORMAL, String.format(" %08d", flagRepository.countAllByStatusAndPriority(QUEUED, FlagPriority.LOW)));
+        curses.write(flagStats, 5, offset, null, BRIGHT_WHITE, NORMAL, String.format(" %08d", flagRepository.countAllByStatusAndPriority(QUEUED, FlagPriority.NORMAL)));
+        curses.write(flagStats, 6, offset, null, BRIGHT_WHITE, NORMAL, String.format(" %08d", flagRepository.countAllByStatusAndPriority(QUEUED, FlagPriority.HIGH)));
 
-        curses.write(flagStats, 8, offset, BLACK, BRIGHT_WHITE, NORMAL, String.format(" %08d", flagRepository.countAllByStatus(ACCEPTED)));
-        curses.write(flagStats, 9, offset, BLACK, BRIGHT_WHITE, NORMAL, String.format(" %08d", flagRepository.countAllByStatus(REJECTED)));
+        curses.write(flagStats, 8, offset, null, BRIGHT_WHITE, NORMAL, String.format(" %08d", flagRepository.countAllByStatus(ACCEPTED)));
+        curses.write(flagStats, 9, offset, null, BRIGHT_WHITE, NORMAL, String.format(" %08d", flagRepository.countAllByStatus(REJECTED)));
     }
 
     private void drawLastFlags() throws IOException {
-        if ((curses.getScreenHeight() < 6) || (curses.getScreenWidth() < 39))
+        if ((curses.getScreenHeight() < 15) || (curses.getScreenWidth() < 39))
             return;
 
-        Rectangle flagHistory = Rectangle.newRect(2, 2, curses.getScreenHeight() - 4, 36);
+        Rectangle flagHistory = Rectangle.newRect(9, 2, curses.getScreenHeight() - 11, 37);
 
-        curses.draw(flagHistory, GREEN, BLACK, BRIGHT_WHITE, "Flag History");
+        curses.draw(flagHistory, GREEN, BRIGHT_WHITE, "Flag History");
 
         int i = 0;
         for (Flag flag: flagRepository.findAllByOrderByCreateTimeStampDesc(PageRequest.of(0, flagHistory.getHeight() - 2))) {
@@ -160,7 +182,7 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
                     flagColor = WHITE;
             }
 
-            curses.write(flagHistory, i + 1, 2, BLACK, flagColor, NORMAL, flag.getFlag());
+            curses.write(flagHistory, i + 1, 2, null, flagColor, NORMAL, flag.getFlag());
             i++;
         }
     }
@@ -169,22 +191,22 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
         if ((curses.getScreenHeight() < 15) || (curses.getScreenWidth() < 99))
             return;
 
-        Rectangle agentInfo = Rectangle.newRect(2, 63, 12, curses.getScreenWidth() - 65);
+        Rectangle agentInfo = Rectangle.newRect(2, 64, 12, 34);
 
-        curses.draw(agentInfo, YELLOW, BLACK, BRIGHT_WHITE, "Agent Info");
+        curses.draw(agentInfo, YELLOW, BRIGHT_WHITE, "Agent Info");
 
-        curses.write(agentInfo, 2, 2, BLACK, BRIGHT_WHITE, BOLD, String.format("Agent On-Line: %s", agentRepository.count()));
+        curses.write(agentInfo, 2, 2, null, BRIGHT_WHITE, BOLD, String.format("Agent On-Line: %s", agentRepository.count()));
 
 
-        curses.write(agentInfo, 4, 2, BLACK, BRIGHT_WHITE, BOLD, "Hostname");
-        curses.write(agentInfo, 4, 15, BLACK, BRIGHT_WHITE, BOLD, "Type");
-        curses.write(agentInfo, 4, 24, BLACK, BRIGHT_WHITE, BOLD, "Task");
+        curses.write(agentInfo, 4, 2, null, BRIGHT_WHITE, BOLD, "Hostname");
+        curses.write(agentInfo, 4, 15, null, BRIGHT_WHITE, BOLD, "Type");
+        curses.write(agentInfo, 4, 24, null, BRIGHT_WHITE, BOLD, "Task");
 
         int line = 0;
         for (Agent agent: agentRepository.findAll()) {
-            curses.write(agentInfo, line + 5, 2, BLACK, BRIGHT_WHITE, NORMAL, curses.wrapLine(agent.getHostName(), 12));
-            curses.write(agentInfo, line + 5, 15, BLACK, BRIGHT_WHITE, NORMAL, curses.wrapLine(agent.getType(), 8));
-            curses.write(agentInfo, line + 5, 24, BLACK, BRIGHT_WHITE, NORMAL, curses.wrapLine(agent.getTask(), 8));
+            curses.write(agentInfo, line + 5, 2, null, BRIGHT_WHITE, NORMAL, curses.wrapLine(agent.getHostName(), 12));
+            curses.write(agentInfo, line + 5, 15, null, BRIGHT_WHITE, NORMAL, curses.wrapLine(agent.getType(), 8));
+            curses.write(agentInfo, line + 5, 24, null, BRIGHT_WHITE, NORMAL, curses.wrapLine(Objects.nonNull(agent.getTask()) ? agent.getTask() : "noop", 8));
             line++;
         }
     }
@@ -193,23 +215,28 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
         if ((curses.getScreenHeight() < 25) || (curses.getScreenWidth() < 99))
             return;
 
-        Rectangle exploitStats = Rectangle.newRect(15, 39, curses.getScreenHeight() - 17, curses.getScreenWidth() - 41);
+        Rectangle exploitStats = Rectangle.newRect(15, 40, curses.getScreenHeight() - 17, 58);
 
-        curses.draw(exploitStats, RED, BLACK, BRIGHT_WHITE, "Exploit Statistics");
+        curses.draw(exploitStats, RED, BRIGHT_WHITE, "Exploit Statistics");
 
-        curses.write(exploitStats, 2, 2, BLACK, BRIGHT_WHITE, BOLD, String.format("Exploits Registered: %s", exploitRepository.count()));
+        curses.write(exploitStats, 2, 2, null, BRIGHT_WHITE, BOLD, String.format("Exploits Registered: %s", exploitRepository.count()));
 
-        curses.write(exploitStats, 4, 2, BLACK, BRIGHT_WHITE, BOLD, "Name");
-        curses.write(exploitStats, 4, 15, BLACK, BRIGHT_WHITE, BOLD, "Type");
-        curses.write(exploitStats, 4, 24, BLACK, BRIGHT_WHITE, BOLD, "Priority");
-        curses.write(exploitStats, 4, 33, BLACK, BRIGHT_WHITE, BOLD, "Hits");
+        curses.write(exploitStats, 4, 2, null, BRIGHT_WHITE, BOLD, "Name");
+        curses.write(exploitStats, 4, 15, null, BRIGHT_WHITE, BOLD, "Type");
+        curses.write(exploitStats, 4, 24, null, BRIGHT_WHITE, BOLD, "Priority");
+        curses.write(exploitStats, 4, 33, null, BRIGHT_WHITE, BOLD, "Hits");
+        curses.write(exploitStats, 4, 41, null, BRIGHT_WHITE, BOLD, "Last Run");
 
         int line = 0;
         for (Exploit exploit: exploitRepository.findAll()) {
-            curses.write(exploitStats, line + 5, 2, BLACK, BRIGHT_WHITE, NORMAL, curses.wrapLine(exploit.getName(), 12));
-            curses.write(exploitStats, line + 5, 15, BLACK, BRIGHT_WHITE, NORMAL, curses.wrapLine(exploit.getType(), 8));
-            curses.write(exploitStats, line + 5, 24, BLACK, BRIGHT_WHITE, NORMAL, curses.wrapLine(exploit.getPriority().toString(), 8));
-            curses.write(exploitStats, line + 5, 33, BLACK, BRIGHT_WHITE, NORMAL, String.format("%07d", exploit.getHits()));
+            boolean isFailed = resultRepository.findAllByExploit(exploit).stream()
+                .anyMatch(result -> result.getExitCode() != 0);
+
+            curses.write(exploitStats, line + 5, 2, null, BRIGHT_WHITE, NORMAL, curses.wrapLine(exploit.getName(), 12));
+            curses.write(exploitStats, line + 5, 15, null, BRIGHT_WHITE, NORMAL, curses.wrapLine(exploit.getType(), 8));
+            curses.write(exploitStats, line + 5, 24, null, BRIGHT_WHITE, NORMAL, curses.wrapLine(exploit.getPriority().toString(), 8));
+            curses.write(exploitStats, line + 5, 33, null, BRIGHT_WHITE, NORMAL, String.format("%07d", exploit.getHits()));
+            curses.write(exploitStats, line + 5, 41, null, BRIGHT_WHITE, NORMAL, curses.wrapLine(isFailed ? "FAILED" : "SUCCESS", 7));
             line++;
         }
     }
@@ -228,8 +255,6 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
 
     @Override
     public void onKeyPress(KeyCode keyCode) throws IOException {
-        curses.draw(Rectangle.newLine(1, 1, 50), BLACK, BLACK);
-
-        curses.write(1, 1, BLACK, BRIGHT_WHITE, NORMAL, keyCode.toString());
+        // do nothing
     }
 }
