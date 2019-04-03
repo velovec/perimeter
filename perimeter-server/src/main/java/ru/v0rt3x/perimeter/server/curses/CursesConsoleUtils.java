@@ -192,4 +192,8 @@ public class CursesConsoleUtils {
 
         return String.format(formatString, line).toUpperCase();
     }
+
+    public Rectangle getScreen() {
+        return this.screen;
+    }
 }

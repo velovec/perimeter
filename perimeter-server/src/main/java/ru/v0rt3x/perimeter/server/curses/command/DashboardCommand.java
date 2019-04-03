@@ -20,11 +20,10 @@ import ru.v0rt3x.perimeter.server.shell.PerimeterShellCommand;
 import ru.v0rt3x.perimeter.server.shell.annotations.ShellCommand;
 import ru.v0rt3x.perimeter.server.shell.console.ConsoleColor;
 import ru.v0rt3x.perimeter.server.themis.ThemisClient;
+import ru.v0rt3x.v0rt3xLogo;
 
 import java.io.IOException;
-import java.util.Objects;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 import static ru.v0rt3x.perimeter.server.flag.dao.FlagStatus.*;
 import static ru.v0rt3x.perimeter.server.shell.console.ConsoleColor.*;
@@ -77,16 +76,17 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
 
     @Override
     protected void execute() throws IOException {
-        curses.init(CYAN, BRIGHT_WHITE, "Perimeter Shell");
+        showLogo();
 
+        curses.init(CYAN, BRIGHT_WHITE, "Perimeter Shell");
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-            try {
-                redraw();
-            } catch (IOException e) {
-                // TODO: Add error dialog
-            }
+                try {
+                    redraw();
+                } catch (IOException e) {
+                    // TODO: Add error dialog
+                }
             }
         }, 0L, 5000L);
 
@@ -94,6 +94,22 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
             curses.read();
             sleep(100L);
         }
+    }
+
+    private void showLogo() throws IOException {
+        curses.init(CYAN, BRIGHT_WHITE, "Perimeter Shell");
+
+        Rectangle logo = Rectangle.newRect(curses.getScreen(), 0.5f, 0.5f, 40, 102);
+        if (!curses.isPossibleToRender(logo))
+            return;
+
+        curses.draw(logo, BLACK, BRIGHT_WHITE, "Powered By");
+        int lineNum = 1;
+        for (String line: v0rt3xLogo.LOGO.split("\n")) {
+            curses.write(logo, lineNum, 1, null, BRIGHT_WHITE, BOLD, line);
+            lineNum++;
+        }
+        sleep(2000L);
     }
 
     private void redraw() throws IOException {
@@ -108,6 +124,7 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
             drawAgentInfo();
             drawExploitStats();
             drawServiceStatus();
+            drawTeamStats();
             drawSize();
         }
     }
@@ -123,7 +140,7 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
     }
 
     private void drawThemisInfo() throws IOException {
-        Rectangle themisInfo = Rectangle.newRect(2, 40, 6, 23);
+        Rectangle themisInfo = Rectangle.newRect(2, 49, 6, 23);
         if (!curses.isPossibleToRender(themisInfo))
             return;
 
@@ -135,7 +152,7 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
     }
 
     private void drawFlagStats() throws IOException {
-        Rectangle flagStats = Rectangle.newRect(9, 40, 12, 23);
+        Rectangle flagStats = Rectangle.newRect(9, 49, 12, 23);
         if (!curses.isPossibleToRender(flagStats))
             return;
 
@@ -160,7 +177,7 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
     }
 
     private void drawLastFlags() throws IOException {
-        Rectangle flagHistory = Rectangle.newRect(2, 2, Math.max(3, curses.getScreenHeight() - 4), 37);
+        Rectangle flagHistory = Rectangle.newRect(2, 2, Math.max(3, curses.getScreenHeight() - 4), 46);
         if (!curses.isPossibleToRender(flagHistory))
             return;
 
@@ -184,13 +201,14 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
                     flagColor = WHITE;
             }
 
-            curses.write(flagHistory, i + 1, 2, null, flagColor, NORMAL, flag.getFlag());
+            curses.write(flagHistory, i + 1, 2, null, WHITE, NORMAL, flag.getFlag());
+            curses.write(flagHistory, i + 1, 36, null, flagColor, NORMAL, curses.wrapLine(flag.getStatus().name(), 9));
             i++;
         }
     }
 
     private void drawAgentInfo() throws IOException {
-        Rectangle agentInfo = Rectangle.newRect(2, 64, 19, 34);
+        Rectangle agentInfo = Rectangle.newRect(2, 73, 19, 34);
         if (!curses.isPossibleToRender(agentInfo))
             return;
 
@@ -214,7 +232,7 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
     }
 
     private void drawExploitStats() throws IOException {
-        Rectangle exploitStats = Rectangle.newRect(22, 40, Math.max(7, curses.getScreenHeight() - 24), 58);
+        Rectangle exploitStats = Rectangle.newRect(22, 49, Math.max(7, curses.getScreenHeight() - 24), 58);
         if (!curses.isPossibleToRender(exploitStats))
             return;
 
@@ -244,7 +262,7 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
     }
 
     private void drawServiceStatus() throws IOException {
-        Rectangle serviceStatus = Rectangle.newRect(2, 99, 19, 31);
+        Rectangle serviceStatus = Rectangle.newRect(2, 108, 19, 31);
         if (!curses.isPossibleToRender(serviceStatus))
             return;
 
@@ -262,6 +280,33 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
             curses.write(serviceStatus, line + 5, 15, null, BRIGHT_WHITE, NORMAL, String.format("%-5d", service.getPort()));
             curses.write(serviceStatus, line + 5, 21, null, BRIGHT_WHITE, NORMAL, curses.wrapLine(service.getStatusString(), 8));
 
+            line++;
+        }
+    }
+
+    private void drawTeamStats() throws IOException {
+        Rectangle teamStats = Rectangle.newRect(22, 108, Math.max(7, curses.getScreenHeight() - 24), 31);
+        if (!curses.isPossibleToRender(teamStats))
+            return;
+
+        curses.draw(teamStats, BLUE, BRIGHT_WHITE, "Team Statistics");
+
+        curses.write(teamStats, 2, 2, null, BRIGHT_WHITE, BOLD, "Team");
+        curses.write(teamStats, 2, 22, null, BRIGHT_WHITE, BOLD, "Hits");
+
+        Map<String, Integer> teamHits = new HashMap<>();
+        resultRepository.findAll().forEach(
+            result -> {
+                int hits = teamHits.getOrDefault(result.getTeam(), 0);
+
+                teamHits.put(result.getTeam(), hits + result.getHits());
+            }
+        );
+
+        int line = 0;
+        for (String team: teamHits.keySet()) {
+            curses.write(teamStats, line + 4, 2, null, BRIGHT_WHITE, NORMAL, curses.wrapLine(team, 19));
+            curses.write(teamStats, line + 4, 22, null, BRIGHT_WHITE, NORMAL, String.format("%07d", teamHits.get(team)));
             line++;
         }
     }

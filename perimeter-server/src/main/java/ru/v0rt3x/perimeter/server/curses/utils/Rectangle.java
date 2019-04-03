@@ -18,16 +18,12 @@ public class Rectangle {
         return new Rectangle(x, y, height, width);
     }
 
-    public static Rectangle newRect(Rectangle parent, float top, float left, float height, float width) {
-        return new Rectangle(
-            Math.round(parent.getHeight() * top), Math.round(parent.getWidth() * left),
-            Math.round(parent.getHeight() * height), Math.round(parent.getWidth() * width)
-        );
-    }
+    public static Rectangle newRect(Rectangle parent, float top, float left, int height, int width) {
+        int x = Math.round(parent.getHeight() * top);
+        int y = Math.round(parent.getWidth() * left);
 
-    public static Rectangle newRect(Rectangle parent, int x, int y, float height, float width) {
         return new Rectangle(
-            x, y, Math.round(parent.getHeight() * height), Math.round(parent.getWidth() * width)
+            x - height / 2, y - width / 2, height, width
         );
     }
 
