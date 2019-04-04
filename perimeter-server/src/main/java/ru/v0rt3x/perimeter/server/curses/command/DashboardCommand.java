@@ -271,11 +271,13 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
                 .filter(result -> result.getExitCode() == 0)
                 .count();
 
+            ConsoleColor statusColor = (countSuccess == countTotal) ? BRIGHT_GREEN : BRIGHT_RED;
+
             curses.write(exploitStats, line + 5, 2, null, BRIGHT_WHITE, NORMAL, curses.wrapLine(exploit.getName(), 12));
             curses.write(exploitStats, line + 5, 15, null, BRIGHT_WHITE, NORMAL, curses.wrapLine(exploit.getType(), 8));
             curses.write(exploitStats, line + 5, 24, null, BRIGHT_WHITE, NORMAL, curses.wrapLine(exploit.getPriority().toString(), 8));
             curses.write(exploitStats, line + 5, 33, null, BRIGHT_WHITE, NORMAL, String.format("%07d", exploit.getHits()));
-            curses.write(exploitStats, line + 5, 41, null, BRIGHT_WHITE, NORMAL, String.format("%02d / %02d", countSuccess, countTotal));
+            curses.write(exploitStats, line + 5, 41, null, statusColor, NORMAL, String.format("%02d / %02d", countSuccess, countTotal));
 
             line++;
         }
@@ -299,9 +301,23 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
 
         int line = 0;
         for (Service service: serviceRepository.findAll()) {
+            ConsoleColor statusColor;
+
+            switch (service.getStatus()) {
+                case "UP":
+                    statusColor = BRIGHT_GREEN;
+                    break;
+                case "DOWN":
+                    statusColor = BRIGHT_RED;
+                    break;
+                default:
+                    statusColor = WHITE;
+                    break;
+            }
+
             curses.write(serviceStatus, line + 5, 2, null, BRIGHT_WHITE, NORMAL, curses.wrapLine(service.getName(), 12));
             curses.write(serviceStatus, line + 5, 15, null, BRIGHT_WHITE, NORMAL, String.format("%-5d", service.getPort()));
-            curses.write(serviceStatus, line + 5, 21, null, BRIGHT_WHITE, NORMAL, curses.wrapLine(service.getStatusString(), 8));
+            curses.write(serviceStatus, line + 5, 21, null, statusColor, NORMAL, curses.wrapLine(service.getStatusString(), 8));
 
             line++;
         }
