@@ -51,6 +51,11 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
     private boolean freeze = false;
 
     private int lastLog = 0;
+    private int lastFlags = 0;
+    private int lastAgents = 0;
+    private int lastExploits = 0;
+    private int lastServices = 0;
+    private int lastTeams = 0;
 
     @Override
     protected void init() throws IOException {
@@ -153,7 +158,6 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
 
         curses.draw(themisInfo, BLUE, BRIGHT_WHITE, "Themis Info");
 
-
         curses.write(themisInfo, 2, 2, null, BRIGHT_WHITE, BOLD, String.format("State: %s", themisClient.getContestState()));
         curses.write(themisInfo, 3, 2, null, BRIGHT_WHITE, BOLD, String.format("Round: %d", themisClient.getContestRound()));
     }
@@ -190,7 +194,9 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
 
         curses.draw(flagHistory, GREEN, BRIGHT_WHITE, "Flag History");
 
-        int i = 0;
+        curses.erase(flagHistory, 1, lastFlags, null);
+
+        int line = 0;
         for (Flag flag: flagRepository.findAllByOrderByCreateTimeStampDesc(PageRequest.of(0, flagHistory.getHeight() - 2))) {
             ConsoleColor flagColor;
 
@@ -208,10 +214,11 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
                     flagColor = WHITE;
             }
 
-            curses.write(flagHistory, i + 1, 2, null, WHITE, NORMAL, flag.getFlag());
-            curses.write(flagHistory, i + 1, 36, null, flagColor, NORMAL, curses.wrapLine(flag.getStatus().name(), 9));
-            i++;
+            curses.write(flagHistory, line + 1, 2, null, WHITE, NORMAL, flag.getFlag());
+            curses.write(flagHistory, line + 1, 36, null, flagColor, NORMAL, curses.wrapLine(flag.getStatus().name(), 9));
+            line++;
         }
+        lastFlags = line;
     }
 
     private void drawAgentInfo() throws IOException {
@@ -227,6 +234,8 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
         curses.write(agentInfo, 4, 15, null, BRIGHT_WHITE, BOLD, "Type");
         curses.write(agentInfo, 4, 24, null, BRIGHT_WHITE, BOLD, "Task");
 
+        curses.erase(agentInfo, 5, lastAgents, null);
+
         int line = 0;
         for (Agent agent: agentRepository.findAll()) {
             curses.write(agentInfo, line + 5, 2, null, BRIGHT_WHITE, NORMAL, curses.wrapLine(agent.getHostName(), 12));
@@ -235,6 +244,7 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
 
             line++;
         }
+        lastAgents = line;
     }
 
     private void drawExploitStats() throws IOException {
@@ -252,6 +262,8 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
         curses.write(exploitStats, 4, 33, null, BRIGHT_WHITE, BOLD, "Hits");
         curses.write(exploitStats, 4, 41, null, BRIGHT_WHITE, BOLD, "Last Run");
 
+        curses.erase(exploitStats, 5, lastExploits, null);
+
         int line = 0;
         for (Exploit exploit: exploitRepository.findAll()) {
             long countTotal = resultRepository.countAllByExploit(exploit);
@@ -267,6 +279,7 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
 
             line++;
         }
+        lastExploits = line;
     }
 
     private void drawServiceStatus() throws IOException {
@@ -282,6 +295,8 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
         curses.write(serviceStatus, 4, 15, null, BRIGHT_WHITE, BOLD, "Port");
         curses.write(serviceStatus, 4, 21, null, BRIGHT_WHITE, BOLD, "Status");
 
+        curses.erase(serviceStatus, 5, lastServices, null);
+
         int line = 0;
         for (Service service: serviceRepository.findAll()) {
             curses.write(serviceStatus, line + 5, 2, null, BRIGHT_WHITE, NORMAL, curses.wrapLine(service.getName(), 12));
@@ -290,6 +305,7 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
 
             line++;
         }
+        lastServices = line;
     }
 
     private void drawTeamStats() throws IOException {
@@ -311,12 +327,15 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
             }
         );
 
+        curses.erase(teamStats, 4, lastTeams, null);
+
         int line = 0;
         for (String team: teamHits.keySet()) {
             curses.write(teamStats, line + 4, 2, null, BRIGHT_WHITE, NORMAL, curses.wrapLine(team, 19));
             curses.write(teamStats, line + 4, 22, null, BRIGHT_WHITE, NORMAL, String.format("%07d", teamHits.get(team)));
             line++;
         }
+        lastTeams = line;
     }
 
     private void drawEventLog() throws IOException {
@@ -328,9 +347,7 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
 
         int size = eventLog.getHeight() - 2;
 
-        for (int i = 0; i < lastLog; i++) {
-            curses.write(eventLog, i + 1, 2, null, BRIGHT_WHITE, NORMAL, curses.wrapLine("", eventLog.getWidth() - 4));
-        }
+        curses.erase(eventLog, 1, lastLog, null);
 
         int line = 0;
         for (Event event: eventRepository.findAllByCreatedGreaterThanOrderByCreatedDesc(System.currentTimeMillis() - 600000L, PageRequest.of(0, size))) {

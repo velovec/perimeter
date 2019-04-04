@@ -10,6 +10,9 @@ import ru.v0rt3x.perimeter.server.shell.console.ConsoleTextStyle;
 import java.io.*;
 import java.util.*;
 
+import static ru.v0rt3x.perimeter.server.shell.console.ConsoleColor.BRIGHT_WHITE;
+import static ru.v0rt3x.perimeter.server.shell.console.ConsoleTextStyle.NORMAL;
+
 public class CursesConsoleUtils {
 
     private final InputStream input;
@@ -97,7 +100,7 @@ public class CursesConsoleUtils {
         for (int x = minX; x < maxX; x++) {
             for (int y = minY; y < maxY; y++) {
                 if ((x == minX) || (x == maxX - 1) || (y == minY) || (y == maxY - 1)) {
-                    write(ANSIUtils.CursorPosition(x, y), ANSIUtils.RenderString(" ", ConsoleColor.BRIGHT_WHITE, borderColor));
+                    write(ANSIUtils.CursorPosition(x, y), ANSIUtils.RenderString(" ", BRIGHT_WHITE, borderColor));
                 }
             }
         }
@@ -191,6 +194,12 @@ public class CursesConsoleUtils {
         String formatString = String.format("%%-%ds", length);
 
         return String.format(formatString, line).toUpperCase();
+    }
+
+    public void erase(Rectangle rect, int startLine, int lines, ConsoleColor bgColor) throws IOException {
+        for (int line = 0; line < lines; line++) {
+            write(rect, startLine + line, 2, bgColor, BRIGHT_WHITE, NORMAL, wrapLine("", rect.getWidth() - 4));
+        }
     }
 
     public Rectangle getScreen() {
