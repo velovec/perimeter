@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 
 import ru.v0rt3x.perimeter.server.agent.dao.Agent;
 import ru.v0rt3x.perimeter.server.agent.dao.AgentRepository;
+import ru.v0rt3x.perimeter.server.event.EventManager;
+import ru.v0rt3x.perimeter.server.event.dao.EventType;
 import ru.v0rt3x.perimeter.server.properties.PerimeterProperties;
 
 import javax.annotation.PostConstruct;
@@ -24,6 +26,9 @@ public class AgentManager {
 
     @Autowired
     private PerimeterProperties perimeterProperties;
+
+    @Autowired
+    private EventManager eventManager;
 
     @PostConstruct
     public void setUpMetrics() {
@@ -72,6 +77,7 @@ public class AgentManager {
                 }
 
                 if (System.currentTimeMillis() - agent.getLastSeen() > perimeterProperties.getAgent().getDeleteAfter()) {
+                    eventManager.createEvent(EventType.WARNING, "Agent '%s' (type: %s) is marked for removal", agent.getHostName(), agent.getType());
                     agentRepository.delete(agent);
                 }
             }

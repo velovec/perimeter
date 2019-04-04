@@ -8,6 +8,8 @@ import ru.v0rt3x.perimeter.server.curses.CursesConsoleUtils;
 import ru.v0rt3x.perimeter.server.curses.CursesInputHandler;
 import ru.v0rt3x.perimeter.server.curses.utils.KeyCode;
 import ru.v0rt3x.perimeter.server.curses.utils.Rectangle;
+import ru.v0rt3x.perimeter.server.event.dao.Event;
+import ru.v0rt3x.perimeter.server.event.dao.EventRepository;
 import ru.v0rt3x.perimeter.server.exploit.dao.Exploit;
 import ru.v0rt3x.perimeter.server.exploit.dao.ExploitExecutionResultRepository;
 import ru.v0rt3x.perimeter.server.exploit.dao.ExploitRepository;
@@ -40,12 +42,15 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
     private ExploitRepository exploitRepository;
     private ExploitExecutionResultRepository resultRepository;
     private ServiceRepository serviceRepository;
+    private EventRepository eventRepository;
 
     private ThemisClient themisClient;
 
     private final Object lock = new Object();
 
     private boolean freeze = false;
+
+    private int lastLog = 0;
 
     @Override
     protected void init() throws IOException {
@@ -70,6 +75,7 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
         exploitRepository = context.getBean(ExploitRepository.class);
         resultRepository = context.getBean(ExploitExecutionResultRepository.class);
         serviceRepository = context.getBean(ServiceRepository.class);
+        eventRepository = context.getBean(EventRepository.class);
 
         themisClient = context.getBean(ThemisClient.class);
     }
@@ -125,6 +131,7 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
             drawExploitStats();
             drawServiceStatus();
             drawTeamStats();
+            drawEventLog();
             drawSize();
         }
     }
@@ -216,7 +223,6 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
 
         curses.write(agentInfo, 2, 2, null, BRIGHT_WHITE, BOLD, String.format("Agent On-Line: %s", agentRepository.count()));
 
-
         curses.write(agentInfo, 4, 2, null, BRIGHT_WHITE, BOLD, "Hostname");
         curses.write(agentInfo, 4, 15, null, BRIGHT_WHITE, BOLD, "Type");
         curses.write(agentInfo, 4, 24, null, BRIGHT_WHITE, BOLD, "Task");
@@ -248,14 +254,16 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
 
         int line = 0;
         for (Exploit exploit: exploitRepository.findAll()) {
-            boolean isFailed = resultRepository.findAllByExploit(exploit).stream()
-                .anyMatch(result -> result.getExitCode() != 0);
+            long countTotal = resultRepository.countAllByExploit(exploit);
+            long countSuccess = resultRepository.findAllByExploit(exploit).stream()
+                .filter(result -> result.getExitCode() == 0)
+                .count();
 
             curses.write(exploitStats, line + 5, 2, null, BRIGHT_WHITE, NORMAL, curses.wrapLine(exploit.getName(), 12));
             curses.write(exploitStats, line + 5, 15, null, BRIGHT_WHITE, NORMAL, curses.wrapLine(exploit.getType(), 8));
             curses.write(exploitStats, line + 5, 24, null, BRIGHT_WHITE, NORMAL, curses.wrapLine(exploit.getPriority().toString(), 8));
             curses.write(exploitStats, line + 5, 33, null, BRIGHT_WHITE, NORMAL, String.format("%07d", exploit.getHits()));
-            curses.write(exploitStats, line + 5, 41, null, BRIGHT_WHITE, NORMAL, curses.wrapLine(isFailed ? "FAILED" : "SUCCESS", 7));
+            curses.write(exploitStats, line + 5, 41, null, BRIGHT_WHITE, NORMAL, String.format("%02d / %02d", countSuccess, countTotal));
 
             line++;
         }
@@ -309,6 +317,46 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
             curses.write(teamStats, line + 4, 22, null, BRIGHT_WHITE, NORMAL, String.format("%07d", teamHits.get(team)));
             line++;
         }
+    }
+
+    private void drawEventLog() throws IOException {
+        Rectangle eventLog = Rectangle.newRect(2, 140, Math.max(7, curses.getScreenHeight() - 4), Math.max(50, curses.getScreenWidth() - 142));
+        if (!curses.isPossibleToRender(eventLog))
+            return;
+
+        curses.draw(eventLog, MAGENTA, BRIGHT_WHITE, "Event Log");
+
+        int size = eventLog.getHeight() - 2;
+
+        for (int i = 0; i < lastLog; i++) {
+            curses.write(eventLog, i + 1, 2, null, BRIGHT_WHITE, NORMAL, curses.wrapLine("", eventLog.getWidth() - 4));
+        }
+
+        int line = 0;
+        for (Event event: eventRepository.findAllByCreatedGreaterThanOrderByCreatedDesc(System.currentTimeMillis() - 600000L, PageRequest.of(0, size))) {
+            long ago = (System.currentTimeMillis() - event.getCreated()) / 1000;
+
+            ConsoleColor eventColor;
+            switch (event.getType()) {
+                case INFO:
+                    eventColor = BRIGHT_WHITE;
+                    break;
+                case WARNING:
+                    eventColor = BRIGHT_YELLOW;
+                    break;
+                case URGENT:
+                    eventColor = BRIGHT_RED;
+                    break;
+                default:
+                    eventColor = WHITE;
+                    break;
+            }
+
+            curses.write(eventLog, line + 1, 2, null, eventColor, NORMAL, curses.wrapLine(event.getMessage(), eventLog.getWidth() - 13));
+            curses.write(eventLog, line + 1, eventLog.getWidth() - 10, null, WHITE, NORMAL, String.format("%03ds ago", ago));
+            line++;
+        }
+        lastLog = line;
     }
 
     private void drawSize() throws IOException {

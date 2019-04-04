@@ -9,6 +9,8 @@ import ru.v0rt3x.perimeter.server.agent.AgentTask;
 import ru.v0rt3x.perimeter.server.agent.AgentTaskQueue;
 import ru.v0rt3x.perimeter.server.agent.dao.Agent;
 import ru.v0rt3x.perimeter.server.agent.dao.AgentRepository;
+import ru.v0rt3x.perimeter.server.event.EventManager;
+import ru.v0rt3x.perimeter.server.event.dao.EventType;
 import ru.v0rt3x.perimeter.server.exploit.ExploitManager;
 import ru.v0rt3x.perimeter.server.exploit.dao.Exploit;
 import ru.v0rt3x.perimeter.server.exploit.dao.ExploitExecutionResult;
@@ -44,6 +46,9 @@ public class AgentRESTController {
     @Autowired
     private FlagProcessor flagProcessor;
 
+    @Autowired
+    private EventManager eventManager;
+
     private static final Logger logger = LoggerFactory.getLogger(AgentRESTController.class);
     private static final Object taskQueueLock = new Object();
 
@@ -51,6 +56,8 @@ public class AgentRESTController {
     private Agent registerAgent(@RequestBody Agent agent) {
         agent.setLastSeen(System.currentTimeMillis());
         agent.setAvailable(true);
+
+        eventManager.createEvent("Agent '%s' registered (type: %s)", agent.getHostName(), agent.getType());
 
         return agentRepository.save(agent);
     }
@@ -150,6 +157,10 @@ public class AgentRESTController {
 
             executionResult.setHits(executionResult.getHits() + hits);
             executionResult.setExitCode((Integer) teamExecution.get("exitCode"));
+
+            if (executionResult.getExitCode() != 0) {
+                eventManager.createEvent(EventType.WARNING, "Exploit '%s' failed for '%s' with code %d", exploit.getName(), team, executionResult.getExitCode());
+            }
 
             exploit.setHits(exploit.getHits() + hits);
 

@@ -8,6 +8,8 @@ import org.springframework.data.util.Pair;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import ru.v0rt3x.perimeter.server.event.EventManager;
+import ru.v0rt3x.perimeter.server.event.dao.EventType;
 import ru.v0rt3x.perimeter.server.git.GitRepositoryManager;
 import ru.v0rt3x.perimeter.server.haproxy.HAProxyManager;
 import ru.v0rt3x.perimeter.server.haproxy.dao.HAProxyBackend;
@@ -36,6 +38,9 @@ public class ServiceManager {
     @Autowired
     private GitRepositoryManager repositoryManager;
 
+    @Autowired
+    private EventManager eventManager;
+
     public List<Service> listServices() {
         return serviceRepository.findAll();
     }
@@ -57,6 +62,20 @@ public class ServiceManager {
 
         if (Objects.isNull(service))
             throw new IllegalArgumentException(String.format("Service '%s' not found", serviceName));
+
+        if (!status.equals(service.getStatus())) {
+            switch (status) {
+                case "DOWN":
+                    eventManager.createEvent(EventType.URGENT, "Service '%s' is DOWN", serviceName);
+                    break;
+                case "UP":
+                    eventManager.createEvent(EventType.INFO, "Service '%s' is back to normal", serviceName);
+                    break;
+                default:
+                    eventManager.createEvent(EventType.WARNING,"Service '%s' in unexpected state: %s", serviceName, status);
+                    break;
+            }
+        }
 
         service.setStatus(status);
 
