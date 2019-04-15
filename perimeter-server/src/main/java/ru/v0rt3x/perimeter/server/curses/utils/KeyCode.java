@@ -102,4 +102,8 @@ public class KeyCode {
 
         return String.format("KeyCode<[%s]>", String.join(", ", codeList));
     }
+
+    public byte[] getCode() {
+        return keyCode;
+    }
 }

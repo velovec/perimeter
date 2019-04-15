@@ -30,17 +30,19 @@ public class CursesConsoleUtils {
     private Rectangle screen;
 
     private Map<KeyCode, CursesInputHandler> inputHandlers = new HashMap<>();
-    private CursesInputHandler defaultInputHandler;
+
+    private CursesInputHandler defaultInputHandler = (k) -> {};
+    private CursesMouseInputHandler mouseInputHandler = (k) -> {};
 
     private CursesScreenSizeHandler screenSizeChangeHandler;
 
-    public CursesConsoleUtils(InputStream input, OutputStream output, OutputStream error, Environment env, Object lock) {
+    public CursesConsoleUtils(InputStream input, OutputStream output, OutputStream error, Environment env) {
         this.input = input;
         this.output = output;
         this.error = error;
 
         this.env = env;
-        this.lock = lock;
+        this.lock = new Object();
 
         this.outputStreamWriter = new OutputStreamWriter(this.output);
         this.errorStreamWriter = new OutputStreamWriter(this.error);
@@ -56,24 +58,19 @@ public class CursesConsoleUtils {
         return Integer.parseInt(env.getEnv().get("LINES"));
     }
 
-    public void init(ConsoleColor borderColor, ConsoleColor textColor, String title) throws IOException {
+    public void init() throws IOException {
         if (!checkTTY())
             throw new IOException("PTY is not available. Use '-t' SSH option or interactive shell.");
 
         this.clear();
         this.screen = Rectangle.newRect(0, 0, getScreenHeight(), getScreenWidth());
 
-        synchronized (lock) {
-            draw(this.screen, borderColor);
-            write(this.screen, 0, getScreenWidth() / 2 - title.length() / 2, borderColor, textColor, ConsoleTextStyle.BOLD, String.format("-[ %s ]-", title));
-        }
-
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
             if (isScreenSizeChanged()) {
                 try {
-                    init(borderColor, textColor, title);
+                    init();
 
                     if (Objects.nonNull(screenSizeChangeHandler)) {
                         screenSizeChangeHandler.onScreenSizeChange();
@@ -108,9 +105,11 @@ public class CursesConsoleUtils {
     }
 
     private void write(String... data) throws IOException {
-        for (String line: data) {
-            outputStreamWriter.write(line);
-            outputStreamWriter.flush();
+        synchronized (lock) {
+            for (String line : data) {
+                outputStreamWriter.write(line);
+                outputStreamWriter.flush();
+            }
         }
     }
 
@@ -131,10 +130,6 @@ public class CursesConsoleUtils {
         write(ANSIUtils.CursorPosition(rect.getX(), rect.getY()));
     }
 
-    public void write(int x, int y, ConsoleColor bgColor, ConsoleColor textColor, ConsoleTextStyle textStyle, String text) throws IOException {
-        write(this.screen, x, y, bgColor, textColor, textStyle, text);
-    }
-
     public void read() throws IOException {
         if (input.available() == 0)
             return;
@@ -147,7 +142,9 @@ public class CursesConsoleUtils {
 
         KeyCode keyCode = KeyCode.of(buffer);
 
-        if (inputHandlers.containsKey(keyCode)) {
+        if (MouseUtils.isMouseKeyCode(keyCode)) {
+            mouseInputHandler.onMouseClick(MouseUtils.toMouseKeyCode(keyCode));
+        } else if (inputHandlers.containsKey(keyCode)) {
             inputHandlers.get(keyCode).onKeyPress(keyCode);
         } else {
             defaultInputHandler.onKeyPress(keyCode);
@@ -163,6 +160,10 @@ public class CursesConsoleUtils {
         for (KeyCode keyCode: keyCodes) {
             inputHandlers.put(keyCode, inputHandler);
         }
+    }
+
+    public void onMouseClick(CursesMouseInputHandler inputHandler) {
+        this.mouseInputHandler = inputHandler;
     }
 
     public void onKeyPress(CursesInputHandler inputHandler) {
@@ -182,8 +183,8 @@ public class CursesConsoleUtils {
     }
 
     public boolean isPossibleToRender(Rectangle rect) {
-        return (screen.getHeight() - 1 >= rect.getX() + rect.getHeight()) &&
-            (screen.getWidth() - 1>= rect.getY() + rect.getWidth());
+        return (getScreenHeight() + 1 >= rect.getX() + rect.getHeight()) &&
+            (getScreenWidth() + 1 >= rect.getY() + rect.getWidth());
     }
 
     public String wrapLine(String line, int length) {
@@ -198,11 +199,15 @@ public class CursesConsoleUtils {
 
     public void erase(Rectangle rect, int startLine, int lines, ConsoleColor bgColor) throws IOException {
         for (int line = 0; line < lines; line++) {
-            write(rect, startLine + line, 2, bgColor, BRIGHT_WHITE, NORMAL, wrapLine("", rect.getWidth() - 4));
+            write(rect, startLine + line, 1, bgColor, BRIGHT_WHITE, NORMAL, wrapLine("", rect.getWidth() - 2));
         }
     }
 
-    public Rectangle getScreen() {
-        return this.screen;
+    public void mouseEnable() throws IOException {
+        write(ANSIUtils.DECSet(9));
+    }
+
+    public void mouseDisable() throws IOException {
+        write(ANSIUtils.DECReset(9));
     }
 }

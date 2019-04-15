@@ -56,6 +56,14 @@ public class ANSIUtils {
         return String.format("%s%d%s", CSI, n, "T");
     }
 
+    public static String DECSet(int n) {
+        return String.format("%s?%d%s", CSI, n, "h");
+    }
+
+    public static String DECReset(int n) {
+        return String.format("%s?%d%s", CSI, n, "l");
+    }
+
     public static String SelectGraphicRendition(Integer... args) {
         return String.format("%s%s%s", CSI, Arrays.stream(args).map(Objects::toString).collect(Collectors.joining(";")), "m");
     }

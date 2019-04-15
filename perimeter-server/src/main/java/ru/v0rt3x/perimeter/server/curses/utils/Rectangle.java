@@ -50,4 +50,11 @@ public class Rectangle {
     public int getWidth() {
         return width;
     }
+
+    public boolean isInside(int x, int y) {
+        int relativeX = x - this.x;
+        int relativeY = y - this.y;
+
+        return (relativeX > 0) && (relativeX < height) && (relativeY > 0) && (relativeY < width);
+    }
 }
