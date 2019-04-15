@@ -39,7 +39,16 @@ public class EventCommand extends PerimeterShellCommand {
 
     @CommandAction("Create event")
     public void create() throws IOException {
-        eventManager.createEvent(EventType.valueOf(kwargs.getOrDefault("level", "info").toUpperCase()), String.join(" ", args));
+        if (args.size() == 0) {
+            console.error("events create [--level <LEVEL>] <message>");
+            exit(1);
+            return;
+        }
+
+        eventManager.createEvent(
+            EventType.valueOf(kwargs.getOrDefault("level", "info").toUpperCase()),
+            String.join(" ", args)
+        );
     }
 
     @Override

@@ -155,11 +155,46 @@ public class AgentRESTController {
                 .mapToInt(x -> x ? 1 : 0)
                 .sum();
 
+            ((List<Map<String, String>>) teamExecution.get("events"))
+                .forEach(event -> {
+                    String message = String.format("%s: %s", exploit.getName(), event.get("message"));
+                    EventType level = EventType.valueOf(event.get("level"));
+
+                    eventManager.createEvent(level, message);
+                });
+
             executionResult.setHits(executionResult.getHits() + hits);
             executionResult.setExitCode((Integer) teamExecution.get("exitCode"));
 
-            if (executionResult.getExitCode() != 0) {
-                eventManager.createEvent(EventType.WARNING, "Exploit '%s' failed for '%s' with code %d", exploit.getName(), team, executionResult.getExitCode());
+            switch (executionResult.getExitCode()) {
+                case 0:
+                    break;
+                case 68:
+                    eventManager.createEvent(EventType.WARNING, "%s: Team '%s' is no longer vulnerable", exploit.getName(), team);
+                    break;
+                case 126:
+                    eventManager.createEvent(EventType.WARNING, "%s: Internal error: command invoked cannot execute", exploit.getName());
+                    break;
+                case 127:
+                    eventManager.createEvent(EventType.WARNING, "%s: Internal error: command not found", exploit.getName());
+                    break;
+                case 128:
+                    eventManager.createEvent(EventType.WARNING, "%s: Internal error: invalid argument to exit", exploit.getName());
+                    break;
+                case 129:
+                case 130:
+                case 131:
+                case 132:
+                case 133:
+                case 134:
+                case 135:
+                case 136:
+                case 137:
+                    eventManager.createEvent(EventType.WARNING, "%s: Exploit for '%s' was killed (signal: %d)", exploit.getName(), team, executionResult.getExitCode() - 128);
+                    break;
+                default:
+                    eventManager.createEvent(EventType.WARNING, "%s: Failed to attack '%s' (exit code: %d)", exploit.getName(), team, executionResult.getExitCode());
+                    break;
             }
 
             exploit.setHits(exploit.getHits() + hits);
@@ -168,6 +203,7 @@ public class AgentRESTController {
             executionResultRepository.save(executionResult);
         }
 
+        exploit.setUpdated(false);
         exploitRepository.save(exploit);
     }
 

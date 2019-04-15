@@ -21,6 +21,7 @@ import ru.v0rt3x.perimeter.server.service.dao.ServiceRepository;
 import ru.v0rt3x.perimeter.server.shell.PerimeterShellCommand;
 import ru.v0rt3x.perimeter.server.shell.annotations.ShellCommand;
 import ru.v0rt3x.perimeter.server.shell.console.ConsoleColor;
+import ru.v0rt3x.perimeter.server.shell.console.ConsoleTextStyle;
 import ru.v0rt3x.perimeter.server.themis.ThemisClient;
 import ru.v0rt3x.v0rt3xLogo;
 
@@ -266,18 +267,23 @@ public class DashboardCommand extends PerimeterShellCommand implements CursesInp
 
         int line = 0;
         for (Exploit exploit: exploitRepository.findAll()) {
-            long countTotal = resultRepository.countAllByExploit(exploit);
+            long countTotal = resultRepository.findAllByExploit(exploit).stream()
+                .filter(result -> result.getExitCode() != 68)
+                .count();
+
             long countSuccess = resultRepository.findAllByExploit(exploit).stream()
                 .filter(result -> result.getExitCode() == 0)
                 .count();
 
-            ConsoleColor statusColor = (countSuccess == countTotal) ? BRIGHT_GREEN : BRIGHT_RED;
+            ConsoleColor statusColor = exploit.isDisabled() ? BRIGHT_WHITE : ((countSuccess == countTotal) ? BRIGHT_GREEN : BRIGHT_RED);
+            ConsoleTextStyle statusStyle = exploit.isDisabled() ? STRIKED : NORMAL;
+            String lastRunStatus = exploit.isDisabled() ? "DISABLED" : String.format("%02d / %02d", countSuccess, countTotal);
 
-            curses.write(exploitStats, line + 5, 2, null, BRIGHT_WHITE, NORMAL, curses.wrapLine(exploit.getName(), 12));
-            curses.write(exploitStats, line + 5, 15, null, BRIGHT_WHITE, NORMAL, curses.wrapLine(exploit.getType(), 8));
-            curses.write(exploitStats, line + 5, 24, null, BRIGHT_WHITE, NORMAL, curses.wrapLine(exploit.getPriority().toString(), 8));
-            curses.write(exploitStats, line + 5, 33, null, BRIGHT_WHITE, NORMAL, String.format("%07d", exploit.getHits()));
-            curses.write(exploitStats, line + 5, 41, null, statusColor, NORMAL, String.format("%02d / %02d", countSuccess, countTotal));
+            curses.write(exploitStats, line + 5, 2, null, BRIGHT_WHITE, statusStyle, curses.wrapLine(exploit.getName(), 12));
+            curses.write(exploitStats, line + 5, 15, null, BRIGHT_WHITE, statusStyle, curses.wrapLine(exploit.getType(), 8));
+            curses.write(exploitStats, line + 5, 24, null, BRIGHT_WHITE, statusStyle, curses.wrapLine(exploit.getPriority().toString(), 8));
+            curses.write(exploitStats, line + 5, 33, null, BRIGHT_WHITE, statusStyle, String.format("%07d", exploit.getHits()));
+            curses.write(exploitStats, line + 5, 41, null, statusColor, statusStyle, lastRunStatus);
 
             line++;
         }
