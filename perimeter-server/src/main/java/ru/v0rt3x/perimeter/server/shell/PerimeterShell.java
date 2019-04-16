@@ -11,7 +11,9 @@ import org.slf4j.LoggerFactory;
 import ru.v0rt3x.perimeter.server.shell.command.EmptyCommand;
 import ru.v0rt3x.perimeter.server.shell.command.InvalidCommand;
 import ru.v0rt3x.perimeter.server.shell.command.UnknownCommand;
-import ru.v0rt3x.perimeter.server.shell.console.*;
+import ru.v0rt3x.shell.console.CommandLineParser;
+import ru.v0rt3x.shell.console.ConsoleEngine;
+import ru.v0rt3x.shell.console.ansi.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,7 +27,7 @@ public class PerimeterShell implements Command, Runnable, ExitCallback, Interrup
     private OutputStream output;
     private OutputStream error;
 
-    private ConsoleUtils console;
+    private ConsoleEngine console;
 
     private ExitCallback exitCallback;
     private Environment environment;
@@ -69,7 +71,7 @@ public class PerimeterShell implements Command, Runnable, ExitCallback, Interrup
 
         environment.addSignalListener(this);
 
-        console = new ConsoleUtils(input, output, error);
+        console = new ConsoleEngine(input, output, error);
 
         console.addCompletions(commandManager.listCommands());
         console.setInterruptHandler(this);
@@ -106,7 +108,7 @@ public class PerimeterShell implements Command, Runnable, ExitCallback, Interrup
 
                 console.addHistoryItem(commandLine);
 
-                CommandLineUtils.CommandLine command = CommandLineUtils.parse(commandLine);
+                CommandLineParser.CommandLine command = CommandLineParser.parse(commandLine);
 
                 subCommand = routeCommand(command.getCmd());
                 subCommand.setUpCommand(commandManager, command);

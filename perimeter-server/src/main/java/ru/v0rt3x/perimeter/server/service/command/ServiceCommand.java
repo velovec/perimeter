@@ -2,14 +2,13 @@ package ru.v0rt3x.perimeter.server.service.command;
 
 import org.eclipse.jgit.lib.Repository;
 import ru.v0rt3x.perimeter.server.git.GitRepositoryManager;
-import ru.v0rt3x.perimeter.server.git.dao.GitRepo;
 import ru.v0rt3x.perimeter.server.service.ServiceManager;
 import ru.v0rt3x.perimeter.server.service.dao.Service;
 import ru.v0rt3x.perimeter.server.shell.PerimeterShellCommand;
 import ru.v0rt3x.perimeter.server.shell.annotations.CommandAction;
 import ru.v0rt3x.perimeter.server.shell.annotations.ShellCommand;
 import ru.v0rt3x.perimeter.server.shell.command.exception.NotImplementedException;
-import ru.v0rt3x.perimeter.server.shell.console.Table;
+import ru.v0rt3x.shell.console.Table;
 import ru.v0rt3x.perimeter.server.utils.GitUtils;
 
 import java.io.IOException;

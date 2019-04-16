@@ -10,7 +10,7 @@ import ru.v0rt3x.perimeter.server.shell.PerimeterShellCommand;
 import ru.v0rt3x.perimeter.server.shell.annotations.CommandAction;
 import ru.v0rt3x.perimeter.server.shell.annotations.ShellCommand;
 import ru.v0rt3x.perimeter.server.shell.command.exception.NotImplementedException;
-import ru.v0rt3x.perimeter.server.shell.console.Table;
+import ru.v0rt3x.shell.console.Table;
 import ru.v0rt3x.perimeter.server.team.TeamManager;
 import ru.v0rt3x.perimeter.server.team.dao.Team;
 import ru.v0rt3x.perimeter.server.themis.ThemisClient;

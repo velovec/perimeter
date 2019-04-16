@@ -19,7 +19,7 @@ import ru.v0rt3x.perimeter.server.flag.dao.FlagPriority;
 import ru.v0rt3x.perimeter.server.flag.dao.FlagRepository;
 import ru.v0rt3x.perimeter.server.flag.dao.FlagResult;
 import ru.v0rt3x.perimeter.server.properties.PerimeterProperties;
-import ru.v0rt3x.perimeter.server.shell.console.Table;
+import ru.v0rt3x.shell.console.Table;
 import ru.v0rt3x.perimeter.server.themis.ContestState;
 import ru.v0rt3x.perimeter.server.themis.ThemisClient;
 import ru.v0rt3x.perimeter.server.utils.PEMUtils;

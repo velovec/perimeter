@@ -11,10 +11,9 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 import ru.v0rt3x.perimeter.server.shell.annotations.CommandAction;
 import ru.v0rt3x.perimeter.server.shell.command.exception.NotImplementedException;
-import ru.v0rt3x.perimeter.server.shell.console.CommandLineUtils;
-import ru.v0rt3x.perimeter.server.shell.console.ConsoleUtils;
-import ru.v0rt3x.perimeter.server.shell.console.InterruptHandler;
-import ru.v0rt3x.perimeter.server.shell.console.Table;
+import ru.v0rt3x.shell.console.CommandLineParser;
+import ru.v0rt3x.shell.console.ConsoleEngine;
+import ru.v0rt3x.shell.console.Table;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -33,7 +32,7 @@ public abstract class PerimeterShellCommand implements Command, Runnable, Interr
     protected OutputStreamWriter outputWriter;
     protected OutputStreamWriter errorWriter;
 
-    protected ConsoleUtils console;
+    protected ConsoleEngine console;
 
     private ExitCallback exitCallback;
     private Environment environment;
@@ -54,7 +53,7 @@ public abstract class PerimeterShellCommand implements Command, Runnable, Interr
 
     private static final String DEFAULT_METHOD = "execute";
 
-    public void setUpCommand(PerimeterShellCommandManager cmdManager, CommandLineUtils.CommandLine commandObject) {
+    public void setUpCommand(PerimeterShellCommandManager cmdManager, CommandLineParser.CommandLine commandObject) {
         args = commandObject.getArgs();
         kwargs = commandObject.getKeywordArgs();
         command = commandObject.getCmd();
@@ -110,7 +109,7 @@ public abstract class PerimeterShellCommand implements Command, Runnable, Interr
     @Override
     public void run() {
         try {
-            console = new ConsoleUtils(input, output, error);
+            console = new ConsoleEngine(input, output, error);
 
             init();
 
@@ -221,6 +220,7 @@ public abstract class PerimeterShellCommand implements Command, Runnable, Interr
                 Throwable t = e.getCause();
 
                 console.writeLine("Unable to execute command: (%s) %s", t.getClass().getSimpleName(), t.getMessage());
+                console.write(t);
             }
         } catch (IllegalAccessException e) {
             console.writeLine("Unable to perform action '%s': %s", methodName, e.getClass().getSimpleName(), e.getMessage());

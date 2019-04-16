@@ -1,11 +1,9 @@
 package ru.v0rt3x.perimeter.server.git.command;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevSort;
 import org.eclipse.jgit.revwalk.RevWalk;
 
 import ru.v0rt3x.perimeter.server.git.GitRepositoryManager;
@@ -14,7 +12,7 @@ import ru.v0rt3x.perimeter.server.shell.PerimeterShellCommand;
 import ru.v0rt3x.perimeter.server.shell.annotations.CommandAction;
 import ru.v0rt3x.perimeter.server.shell.annotations.ShellCommand;
 import ru.v0rt3x.perimeter.server.shell.command.exception.NotImplementedException;
-import ru.v0rt3x.perimeter.server.shell.console.Table;
+import ru.v0rt3x.shell.console.Table;
 import ru.v0rt3x.perimeter.server.utils.GitUtils;
 
 import java.io.IOException;

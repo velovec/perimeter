@@ -1,7 +1,7 @@
 package ru.v0rt3x.perimeter.server.flag;
 
 import ru.v0rt3x.perimeter.server.flag.dao.Flag;
-import ru.v0rt3x.perimeter.server.shell.console.Table;
+import ru.v0rt3x.shell.console.Table;
 
 import java.util.Date;
 import java.util.Objects;

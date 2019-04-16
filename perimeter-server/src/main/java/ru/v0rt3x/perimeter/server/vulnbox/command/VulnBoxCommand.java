@@ -8,7 +8,7 @@ import ru.v0rt3x.perimeter.server.shell.PerimeterShellCommand;
 import ru.v0rt3x.perimeter.server.shell.annotations.CommandAction;
 import ru.v0rt3x.perimeter.server.shell.annotations.ShellCommand;
 import ru.v0rt3x.perimeter.server.shell.command.exception.NotImplementedException;
-import ru.v0rt3x.perimeter.server.shell.console.Table;
+import ru.v0rt3x.shell.console.Table;
 import ru.v0rt3x.perimeter.server.utils.SSHUtils;
 import ru.v0rt3x.perimeter.server.vulnbox.VulnBoxUserInfo;
 import ru.v0rt3x.perimeter.server.utils.iptables.IPTablesRule;

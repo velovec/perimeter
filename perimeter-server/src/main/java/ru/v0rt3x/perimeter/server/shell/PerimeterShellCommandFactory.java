@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.v0rt3x.perimeter.server.shell.command.InvalidCommand;
 import ru.v0rt3x.perimeter.server.shell.command.UnknownCommand;
-import ru.v0rt3x.perimeter.server.shell.console.CommandLineUtils;
+import ru.v0rt3x.shell.console.CommandLineParser;
 
 @Component
 public class PerimeterShellCommandFactory implements CommandFactory {
@@ -18,7 +18,7 @@ public class PerimeterShellCommandFactory implements CommandFactory {
     public Command createCommand(String commandLine) {
         PerimeterShellCommand targetCommand;
 
-        CommandLineUtils.CommandLine command = CommandLineUtils.parse(commandLine);
+        CommandLineParser.CommandLine command = CommandLineParser.parse(commandLine);
 
         targetCommand = routeCommand(command.getCmd());
         targetCommand.setUpCommand(commandManager, command);

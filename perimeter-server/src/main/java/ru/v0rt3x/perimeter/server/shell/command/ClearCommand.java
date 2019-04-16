@@ -2,7 +2,7 @@ package ru.v0rt3x.perimeter.server.shell.command;
 
 import ru.v0rt3x.perimeter.server.shell.PerimeterShellCommand;
 import ru.v0rt3x.perimeter.server.shell.annotations.ShellCommand;
-import ru.v0rt3x.perimeter.server.shell.console.ANSIUtils;
+import ru.v0rt3x.shell.console.ansi.ANSIUtils;
 
 import java.io.IOException;
 

@@ -1,15 +1,15 @@
 package ru.v0rt3x.perimeter.server.vulnbox;
 
 import com.jcraft.jsch.UserInfo;
-import ru.v0rt3x.perimeter.server.shell.console.ConsoleUtils;
+import ru.v0rt3x.shell.console.ConsoleEngine;
 
 import java.io.IOException;
 
 public class VulnBoxUserInfo implements UserInfo {
 
-    private ConsoleUtils console;
+    private ConsoleEngine console;
 
-    public VulnBoxUserInfo(ConsoleUtils consoleUtils) {
+    public VulnBoxUserInfo(ConsoleEngine consoleUtils) {
         this.console = consoleUtils;
     }
 
