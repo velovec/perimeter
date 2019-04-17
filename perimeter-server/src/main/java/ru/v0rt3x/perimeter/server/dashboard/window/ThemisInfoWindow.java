@@ -1,5 +1,6 @@
 package ru.v0rt3x.perimeter.server.dashboard.window;
 
+import ru.v0rt3x.perimeter.server.dashboard.window.modal.ThemisContextMenuWindow;
 import ru.v0rt3x.shell.curses.input.KeyCode;
 import ru.v0rt3x.shell.curses.input.MouseKey;
 import ru.v0rt3x.shell.curses.window.Window;
@@ -24,7 +25,11 @@ public class ThemisInfoWindow extends Window {
 
     @Override
     protected void onMouseClick(MouseKey key, int x, int y) throws IOException {
-        // do nothing
+        if (key.equals(MouseKey.RIGHT)) {
+            ThemisContextMenuWindow contextMenu = windowManager.createWindow(ThemisContextMenuWindow.class, "themis_menu");
+
+            contextMenu.draw(true);
+        }
     }
 
     @Override

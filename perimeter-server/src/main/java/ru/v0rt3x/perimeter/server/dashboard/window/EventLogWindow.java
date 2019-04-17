@@ -2,8 +2,10 @@ package ru.v0rt3x.perimeter.server.dashboard.window;
 
 import org.springframework.data.domain.PageRequest;
 
+import ru.v0rt3x.perimeter.server.dashboard.window.modal.EventContextMenuWindow;
 import ru.v0rt3x.shell.curses.input.KeyCode;
 import ru.v0rt3x.shell.curses.input.MouseKey;
+import ru.v0rt3x.shell.curses.window.Rectangle;
 import ru.v0rt3x.shell.curses.window.Window;
 import ru.v0rt3x.shell.curses.window.WindowManager;
 import ru.v0rt3x.perimeter.server.event.dao.Event;
@@ -54,8 +56,15 @@ public class EventLogWindow extends Window {
                     break;
             }
 
-            write(line, 2, eventColor, NORMAL, curses.wrapLine(event.getMessage(), window.getWidth() - 13));
-            write(line, window.getWidth() - 10, WHITE, NORMAL, String.format("%03ds ago", ago));
+            Rectangle rect = contextMenu(line, 2, window.getWidth() - 4, () -> {
+                EventContextMenuWindow contextMenu = windowManager.createWindow(EventContextMenuWindow.class, "event_menu");
+                contextMenu.setEvent(event);
+
+                contextMenu.draw(true);
+            });
+
+            write(rect.getX(), 2, eventColor, NORMAL, curses.wrapLine(event.getMessage(), window.getWidth() - 13));
+            write(rect.getY(), window.getWidth() - 10, WHITE, NORMAL, String.format("%03ds ago", ago));
             line++;
         }
     }

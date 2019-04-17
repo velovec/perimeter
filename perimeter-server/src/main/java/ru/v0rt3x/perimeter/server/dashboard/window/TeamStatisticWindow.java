@@ -40,6 +40,8 @@ public class TeamStatisticWindow extends Window {
         write(2, 22, BRIGHT_WHITE, BOLD, "Hits");
 
         Map<String, Integer> teamHits = new HashMap<>();
+        teamRepository.findAll().forEach(team -> teamHits.put(team.getName(), 0));
+
         resultRepository.findAll().forEach(
             result -> {
                 int hits = teamHits.getOrDefault(result.getTeam(), 0);
@@ -60,8 +62,8 @@ public class TeamStatisticWindow extends Window {
                 // windowManager.draw();
             });
 
-            write(line, 2, enabled ? BRIGHT_WHITE : WHITE, NORMAL, curses.wrapLine(team, 19));
-            write(line, 22, enabled ? BRIGHT_WHITE : WHITE, NORMAL, String.format("%07d", teamHits.get(team)));
+            write(rect.getX(), 2, enabled ? BRIGHT_WHITE : WHITE, NORMAL, curses.wrapLine(team, 19));
+            write(rect.getX(), 22, enabled ? BRIGHT_WHITE : WHITE, NORMAL, String.format("%07d", teamHits.get(team)));
             line++;
         }
     }

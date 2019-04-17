@@ -14,21 +14,16 @@ import static ru.v0rt3x.shell.console.ansi.ConsoleTextStyle.*;
 public class ErrorWindow extends ModalWindow {
 
     private String errorMessage = "";
-    private Rectangle okButton;
 
     public ErrorWindow(WindowManager windowManager) {
         super(windowManager, "Error", (windowManager.getCurses().getScreenHeight() - 9) / 2 , (windowManager.getCurses().getScreenWidth() - 70) / 2, 9, 70, BRIGHT_RED, BRIGHT_WHITE, null, 2);
 
-        okButton = Rectangle.newRect(window.getHeight() - 4, (window.getWidth() - 4) / 2, 0, 4);
+        hotkey(KeyCode.ENTER, (keyCode) -> onConfirm());
     }
 
     @Override
     protected void onMouseClick(MouseKey key, int x, int y) throws IOException {
-        if (key.equals(MouseKey.LEFT) && okButton.isInside(x, y)) {
-            hide();
 
-            windowManager.draw(true);
-        }
     }
 
     @Override
@@ -43,16 +38,17 @@ public class ErrorWindow extends ModalWindow {
             line++;
         }
 
-        write(okButton.getX(), okButton.getY(), BRIGHT_BLACK, BRIGHT_WHITE, BOLD, "[OK]");
+        button(window.getHeight() - 4, (window.getWidth() - 4) / 2, "OK", this::onConfirm);
+    }
+
+    private void onConfirm() throws IOException {
+        hide();
+        windowManager.draw(true);
     }
 
     @Override
     protected void onKeyPress(KeyCode keyCode) throws IOException {
-        if (keyCode.equals(KeyCode.ENTER)) {
-            hide();
 
-            windowManager.draw(true);
-        }
     }
 
     public void setErrorMessage(String errorMessage) {

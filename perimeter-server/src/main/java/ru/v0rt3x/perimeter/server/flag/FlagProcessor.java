@@ -14,6 +14,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import ru.v0rt3x.perimeter.server.event.EventManager;
+import ru.v0rt3x.perimeter.server.event.dao.EventType;
 import ru.v0rt3x.perimeter.server.flag.dao.Flag;
 import ru.v0rt3x.perimeter.server.flag.dao.FlagPriority;
 import ru.v0rt3x.perimeter.server.flag.dao.FlagRepository;
@@ -46,6 +48,9 @@ public class FlagProcessor {
 
     @Autowired
     private ThemisClient themisClient;
+
+    @Autowired
+    private EventManager eventManager;
 
     private Algorithm algorithm = null;
     private JWTVerifier verifier = null;
@@ -241,10 +246,16 @@ public class FlagProcessor {
     public void checkFlagsExpiration() {
         long createdBefore = System.currentTimeMillis() - perimeterProperties.getFlag().getTtl() * 1000;
 
+        int count = 0;
         for (Flag flag: flagRepository.findAllByStatusAndCreateTimeStampLessThan(QUEUED, createdBefore)) {
             flag.setStatus(REJECTED);
             flagHistory.add(flag);
             flagRepository.save(flag);
+            count++;
+        }
+
+        if (count > 0) {
+            eventManager.createEvent(EventType.INFO, "%d flags expired", count);
         }
     }
 
@@ -270,6 +281,7 @@ public class FlagProcessor {
                 return false;
             default:
                 logger.error("Unexpected result: {} : {}", flag, result);
+                eventManager.createEvent(EventType.URGENT, "Unexpected response from Themis: %s", result);
                 return false;
         }
     }
@@ -310,7 +322,9 @@ public class FlagProcessor {
             }
 
             verifier = JWT.require(algorithm).build();
+            eventManager.createEvent(EventType.INFO, "Themis public key updated");
         } catch (IOException e) {
+            eventManager.createEvent(EventType.URGENT, "Unable to setup JWT: %s", e.getMessage());
             throw new IllegalStateException(String.format("Unable to setup JWT: %s", e.getMessage()));
         }
     }
@@ -318,6 +332,7 @@ public class FlagProcessor {
     public void clearQueue() {
         flagHistory.clear();
         flagRepository.deleteAll();
+        eventManager.createEvent(EventType.INFO, "Flag queue was cleared");
     }
 
     public Table getStatsAsTable() {

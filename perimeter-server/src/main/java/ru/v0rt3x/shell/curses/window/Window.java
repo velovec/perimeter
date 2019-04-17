@@ -4,6 +4,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import ru.v0rt3x.shell.curses.CursesEngine;
 import ru.v0rt3x.shell.console.ansi.ConsoleColor;
 import ru.v0rt3x.shell.console.ansi.ConsoleTextStyle;
+import ru.v0rt3x.shell.curses.handlers.CursesInputHandler;
 import ru.v0rt3x.shell.curses.handlers.WindowOnClickHandler;
 import ru.v0rt3x.shell.curses.input.KeyCode;
 import ru.v0rt3x.shell.curses.input.MouseKey;
@@ -39,6 +40,8 @@ public abstract class Window {
     private final Map<Rectangle, WindowOnClickHandler> buttons = new ConcurrentHashMap<>();
     private final Map<Rectangle, WindowOnClickHandler> contextMenus = new ConcurrentHashMap<>();
 
+    private final Map<KeyCode, CursesInputHandler> hotkeys = new ConcurrentHashMap<>();
+
     public Window(WindowManager windowManager, String title, int x, int y, int height, int width, ConsoleColor borderColor, ConsoleColor borderTextColor, ConsoleColor bgColor, int zIndex) {
         this.windowManager = windowManager;
 
@@ -53,6 +56,10 @@ public abstract class Window {
         this.bgColor = bgColor;
 
         this.zIndex = zIndex;
+
+        hotkey(KeyCode.of('f'), (keyCode) -> {
+            freeze = !freeze;
+        });
     }
 
     public boolean onMouseClickEvent(MouseKeyCode keyCode) throws IOException {
@@ -88,12 +95,13 @@ public abstract class Window {
     }
 
     public void onKeyPressEvent(KeyCode keyCode) throws IOException {
-        if (keyCode.equals(KeyCode.of('f'))) {
-            freeze = !freeze;
+        if (hotkeys.containsKey(keyCode)) {
+            hotkeys.get(keyCode).onKeyPress(keyCode);
         }
 
         onKeyPress(keyCode);
     }
+
 
     public void draw() throws IOException {
         draw(false);
@@ -110,6 +118,10 @@ public abstract class Window {
                 erase();
             onDraw();
         }
+    }
+
+    public void hotkey(KeyCode keyCode, CursesInputHandler handler) {
+        hotkeys.put(keyCode, handler);
     }
 
     protected Rectangle button(int x, int y, String text, WindowOnClickHandler onClickHandler) throws IOException {
