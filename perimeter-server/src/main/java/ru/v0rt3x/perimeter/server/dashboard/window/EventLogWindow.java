@@ -23,7 +23,7 @@ public class EventLogWindow extends Window {
     private EventRepository eventRepository;
 
     public EventLogWindow(WindowManager windowManager) {
-        super(windowManager, "Event Log", 2, 140, Math.max(7, windowManager.getCurses().getScreenHeight() - 4), Math.max(50, windowManager.getCurses().getScreenWidth() - 142), MAGENTA, BRIGHT_WHITE, null, 1);
+        super(windowManager, "Event Log", 2, 140, Math.max(7, windowManager.getCurses().getScreenHeight() - 4), Math.max(50, windowManager.getCurses().getScreenWidth() - 142), RED, BRIGHT_WHITE, null, 1);
 
         this.eventRepository = context.getBean(EventRepository.class);
     }
@@ -63,8 +63,8 @@ public class EventLogWindow extends Window {
                 contextMenu.draw(true);
             });
 
-            write(rect.getX(), 2, eventColor, NORMAL, curses.wrapLine(event.getMessage(), window.getWidth() - 13));
-            write(rect.getY(), window.getWidth() - 10, WHITE, NORMAL, String.format("%03ds ago", ago));
+            write(rect.getX(), 2, eventColor, NORMAL, curses.wrapLine(event.getMessage(), rect.getWidth() - 11));
+            write(rect.getX(), rect.getWidth() - 8, WHITE, NORMAL, String.format("%03ds ago", ago));
             line++;
         }
     }

@@ -1,7 +1,9 @@
 package ru.v0rt3x.perimeter.server.dashboard.window;
 
+import ru.v0rt3x.perimeter.server.dashboard.window.modal.ServiceContextMenuWindow;
 import ru.v0rt3x.shell.curses.input.KeyCode;
 import ru.v0rt3x.shell.curses.input.MouseKey;
+import ru.v0rt3x.shell.curses.window.Rectangle;
 import ru.v0rt3x.shell.curses.window.Window;
 import ru.v0rt3x.shell.curses.window.WindowManager;
 import ru.v0rt3x.perimeter.server.service.dao.Service;
@@ -19,7 +21,7 @@ public class ServiceStatusWindow extends Window {
     private final ServiceRepository serviceRepository;
 
     public ServiceStatusWindow(WindowManager windowManager) {
-        super(windowManager,"Service Status", 2, 108, 19, 31, GREEN, BRIGHT_WHITE, null, 1);
+        super(windowManager,"Service Status", 2, 108, 14, 31, GREEN, BRIGHT_WHITE, null, 1);
 
         this.serviceRepository = context.getBean(ServiceRepository.class);
     }
@@ -53,9 +55,16 @@ public class ServiceStatusWindow extends Window {
                     break;
             }
 
-            write(line, 2, BRIGHT_WHITE, NORMAL, curses.wrapLine(service.getName(), 12));
-            write(line, 15, BRIGHT_WHITE, NORMAL, String.format("%-5d", service.getPort()));
-            write(line, 21, statusColor, NORMAL, curses.wrapLine(service.getStatusString(), 8));
+            Rectangle rect = contextMenu(line, 2, window.getWidth() - 4, () -> {
+                ServiceContextMenuWindow contextMenuWindow = windowManager.createWindow(ServiceContextMenuWindow.class, "service_menu");
+                contextMenuWindow.setService(service);
+
+                contextMenuWindow.draw(true);
+            });
+
+            write(rect.getX(), 2, BRIGHT_WHITE, NORMAL, curses.wrapLine(service.getName(), 12));
+            write(rect.getX(), 15, BRIGHT_WHITE, NORMAL, String.format("%-5d", service.getPort()));
+            write(rect.getX(), 21, statusColor, NORMAL, curses.wrapLine(service.getStatusString(), 8));
 
             line++;
         }

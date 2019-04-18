@@ -33,6 +33,7 @@ public class DashboardCommand extends PerimeterShellCommand {
             wm.createWindow(ExploitWindow.class, "exploits");
             wm.createWindow(AgentInfoWindow.class, "agents");
             wm.createWindow(ServiceStatusWindow.class, "services");
+            wm.createWindow(JudasWindow.class, "judas");
             wm.createWindow(TeamStatisticWindow.class, "team_statistics");
             wm.createWindow(EventLogWindow.class, "event_log");
         }, !kwargs.containsKey("nosplash") ? SplashWindow.class : null, 2000L);

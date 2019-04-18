@@ -18,6 +18,10 @@ public class JudasTarget {
     private String host;
     private int port;
 
+    private String status = "DOWN";
+    private int serversMax = 0;
+    private int serversActive = 0;
+
     private String description;
 
     @JsonGetter("protocol")
@@ -68,5 +72,40 @@ public class JudasTarget {
     @JsonIgnore
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @JsonIgnore
+    public String getStatus() {
+        return status;
+    }
+
+    @JsonIgnore
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    @JsonIgnore
+    public void setServersMax(int serversMax) {
+        this.serversMax = serversMax;
+    }
+
+    @JsonIgnore
+    public int getServersMax() {
+        return serversMax;
+    }
+
+    @JsonIgnore
+    public void setServersActive(int serversActive) {
+        this.serversActive = serversActive;
+    }
+
+    @JsonIgnore
+    public int getServersActive() {
+        return serversActive;
+    }
+
+    @JsonIgnore
+    public String getStatusString() {
+        return "UP".equals(status) ? String.format("%s (%d/%d)", status, serversActive, serversMax) : status;
     }
 }

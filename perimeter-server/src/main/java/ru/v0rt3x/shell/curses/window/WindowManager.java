@@ -171,7 +171,7 @@ public class WindowManager implements CursesInputHandler, CursesMouseInputHandle
     @Override
     public void onKeyPress(KeyCode keyCode) throws IOException {
         if (keyCode.equals(KeyCode.of('r'))) {
-            draw();
+            draw(true);
         }
 
         for (String windowName: windows.keySet()) {

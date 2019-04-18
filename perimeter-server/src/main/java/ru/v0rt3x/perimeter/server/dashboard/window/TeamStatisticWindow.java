@@ -23,7 +23,7 @@ public class TeamStatisticWindow extends Window {
     private final TeamRepository teamRepository;
 
     public TeamStatisticWindow(WindowManager windowManager) {
-        super(windowManager, "Team Statistics", 22, 108, Math.max(7, windowManager.getCurses().getScreenHeight() - 24), 31, BLUE, BRIGHT_WHITE, null, 1);
+        super(windowManager, "Team Statistics", 31, 108, Math.max(7, windowManager.getCurses().getScreenHeight() - 33), 31, MAGENTA, BRIGHT_WHITE, null, 1);
 
         this.resultRepository = context.getBean(ExploitExecutionResultRepository.class);
         this.teamRepository = context.getBean(TeamRepository.class);
