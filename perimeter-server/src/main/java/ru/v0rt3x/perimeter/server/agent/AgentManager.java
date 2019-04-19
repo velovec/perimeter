@@ -32,44 +32,21 @@ public class AgentManager {
     @Autowired
     private EventManager eventManager;
 
-    @PostConstruct
-    public void setUpMetrics() {
-        Gauge.builder("remote_agents", agentRepository, (r) -> r.countByAvailableAndTypeAndTask(true, "execute", "noop"))
-            .tag("type", "execute")
-            .tag("task", "noop")
-            .register(Metrics.globalRegistry);
-
-        Gauge.builder("remote_agents", agentRepository, (r) -> r.countByAvailableAndTypeAndTask(true, "execute", "execute"))
-            .tag("type", "execute")
-            .tag("task", "execute")
-            .register(Metrics.globalRegistry);
-
-        Gauge.builder("remote_agents", agentRepository, (r) -> r.countByAvailableAndTypeAndTask(true, "configure", "noop"))
-            .tag("type", "configure")
-            .tag("task", "noop")
-            .register(Metrics.globalRegistry);
-
-        Gauge.builder("remote_agents", agentRepository, (r) -> r.countByAvailableAndTypeAndTask(true, "configure", "configure"))
-            .tag("type", "configure")
-            .tag("task", "configure")
-            .register(Metrics.globalRegistry);
-    }
-
     public void clearTaskQueue(String type) {
         taskQueue.clear(type);
     }
 
-    public void queueTask(String taskType, Map<String, Object> parameters) {
+    public void queueTask(String agentType, String taskType, Map<String, Object> parameters) {
         AgentTask task = new AgentTask();
 
         task.setType(taskType);
         task.setParameters(parameters);
 
-        queueTask(task);
+        queueTask(agentType, task);
     }
 
-    public void queueTask(AgentTask executionTask) {
-        taskQueue.queueTask(executionTask);
+    public void queueTask(String agentType, AgentTask task) {
+        taskQueue.queueTask(agentType, task);
     }
 
     public List<Agent> listAgents() {

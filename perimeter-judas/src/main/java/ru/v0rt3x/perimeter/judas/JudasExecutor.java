@@ -48,7 +48,7 @@ public class JudasExecutor {
         AgentTask agentTask = perimeterAgent.getTask();
 
         switch (agentTask.getType()) {
-            case "judas":
+            case "setup":
                 this.task = agentTask;
                 break;
             default:

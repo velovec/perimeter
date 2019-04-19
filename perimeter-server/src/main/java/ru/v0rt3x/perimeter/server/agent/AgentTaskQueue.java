@@ -22,8 +22,8 @@ public class AgentTaskQueue {
         return !getQueue(type).isEmpty();
     }
 
-    public boolean queueTask(AgentTask task) {
-        return getQueue(task.getType()).add(task);
+    public boolean queueTask(String type, AgentTask task) {
+        return getQueue(type).add(task);
     }
 
     public AgentTask getTask(String type) {

@@ -87,7 +87,7 @@ public class JudasManager {
         parameters.put("port", target.getPort());
         parameters.put("target", target.getHost());
 
-        agentManager.queueTask("judas", parameters);
+        agentManager.queueTask("judas", "setup", parameters);
         eventManager.createEvent(EventType.INFO, "Setting up Judas instance for %d", target.getPort());
         return targetRepository.save(target);
     }

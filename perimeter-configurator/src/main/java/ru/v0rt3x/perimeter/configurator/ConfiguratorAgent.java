@@ -33,7 +33,7 @@ public class ConfiguratorAgent {
 
     @PostConstruct
     private void registerAgent() {
-        perimeterAgent.registerAgent("configure");
+        perimeterAgent.registerAgent("configurator");
     }
 
     @Scheduled(fixedRate = 5000L)
@@ -41,7 +41,7 @@ public class ConfiguratorAgent {
         AgentTask agentTask = perimeterAgent.getTask();
 
         switch (agentTask.getType()) {
-            case "configure":
+            case "apply":
                 applyConfiguration(agentTask.getParameters());
                 break;
             default:

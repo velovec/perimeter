@@ -173,7 +173,7 @@ public class HAProxyManager {
         parameters.put("type", "haproxy");
         parameters.put("configuration", Collections.singletonMap("services", configuration));
 
-        agentManager.queueTask("configure", parameters);
+        agentManager.queueTask("configurator","apply", parameters);
     }
 
     public List<CSVRecord> getHAProxyStats() throws IOException {

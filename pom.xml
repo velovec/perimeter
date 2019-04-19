@@ -41,33 +41,8 @@
         <docker.skip.push>false</docker.skip.push>
     </properties>
 
-    <distributionManagement>
-        <snapshotRepository>
-            <id>nexus.inferno-project.ru</id>
-            <url>https://nexus.inferno-project.ru/repository/maven-snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
-
     <dependencyManagement>
         <dependencies>
-            <!-- UI -->
-            <dependency>
-                <groupId>org.webjars</groupId>
-                <artifactId>webjars-locator</artifactId>
-                <version>0.34</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.webjars</groupId>
-                <artifactId>stomp-websocket</artifactId>
-                <version>2.3.3-1</version>
-            </dependency>
-            <dependency>
-                <groupId>org.webjars</groupId>
-                <artifactId>sockjs-client</artifactId>
-                <version>1.1.2</version>
-            </dependency>
-
             <!-- UTILS -->
             <dependency>
                 <groupId>org.reflections</groupId>
@@ -83,6 +58,11 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-csv</artifactId>
                 <version>1.6</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hubspot.jinjava</groupId>
+                <artifactId>jinjava</artifactId>
+                <version>2.4.12</version>
             </dependency>
 
             <!-- SSH -->
