@@ -8,8 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.yaml.snakeyaml.Yaml;
 
+import ru.v0rt3x.perimeter.server.agent.AgentManager;
+import ru.v0rt3x.perimeter.server.agent.dao.Agent;
 import ru.v0rt3x.perimeter.server.config.ConfigManager;
 import ru.v0rt3x.perimeter.server.haproxy.dao.*;
+import ru.v0rt3x.perimeter.server.judas.JudasManager;
 import ru.v0rt3x.perimeter.server.properties.PerimeterProperties;
 import ru.v0rt3x.perimeter.server.service.ServiceManager;
 import ru.v0rt3x.perimeter.server.service.dao.Service;
@@ -19,10 +22,8 @@ import javax.annotation.PostConstruct;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class HAProxyManager {
@@ -44,6 +45,12 @@ public class HAProxyManager {
 
     @Autowired
     private ConfigManager configManager;
+
+    @Autowired
+    private JudasManager judasManager;
+
+    @Autowired
+    private AgentManager agentManager;
 
     @PostConstruct
     public void setUpHAProxyManager() {
@@ -109,6 +116,64 @@ public class HAProxyManager {
 
     public List<HAProxyBackend> listBackends() {
         return backendRepository.findAll();
+    }
+
+    public void applyConfig() {
+        Map<Service, List<HAProxyMapping>> serviceMappings = listMappings().stream()
+            .collect(Collectors.groupingBy(HAProxyMapping::getService, Collectors.mapping(x -> x, Collectors.toList())));
+
+        Map<String, Object> configuration = new HashMap<>();
+        for (Service service: serviceMappings.keySet()) {
+            Map<String, Object> serviceDefinition = new HashMap<>();
+
+            serviceDefinition.put("port", service.getPort());
+            serviceDefinition.put("mode", service.getMode());
+            serviceDefinition.put("check", service.getCheck());
+            serviceDefinition.put("expect", service.getExpect());
+
+            List<Map<String, Object>> mappings = new ArrayList<>();
+            boolean judasEnabled = Objects.nonNull(judasManager.getTarget(service.getPort()));
+
+            for (HAProxyMapping mapping: serviceMappings.get(service)) {
+                Map<String, Object> mappingDefinition = new HashMap<>();
+
+                mappingDefinition.put("backend", mapping.getBackend());
+                mappingDefinition.put("acl", mapping.getAcl());
+
+                if (!judasEnabled || Objects.nonNull(mapping.getAcl())) {
+                    mappings.add(mappingDefinition);
+                }
+            }
+
+            if (judasEnabled) {
+                Map<String, Object> mappingDefinition = new HashMap<>();
+
+                HAProxyBackend backend = new HAProxyBackend();
+
+                backend.setName("judas");
+                backend.setServers(
+                    agentManager.getAgentsByType("judas").stream()
+                        .map(Agent::getIp)
+                        .collect(Collectors.toSet())
+                );
+
+                mappingDefinition.put("backend", backend);
+                mappingDefinition.put("acl", null);
+
+                mappings.add(mappingDefinition);
+            }
+
+            serviceDefinition.put("mappings", mappings);
+
+            configuration.put(service.getName(), serviceDefinition);
+        }
+
+        Map<String, Object> parameters = new HashMap<>();
+
+        parameters.put("type", "haproxy");
+        parameters.put("configuration", Collections.singletonMap("services", configuration));
+
+        agentManager.queueTask("configure", parameters);
     }
 
     public List<CSVRecord> getHAProxyStats() throws IOException {

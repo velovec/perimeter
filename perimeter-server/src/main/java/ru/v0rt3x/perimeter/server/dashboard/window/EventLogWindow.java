@@ -23,7 +23,7 @@ public class EventLogWindow extends Window {
     private EventRepository eventRepository;
 
     public EventLogWindow(WindowManager windowManager) {
-        super(windowManager, "Event Log", 2, 140, Math.max(7, windowManager.getCurses().getScreenHeight() - 4), Math.max(50, windowManager.getCurses().getScreenWidth() - 142), RED, BRIGHT_WHITE, null, 1);
+        super(windowManager, "Event Log", 2, 143, Math.max(7, windowManager.getCurses().getScreenHeight() - 4), Math.max(50, windowManager.getCurses().getScreenWidth() - 145), RED, BRIGHT_WHITE, null, 1);
 
         this.eventRepository = context.getBean(EventRepository.class);
     }

@@ -21,7 +21,7 @@ public class ServiceStatusWindow extends Window {
     private final ServiceRepository serviceRepository;
 
     public ServiceStatusWindow(WindowManager windowManager) {
-        super(windowManager,"Service Status", 2, 108, 14, 31, GREEN, BRIGHT_WHITE, null, 1);
+        super(windowManager,"Service Status", 2, 108, 14, 34, GREEN, BRIGHT_WHITE, null, 1);
 
         this.serviceRepository = context.getBean(ServiceRepository.class);
     }
@@ -36,8 +36,8 @@ public class ServiceStatusWindow extends Window {
         write(2, 2, BRIGHT_WHITE, BOLD, String.format("Services Registered: %s", serviceRepository.count()));
 
         write(4, 2, BRIGHT_WHITE, BOLD, "Name");
-        write(4, 15, BRIGHT_WHITE, BOLD, "Port");
-        write(4, 21, BRIGHT_WHITE, BOLD, "Status");
+        write(4, 18, BRIGHT_WHITE, BOLD, "Port");
+        write(4, 24, BRIGHT_WHITE, BOLD, "Status");
 
         int line = 5;
         for (Service service: serviceRepository.findAll()) {
@@ -62,9 +62,9 @@ public class ServiceStatusWindow extends Window {
                 contextMenuWindow.draw(true);
             });
 
-            write(rect.getX(), 2, BRIGHT_WHITE, NORMAL, curses.wrapLine(service.getName(), 12));
-            write(rect.getX(), 15, BRIGHT_WHITE, NORMAL, String.format("%-5d", service.getPort()));
-            write(rect.getX(), 21, statusColor, NORMAL, curses.wrapLine(service.getStatusString(), 8));
+            write(rect.getX(), 2, BRIGHT_WHITE, NORMAL, curses.wrapLine(service.getName(), 15));
+            write(rect.getX(), 18, BRIGHT_WHITE, NORMAL, String.format("%-5d", service.getPort()));
+            write(rect.getX(), 24, statusColor, NORMAL, curses.wrapLine(service.getStatusString(), 8));
 
             line++;
         }

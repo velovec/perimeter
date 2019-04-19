@@ -19,6 +19,7 @@ import ru.v0rt3x.perimeter.server.exploit.dao.ExploitRepository;
 import ru.v0rt3x.perimeter.server.flag.FlagProcessor;
 import ru.v0rt3x.perimeter.server.flag.dao.Flag;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,9 +54,10 @@ public class AgentRESTController {
     private static final Object taskQueueLock = new Object();
 
     @RequestMapping(path = "/register", method = RequestMethod.POST)
-    private Agent registerAgent(@RequestBody Agent agent) {
+    private Agent registerAgent(@RequestBody Agent agent, HttpServletRequest request) {
         agent.setLastSeen(System.currentTimeMillis());
         agent.setAvailable(true);
+        agent.setIp(request.getRemoteAddr());
 
         eventManager.createEvent("Agent '%s' registered (type: %s)", agent.getHostName(), agent.getType());
 

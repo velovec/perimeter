@@ -13,7 +13,9 @@ import ru.v0rt3x.perimeter.server.event.dao.EventType;
 import ru.v0rt3x.perimeter.server.properties.PerimeterProperties;
 
 import javax.annotation.PostConstruct;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class AgentManager {
@@ -57,6 +59,15 @@ public class AgentManager {
         taskQueue.clear(type);
     }
 
+    public void queueTask(String taskType, Map<String, Object> parameters) {
+        AgentTask task = new AgentTask();
+
+        task.setType(taskType);
+        task.setParameters(parameters);
+
+        queueTask(task);
+    }
+
     public void queueTask(AgentTask executionTask) {
         taskQueue.queueTask(executionTask);
     }
@@ -65,6 +76,9 @@ public class AgentManager {
         return agentRepository.findAll();
     }
 
+    public List<Agent> getAgentsByType(String type) {
+        return agentRepository.findAllByType(type);
+    }
 
     @Scheduled(fixedRate = 5000L)
     private void checkAgentsStatus() {

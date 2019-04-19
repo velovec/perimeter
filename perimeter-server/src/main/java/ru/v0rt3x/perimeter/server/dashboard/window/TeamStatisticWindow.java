@@ -23,7 +23,7 @@ public class TeamStatisticWindow extends Window {
     private final TeamRepository teamRepository;
 
     public TeamStatisticWindow(WindowManager windowManager) {
-        super(windowManager, "Team Statistics", 31, 108, Math.max(7, windowManager.getCurses().getScreenHeight() - 33), 31, MAGENTA, BRIGHT_WHITE, null, 1);
+        super(windowManager, "Team Statistics", 31, 108, Math.max(7, windowManager.getCurses().getScreenHeight() - 33), 34, MAGENTA, BRIGHT_WHITE, null, 1);
 
         this.resultRepository = context.getBean(ExploitExecutionResultRepository.class);
         this.teamRepository = context.getBean(TeamRepository.class);
@@ -37,7 +37,7 @@ public class TeamStatisticWindow extends Window {
     @Override
     protected void onDraw() throws IOException {
         write(2, 2, BRIGHT_WHITE, BOLD, "Team");
-        write(2, 22, BRIGHT_WHITE, BOLD, "Hits");
+        write(2, 25, BRIGHT_WHITE, BOLD, "Hits");
 
         Map<String, Integer> teamHits = new HashMap<>();
         teamRepository.findAll().forEach(team -> teamHits.put(team.getName(), 0));
@@ -62,8 +62,8 @@ public class TeamStatisticWindow extends Window {
                 // windowManager.draw();
             });
 
-            write(rect.getX(), 2, enabled ? BRIGHT_WHITE : WHITE, NORMAL, curses.wrapLine(team, 19));
-            write(rect.getX(), 22, enabled ? BRIGHT_WHITE : WHITE, NORMAL, String.format("%07d", teamHits.get(team)));
+            write(rect.getX(), 2, enabled ? BRIGHT_WHITE : WHITE, NORMAL, curses.wrapLine(team, 24));
+            write(rect.getX(), 25, enabled ? BRIGHT_WHITE : WHITE, NORMAL, String.format("%07d", teamHits.get(team)));
             line++;
         }
     }

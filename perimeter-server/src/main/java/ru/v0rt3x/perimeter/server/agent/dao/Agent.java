@@ -24,6 +24,8 @@ public class Agent {
 
     private String task;
 
+    private String ip;
+
     private Long lastSeen;
     private boolean available;
 
@@ -107,5 +109,13 @@ public class Agent {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
     }
 }

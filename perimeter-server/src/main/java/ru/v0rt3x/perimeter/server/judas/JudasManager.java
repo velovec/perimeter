@@ -7,6 +7,8 @@ import org.springframework.data.util.Pair;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import ru.v0rt3x.perimeter.server.agent.AgentManager;
+import ru.v0rt3x.perimeter.server.agent.AgentTask;
 import ru.v0rt3x.perimeter.server.event.EventManager;
 import ru.v0rt3x.perimeter.server.event.dao.EventType;
 import ru.v0rt3x.perimeter.server.haproxy.HAProxyManager;
@@ -18,6 +20,7 @@ import ru.v0rt3x.perimeter.server.service.dao.Service;
 import ru.v0rt3x.perimeter.server.team.TeamManager;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -41,16 +44,13 @@ public class JudasManager {
     @Autowired
     private EventManager eventManager;
 
+    @Autowired
+    private AgentManager agentManager;
+
     private static final Logger logger = LoggerFactory.getLogger(JudasManager.class);
 
     public JudasTarget getTarget(int port) {
-        JudasTarget target = targetRepository.findByPort(port);
-
-        if (Objects.isNull(target)) {
-            target = setTarget(port, null);
-        }
-
-        return target;
+        return targetRepository.findByPort(port);
     }
 
     public JudasTarget setTarget(int port, String host) {
@@ -82,6 +82,13 @@ public class JudasManager {
 
         target.setHost(host);
 
+        Map<String, Object> parameters = new HashMap<>();
+
+        parameters.put("port", target.getPort());
+        parameters.put("target", target.getHost());
+
+        agentManager.queueTask("judas", parameters);
+        eventManager.createEvent(EventType.INFO, "Setting up Judas instance for %d", target.getPort());
         return targetRepository.save(target);
     }
 
@@ -102,6 +109,7 @@ public class JudasManager {
             haProxyManager.getHAProxyStats().stream()
                 .filter(record -> "BACKEND".equals(record.get(1)))
                 .filter(record -> serviceBackendMap.containsKey(record.get(0)))
+                .filter(record -> Objects.nonNull(getTarget(serviceBackendMap.get(record.get(0)).getFirst().getPort())))
                 .forEach(record -> setTargetStatus(
                     serviceBackendMap.get(record.get(0)).getFirst().getName(), record.get(17),
                     serviceBackendMap.get(record.get(0)).getSecond().getServers().size(),

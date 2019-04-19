@@ -20,7 +20,7 @@ public class JudasWindow extends Window {
     private final JudasTargetRepository targetRepository;
 
     public JudasWindow(WindowManager windowManager) {
-        super(windowManager,"Judas", 17, 108, 13, 31, BLUE, BRIGHT_WHITE, null, 1);
+        super(windowManager,"Judas", 17, 108, 13, 34, BLUE, BRIGHT_WHITE, null, 1);
 
         this.targetRepository = context.getBean(JudasTargetRepository.class);
     }
@@ -34,7 +34,7 @@ public class JudasWindow extends Window {
     protected void onDraw() throws IOException {
         write(2, 2, BRIGHT_WHITE, BOLD, "Port");
         write(2, 8, BRIGHT_WHITE, BOLD, "Target");
-        write(2, 23, BRIGHT_WHITE, BOLD, "Status");
+        write(2, 24, BRIGHT_WHITE, BOLD, "Status");
 
         int line = 4;
         for (JudasTarget target: targetRepository.findAll()) {
@@ -58,7 +58,7 @@ public class JudasWindow extends Window {
 
             write(rect.getX(), 2, BRIGHT_WHITE, NORMAL, "%-5d", target.getPort());
             write(rect.getX(), 8, BRIGHT_WHITE, NORMAL, curses.wrapLine(target.getHost(), 15));
-            write(rect.getX(), 24, statusColor, NORMAL, curses.wrapLine(target.getStatus(), 6));
+            write(rect.getX(), 24, statusColor, NORMAL, curses.wrapLine(target.getStatusString(), 8));
         }
     }
 

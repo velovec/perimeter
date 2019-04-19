@@ -1,0 +1,15 @@
+spring:
+  task:
+    scheduling:
+      pool:
+        size: 10
+  jackson:
+    date-format: com.fasterxml.jackson.databind.util.ISO8601DateFormat
+
+perimeter:
+    server:
+        host: 127.0.0.1
+        port: 8080
+        protocol: http
+    judas:
+        path: /opt/perimeter/judas

@@ -17,6 +17,8 @@
         <module>perimeter-agent</module>
         <module>perimeter-executor</module>
         <module>perimeter-configurator</module>
+        <module>perimeter-judas</module>
+
         <module>themis-mock-server</module>
     </modules>
 
