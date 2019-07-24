@@ -13,6 +13,7 @@ public class CompetitionManager {
     @Autowired
     private ThemisProperties themisProperties;
 
+    private int round = 0;
     private CompetitionStage stage = CompetitionStage.NOT_STARTED;
     private Long startTime;
 
@@ -25,7 +26,11 @@ public class CompetitionManager {
     }
 
     public Integer getRound() {
-        return Math.toIntExact((System.currentTimeMillis() - startTime) / ROUND_DURATION);
+        if (stage == CompetitionStage.STARTED) {
+            round = Math.toIntExact((System.currentTimeMillis() - startTime) / ROUND_DURATION);
+        }
+
+        return round;
     }
 
     public CompetitionStage getStage() {

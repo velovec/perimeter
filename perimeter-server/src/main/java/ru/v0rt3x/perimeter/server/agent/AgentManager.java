@@ -1,7 +1,7 @@
 package ru.v0rt3x.perimeter.server.agent;
 
-import io.micrometer.core.instrument.Gauge;
-import io.micrometer.core.instrument.Metrics;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -12,8 +12,7 @@ import ru.v0rt3x.perimeter.server.event.EventManager;
 import ru.v0rt3x.perimeter.server.event.dao.EventType;
 import ru.v0rt3x.perimeter.server.properties.PerimeterProperties;
 
-import javax.annotation.PostConstruct;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +30,14 @@ public class AgentManager {
 
     @Autowired
     private EventManager eventManager;
+
+    private static final Logger logger = LoggerFactory.getLogger(AgentManager.class);
+
+    private List<AgentReportHandler> reportHandlers = new ArrayList<>();
+
+    public void registerReportHandler(String agentType, String taskType, AgentTaskResultHandler resultHandler) {
+        reportHandlers.add(new AgentReportHandler(agentType, taskType, resultHandler));
+    }
 
     public void clearTaskQueue(String type) {
         taskQueue.clear(type);
@@ -55,6 +62,15 @@ public class AgentManager {
 
     public List<Agent> getAgentsByType(String type) {
         return agentRepository.findAllByType(type);
+    }
+
+    public void handleReport(Agent agent, AgentTask task) {
+        for (AgentReportHandler reportHandler: reportHandlers) {
+            if (reportHandler.handleResult(agent, task))
+                return;
+        }
+
+        logger.warn("No handler for report '{}' (agent type: {}) found", task.getType(), agent.getType());
     }
 
     @Scheduled(fixedRate = 5000L)

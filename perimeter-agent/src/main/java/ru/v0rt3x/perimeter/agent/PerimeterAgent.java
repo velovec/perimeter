@@ -58,4 +58,13 @@ public class PerimeterAgent {
 
         reportData("report", report);
     }
+
+    public void reportEvent(String type, String message) {
+        Map<String, Object> event = new HashMap<>();
+
+        event.put("type", type);
+        event.put("message", message);
+
+        reportData("event", event);
+    }
 }

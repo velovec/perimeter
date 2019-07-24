@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import ru.v0rt3x.perimeter.agent.PerimeterAgent;
+import ru.v0rt3x.perimeter.agent.PerimeterAgentTaskHandler;
+import ru.v0rt3x.perimeter.agent.annotation.AgentTaskHandler;
 import ru.v0rt3x.perimeter.agent.properties.PerimeterAgentProperties;
 import ru.v0rt3x.perimeter.agent.types.AgentTask;
 import ru.v0rt3x.perimeter.judas.properties.PerimeterJudasProperties;
@@ -19,10 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public class JudasExecutor {
-
-    @Autowired
-    private PerimeterAgent perimeterAgent;
+public class JudasExecutor extends PerimeterAgentTaskHandler {
 
     @Autowired
     private PerimeterJudasProperties judasProperties;
@@ -30,39 +29,16 @@ public class JudasExecutor {
     @Autowired
     private PerimeterAgentProperties agentProperties;
 
-    private AgentTask task = AgentTask.noOp();
-
     private static final Logger logger = LoggerFactory.getLogger(JudasExecutor.class);
 
     private final Map<JudasInstance, Process> judasInstances = new ConcurrentHashMap<>();
 
-    @PostConstruct
-    private void registerAgent() {
-        perimeterAgent.registerAgent("judas");
+    public JudasExecutor() {
+        super("judas");
     }
 
-    private void getTask() {
-        if (!"noop".equals(task.getType()))
-            return;
-
-        AgentTask agentTask = perimeterAgent.getTask();
-
-        switch (agentTask.getType()) {
-            case "setup":
-                this.task = agentTask;
-                break;
-            default:
-                break;
-        }
-    }
-
-    @Scheduled(fixedDelay = 5000L)
-    void setUpJudas() throws InterruptedException, IOException {
-        getTask();
-
-        if (task.getType().equals("noop"))
-            return;
-
+    @AgentTaskHandler(taskType = "setup")
+    void setUpJudas(AgentTask task) throws InterruptedException, IOException {
         Map<String, Object> parameters = task.getParameters();
 
         Optional<JudasInstance> judasInstance = judasInstances.keySet().stream()
@@ -89,8 +65,6 @@ public class JudasExecutor {
             startJudasInstance(newInstance);
             logger.info("Starting Judas instance '{}'", newInstance.getPort());
         }
-
-        task = AgentTask.noOp();
     }
 
     @Scheduled(fixedDelay = 5000L)
@@ -98,6 +72,7 @@ public class JudasExecutor {
         for (JudasInstance judasInstance: judasInstances.keySet()) {
             if (!isJudasRunning(judasInstance)) {
                 restartJudasInstance(judasInstance);
+                perimeterAgent.reportEvent("warning", String.format("Judas instance '%s' failed. Restarting...", judasInstance.getPort()));
                 logger.warn("Judas instance '{}' failed. Restarting...", judasInstance.getPort());
             }
         }
@@ -110,6 +85,7 @@ public class JudasExecutor {
             "--perimeter", String.format("%s://%s:%s", agentProperties.getProtocol(), agentProperties.getHost(), agentProperties.getPort())
         ).start();
 
+        perimeterAgent.reportEvent("info", String.format("Judas instance '%s' started", judasInstance.getPort()));
         judasInstances.put(judasInstance, judasProcess);
     }
 
