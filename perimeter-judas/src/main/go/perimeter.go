@@ -52,13 +52,13 @@ func NewPerimeter(serverUrl url.URL, servicePort int) (p *Perimeter, err error) 
 
 func (p *Perimeter) getJudasConfig() error {
 	return getJsonAndUnmarshal(
-		fmt.Sprintf("%s/api/judas/config", p.serverUrl.String()), &p.config)
+		fmt.Sprintf("%s/api/judas/config/", p.serverUrl.String()), &p.config)
 }
 
 func (p *Perimeter) getJudasTargetUrl() (*PerimeterJudasTarget, error) {
 	target := new(PerimeterJudasTarget)
 	return target, getJsonAndUnmarshal(
-		fmt.Sprintf("%s/api/judas/target/%d", p.serverUrl.String(), p.servicePort), &target)
+		fmt.Sprintf("%s/api/judas/target/%d/", p.serverUrl.String(), p.servicePort), &target)
 }
 func (p *Perimeter) GetJudasUrl() (*url.URL, error) {
 	target, err := p.getJudasTargetUrl()
