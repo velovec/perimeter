@@ -81,7 +81,7 @@ func (p *Perimeter) SubmitFlag(flag string) error {
 		return errors.Wrap(err, "Marshal error")
 	}
 
-	submitUrl := fmt.Sprintf("%s/api/judas/submit/", p.serverUrl)
+	submitUrl := fmt.Sprintf("%s/api/judas/submit/", p.serverUrl.String())
 
 	if _, err = http.Post(submitUrl, "application/json", bytes.NewBuffer(flagBuffer)); err != nil {
 		return errors.Wrap(err, "Post request error")
