@@ -1,4 +1,4 @@
-package perimeter
+package main
 
 import (
 	"encoding/json"

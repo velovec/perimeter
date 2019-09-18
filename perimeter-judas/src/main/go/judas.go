@@ -10,8 +10,6 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-
-	"github.com/velovec/perimeter/perimeter-judas/src/main/go/perimeter"
 )
 
 const (
@@ -38,7 +36,7 @@ func start() error {
 		return errors.Wrap(err, "Perimeter server url parse error")
 	}
 
-	p, err := perimeter.NewPerimeter(*perimeterServerUrl, *servicePort)
+	p, err := NewPerimeter(*perimeterServerUrl, *servicePort)
 	if err != nil {
 		return errors.Wrap(err, "Error crating perimeter")
 	}
