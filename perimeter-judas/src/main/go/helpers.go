@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -17,7 +18,14 @@ var seededRand *rand.Rand = rand.New(
 	rand.NewSource(time.Now().UnixNano()))
 
 func GenerateRandomFlag(length int) string {
-	return "VolgaCTF{" + StringWithCharset(length-10, charset) + "}"
+	if length != 193 {
+		return "VolgaCTF{" + StringWithCharset(length-10, charset) + "}"
+	} else {
+		return fmt.Sprintf("VolgaCTF{%s.%s.%s}",
+			StringWithCharset(36, charset),
+			StringWithCharset(59, charset),
+			StringWithCharset(86, charset))
+	}
 }
 
 func StringWithCharset(length int, charset string) string {
