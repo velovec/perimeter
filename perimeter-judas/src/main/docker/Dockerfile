@@ -14,7 +14,8 @@ RUN apt update && \
     apt upgrade -qy && \
     apt dist-upgrade -qy && \
     apt install -qy procps && \
-    rm -rf /var/cache/apt/*
+    rm -rf /var/cache/apt/* && \
+    go get -u "github.com/pkg/errors"
 
 COPY --from=build /usr/src/judas/judas /opt/perimeter/judas
 COPY classes/application.yml /opt/perimeter/perimeter-judas.yml
