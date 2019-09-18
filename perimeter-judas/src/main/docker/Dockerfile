@@ -3,6 +3,8 @@ FROM golang AS build
 COPY *.go /usr/src/judas/
 WORKDIR /usr/src/judas
 
+RUN go get -u "github.com/pkg/errors"
+
 RUN go build -o judas -ldflags "-linkmode external -extldflags -static" *.go
 
 FROM @docker.baseImage@
@@ -14,8 +16,7 @@ RUN apt update && \
     apt upgrade -qy && \
     apt dist-upgrade -qy && \
     apt install -qy procps && \
-    rm -rf /var/cache/apt/* && \
-    go get -u "github.com/pkg/errors"
+    rm -rf /var/cache/apt/*
 
 COPY --from=build /usr/src/judas/judas /opt/perimeter/judas
 COPY classes/application.yml /opt/perimeter/perimeter-judas.yml
