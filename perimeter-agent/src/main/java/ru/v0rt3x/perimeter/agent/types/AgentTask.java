@@ -29,4 +29,10 @@ public class AgentTask {
     public void setParameters(Map<String, Object> parameters) {
         this.parameters = parameters;
     }
+
+    @Override
+    public String toString() {
+        return String.format("AgentTask<%s>: %s", type, parameters);
+    }
+
 }

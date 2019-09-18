@@ -46,9 +46,7 @@ public class JudasCommand extends PerimeterShellCommand {
             return;
         }
 
-        JudasTarget target = judasManager.getTarget(Integer.parseInt(args.get(0)));
-
-        target = judasManager.setTarget(target.getPort(), args.size() > 1 ? args.get(1) : null);
+        JudasTarget target = judasManager.setTarget(Integer.parseInt(args.get(0)), args.size() > 1 ? args.get(1) : null);
 
         console.writeLine(
             "Judas target for '%s' (port: %d) set to: %s",

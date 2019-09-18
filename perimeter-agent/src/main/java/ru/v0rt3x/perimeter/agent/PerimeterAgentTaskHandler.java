@@ -11,6 +11,7 @@ import ru.v0rt3x.perimeter.agent.types.AgentTask;
 import javax.annotation.PostConstruct;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 public abstract class PerimeterAgentTaskHandler {
 
@@ -34,6 +35,9 @@ public abstract class PerimeterAgentTaskHandler {
     protected void pollTask() {
         AgentTask task = perimeterAgent.getTask();
 
+        if (Objects.isNull(task))
+            return;
+
         for (Method method: getClass().getDeclaredMethods()) {
             if (method.isAnnotationPresent(AgentTaskHandler.class)) {
                 AgentTaskHandler taskHandlerInfo = method.getAnnotation(AgentTaskHandler.class);
@@ -42,9 +46,13 @@ public abstract class PerimeterAgentTaskHandler {
                     try {
                         method.setAccessible(true);
                         method.invoke(this, task);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        perimeterAgent.reportEvent("warning", String.format("Unable to handle task '%s'", task.getType()));
+                    } catch (IllegalAccessException e) {
+                        // perimeterAgent.reportEvent("warning", String.format("Unable to handle task '%s'", task.getType()));
                         logger.warn("Unable to handle task '{}': ({}) {}", task.getType(), e.getClass().getSimpleName(), e.getMessage());
+                    } catch (InvocationTargetException e) {
+                        Throwable t = e.getCause();
+
+                        logger.warn("Unable to handle task '{}': ({}) {}", task.getType(), t.getClass().getSimpleName(), t.getMessage());
                     }
                 }
             }

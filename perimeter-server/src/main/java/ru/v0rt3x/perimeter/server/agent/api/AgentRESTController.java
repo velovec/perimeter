@@ -80,6 +80,8 @@ public class AgentRESTController {
     private Map<String, Object> reportTask(@PathVariable String uuid, @RequestBody AgentTask task) {
         Agent agent = agentRepository.findByUuid(uuid);
 
+        logger.info("Agent Task: {}", task);
+
         if (agent != null) {
             agent.setLastSeen(System.currentTimeMillis());
 

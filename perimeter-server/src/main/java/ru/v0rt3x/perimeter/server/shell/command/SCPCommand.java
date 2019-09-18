@@ -48,7 +48,7 @@ public class SCPCommand extends PerimeterShellCommand {
 
                     while (totalRead < fileSize) {
                         bytesRead = console.read(buffer);
-                        fileContents.write(buffer, 0, bytesRead - 1);
+                        fileContents.write(buffer, 0, Math.min(bytesRead, fileSize - totalRead));
                         totalRead += bytesRead;
                     }
 

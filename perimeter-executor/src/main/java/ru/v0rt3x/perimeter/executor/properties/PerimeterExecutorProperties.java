@@ -4,12 +4,13 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.io.File;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 @ConfigurationProperties(prefix = "perimeter.executor")
 public class PerimeterExecutorProperties {
 
-    private Map<String, String> commandLine = new LinkedHashMap<>();
+    private Map<String, List<String>> commandLine = new LinkedHashMap<>();
 
     private File tmpDirectory;
 
@@ -23,11 +24,11 @@ public class PerimeterExecutorProperties {
         this.tmpDirectory = new File(tmpDirectory);
     }
 
-    public Map<String, String> getCommandLine() {
+    public Map<String, List<String>> getCommandLine() {
         return commandLine;
     }
 
-    public void setCommandLine(Map<String, String> commandLine) {
+    public void setCommandLine(Map<String, List<String>> commandLine) {
         this.commandLine = commandLine;
     }
 
