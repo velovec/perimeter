@@ -1,0 +1,21 @@
+
+VM:
+[ ] mac address
+[ ] network collisions
+[ ] password
+[ ] disk size
+
+SERVICES:
+[ ] passwords
+[ ] tokens
+
+IDEAS:
+[ ] first 10 minutes tcp dump
+[ ] tcp filter
+[ ] mtu/ttl filter
+[ ] charlie replace
+[ ] sequence id
+[ ] haproxy check parameters http service (get or post flag to filter). ?perimeter
+
+
+
